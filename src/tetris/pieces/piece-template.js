@@ -15,11 +15,15 @@ class Piece{
         this.default_position = pDefaultPositions
 
 
-        this.vx = 0.2*Math.random();
-        this.vy = 0.2*Math.random();
+        this.vx = 0.05*Math.random();
+        this.vy = 0.05*Math.random();
+        this.vz = 0.05*Math.random();
 
         this.movUp = true;
         this.movRight = true;
+        this.moveForward = true;
+
+
         this.clamp = 10;
 
         this.posX = 0;
@@ -68,16 +72,17 @@ class Piece{
         })
     }
 
-    rotate(angle_x, angle_y) {
+    rotate(angle_x, angle_y, angle_z) {
         this.meshs.forEach((p)=>{
-            p.rotation.x+=angle_x;
-            p.rotation.y+=angle_y;
+            p.rotation.x += angle_x;
+            p.rotation.y += angle_y;
+            p.rotation.z += angle_z;
         });
     };
 
     update(){
 
-        //this.rotate(0.1,0.01);
+        this.rotate(0.01,0.01);
 
         //left right
         if(this.posX>this.clamp){
@@ -107,6 +112,21 @@ class Piece{
         this.move(0,this.vy,0);
         }else{
         this.move(0,-this.vy,0);
+        }
+
+        ////// forward back
+        if(this.posZ>this.clamp){
+            this.moveForward = false;
+        }
+
+        if(this.posZ < -this.clamp){
+        this.moveForward = true;
+        }
+
+        if(this.moveForward){
+        this.move(0,0,this.vz);
+        }else{
+        this.move(0,0,-this.vy);
         }
     
     

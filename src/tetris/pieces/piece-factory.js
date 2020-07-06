@@ -11,12 +11,12 @@ const Z_color = 0x00ff00;
 const O_color = 0xffff00;
 
 
-const pieceFactory = (pieceType) =>{
+const pieceFactory = (pieceType = 0) =>{
 
     let retPiece;
 
     switch(pieceType){
-        case 'T':
+        case 0://T
             {
                 let blocks = [
                     new Vector3(0,0,0),
@@ -26,7 +26,7 @@ const pieceFactory = (pieceType) =>{
                 retPiece = new piece_template(blocks,T_color);
                 break;
             }
-        case 'S':
+        case 1://S
             {
                 let blocks = [
                     new Vector3(0,0,0),
@@ -36,7 +36,7 @@ const pieceFactory = (pieceType) =>{
                 retPiece = new piece_template(blocks,S_color);
                 break;
             }
-        case 'I':
+        case 2://I
             {
                 let blocks = [
                     new Vector3(0,0,0),
@@ -46,7 +46,8 @@ const pieceFactory = (pieceType) =>{
                 retPiece = new piece_template(blocks,I_color);
                 break;
             }
-        case 'L':{
+        case 3://L
+            {
                 let blocks = [
                     new Vector3(0,0,0),
                     new Vector3(1,0,0),
@@ -55,7 +56,8 @@ const pieceFactory = (pieceType) =>{
                 retPiece = new piece_template(blocks,L_color);
                 break;
             }
-        case 'J':{
+        case 4://J
+            {
             let blocks = [
                 new Vector3(0,0,0),
                 new Vector3(-1,0,0),
@@ -64,7 +66,8 @@ const pieceFactory = (pieceType) =>{
             retPiece = new piece_template(blocks,J_color);
             break;
         }
-        case 'Z':{
+        case 5://Z
+            {
             let blocks = [
                 new Vector3(0,0,0),
                 new Vector3(-1,0,0),
@@ -73,7 +76,8 @@ const pieceFactory = (pieceType) =>{
             retPiece = new piece_template(blocks,Z_color);
             break;
         }
-        case 'O':{
+        case 6://O
+            {
             let blocks = [
                 new Vector3(0,0,0),
                 new Vector3(1,0,0),
