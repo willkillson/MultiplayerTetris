@@ -1,87 +1,73 @@
 import React, { Component } from "react";
-import ReactDOM from "react-dom";
+
 
 import * as THREE from "three";
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { AmbientLight, Vector3 } from "three";
+//import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { Vector3 } from "three";
 
 
 //local imports
 
-import PieceFactory from './pieces/piece-factory';
-import Gizmo from './util';
-import gizmo from "./util";
+import Piece from './pieces/piece'
 import * as BOARD from './board/board';
 
 
-
-
-
-const zMax = 30;
-//
 class Tetris extends Component {
 
   constructor(){
     super();
 
+    this.renderer = new THREE.WebGLRenderer();
+    this.scene = new THREE.Scene();
+    this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+    this.renderer.setSize( window.innerWidth*0.75, window.innerHeight*0.75 );
+    this.renderer.gammaFactor = 2.2;
     
+    //camera position
+    this.camera.position.y = 8.5;
+    this.camera.position.x = 0.15;
+    this.camera.position.z = 15;
 
-    
+
   }
+
+  
   
   componentDidMount() {
 
+    this.mount.appendChild( this.renderer.domElement ); //must be located in the componentDidMount()
+
+    //this.scene.add(...Gizmo());
+    //const controls = new OrbitControls(this.camera, this.renderer.domElement);
+
+    let currentPiece = Piece(7);
+
+    //currentPiece.move(new Vector3(0,1,0));dd
+    let cube2 = Piece(7);
+
+    cube2.move(new Vector3(0,8,0));
+
+    currentPiece.move(new Vector3(0,5,0));
 
 
+    this.scene.add(currentPiece.mesh);
+    this.scene.add(cube2.mesh);
 
-    let renderer = new THREE.WebGLRenderer();
-    let scene = new THREE.Scene();
-    let camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+    this.scene.add(BOARD.levelFloor());   //grpimd
+    this.scene.add(BOARD.sky());      
 
+    let frame = BOARD.frame();
+    frame.position.add(new Vector3(-5,0,0))
+    this.scene.add(frame);          
 
-    console.log(Gizmo());
-    scene.add(...Gizmo());
-    renderer.setSize( window.innerWidth*0.75, window.innerHeight*0.75 );
-    renderer.gammaFactor = 2.2;
-    renderer.gammaOutput = true;
-
-    this.mount.appendChild( renderer.domElement );
-
-    const controls = new OrbitControls(camera, renderer.domElement);
-    
-
-    let piece = PieceFactory();
-    piece.move(0,15,0);
-    
-    // console.log(piece.meshs);
-    // scene.add( ...piece.meshs);
-    
-    camera.position.y = 8.5;
-    camera.position.x = 0.15;
-    camera.position.z = 15;
-
-    //BOARD.levelFloor();
-    scene.add(...piece.meshs);
-    scene.add(BOARD.levelFloor());
-
-    //frame
-    scene.add(BOARD.frame());
-
-    //skybox
-    scene.add(BOARD.sky());
-    
-    const light = new THREE.DirectionalLight(0xfffffff,3.0);
-    scene.add(light);
-  
-
-
-
+    this.scene.add(new THREE.DirectionalLight(0xfffffff,3.0));
 
     //controls.
-    const xSpeed = 1;
-    const ySpeed = 1;
+
     document.addEventListener("keydown", onDocumentKeyDown, false);
-    function onDocumentKeyDown(event){
+    function onDocumentKeyDown (event) {
+      const xSpeed = 1;
+      const ySpeed = 1;
       const keyCode = event.which;
       //w 87
       //a 65
@@ -90,66 +76,80 @@ class Tetris extends Component {
   
       //j 74
       //k 75
-
+  
       //h 72
   
-      if(keyCode===83){
-        piece.move(0, -ySpeed,0);
-      }
       switch(keyCode){
         case 65://a
-          piece.move(-xSpeed, 0,0);
-          break;
+          {
+            if(!currentPiece.collision_isBlocked['left']){
+              currentPiece.move(new Vector3(-xSpeed, 0,0));
+            }
+            break;
+          }
         case 68://d
-          piece.move(xSpeed, 0,0);
-          break;
+          {
+            if(!currentPiece.collision_isBlocked['right']){
+              currentPiece.move(new Vector3(xSpeed, 0,0));
+            }
+            break;
+          }
         case 87://w
-          piece.move(0, ySpeed,0);
-          break;
+          {
+            if(!currentPiece.collision_isBlocked['up'])
+              currentPiece.move(new Vector3(0, ySpeed,0));
+            break;
+          }
         case 83://s
-          piece.move(0, -ySpeed,0);
-          break;
+          {
+            if(!currentPiece.collision_isBlocked['down']){
+              currentPiece.move(new Vector3(0, -ySpeed,0));
+            }
+              
+            break;
+          }
         case 74://j
-          piece.rotate(0,0,Math.PI/2);
+        
+        currentPiece.rotate(new Vector3(0,0,Math.PI/2));
           break;
         case 75://k
-        piece.rotate(0,0,-1*Math.PI/2);
+        
+        currentPiece.rotate(new Vector3(0,0,-1*Math.PI/2));
           break;
         case 72://h temp set into board
-          piece = newPiece();
-          break;
+          {
+            currentPiece = Piece(7);
+            this.scene.add(currentPiece.mesh);
+            break;
+          }
+
+        default:
+           break;
       }
     }
 
+    const animate = () => {
 
-
-
-    function newPiece(){
-      let newPiece = PieceFactory(Math.floor(Math.random()*6));
-      newPiece.move(0,15,0);
-      scene.add(...newPiece.meshs);
- 
-    
-      return newPiece;
-    }
-
-    const animate = function () {
+      currentPiece.update();
+      
+      //console.log(this.currentPiece);
+      this.renderer.render( this.scene, this.camera );
       requestAnimationFrame( animate );
-
-      console.log("camera x pos = " + camera.position.x);
-      console.log("camera y pos = " + camera.position.y);
-      console.log("camera z pos = " + camera.position.z);
-      // required if controls.enableDamping or controls.autoRotate are set to true
-      //controls.update();
-      console.log(scene.children);
-    
-      renderer.render( scene, camera );
     };
-    //
+
     animate();
-
-
   }
+
+
+
+
+  newPiece(){
+    let newPiece = Piece(Math.floor(Math.random()*6));
+    newPiece.move(0,15,0);
+    this.scene.add(...newPiece.meshs);
+    return newPiece;
+  }
+
 
   render() {
     return (
@@ -159,10 +159,6 @@ class Tetris extends Component {
       </div>
     )
   }
-
-
-
-
 
 }
 
