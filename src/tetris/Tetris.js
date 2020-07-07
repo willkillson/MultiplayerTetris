@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 
+import Mousetrap from 'mousetrap';
 
 import * as THREE from "three";
 //import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
@@ -28,111 +29,40 @@ class Tetris extends Component {
     this.camera.position.x = 0.15;
     this.camera.position.z = 15;
 
+    //controls
+
+    Mousetrap.bind('w',()=>{
+      this.currentPiece.instantDrop();
+    })
+    Mousetrap.bind('a',()=>{
+      this.currentPiece.moveLeft();
+    })
+    Mousetrap.bind('s',()=>{
+      this.currentPiece.moveDown();
+    })
+    Mousetrap.bind('d',()=>{
+      this.currentPiece.moveRight();
+    })
+    Mousetrap.bind('h',()=>{
+      this.currentPiece = Piece(7);
+      this.scene.add(this.currentPiece.mesh);
+    })
+
+    this.init();
 
   }
 
-  
+
   
   componentDidMount() {
 
     this.mount.appendChild( this.renderer.domElement ); //must be located in the componentDidMount()
 
-    //this.scene.add(...Gizmo());
-    //const controls = new OrbitControls(this.camera, this.renderer.domElement);
-
-    let currentPiece = Piece(7);
-
-    //currentPiece.move(new Vector3(0,1,0));dd
-    let cube2 = Piece(7);
-
-    cube2.move(new Vector3(0,8,0));
-
-    currentPiece.move(new Vector3(0,5,0));
-
-
-    this.scene.add(currentPiece.mesh);
-    this.scene.add(cube2.mesh);
-
-    this.scene.add(BOARD.levelFloor());   //grpimd
-    this.scene.add(BOARD.sky());      
-
-    let frame = BOARD.frame();
-    frame.position.add(new Vector3(-5,0,0))
-    this.scene.add(frame);          
-
-    this.scene.add(new THREE.DirectionalLight(0xfffffff,3.0));
-
-    //controls.
-
-    document.addEventListener("keydown", onDocumentKeyDown, false);
-    function onDocumentKeyDown (event) {
-      const xSpeed = 1;
-      const ySpeed = 1;
-      const keyCode = event.which;
-      //w 87
-      //a 65
-      //s 83
-      //d 68
-  
-      //j 74
-      //k 75
-  
-      //h 72
-  
-      switch(keyCode){
-        case 65://a
-          {
-            if(!currentPiece.collision_isBlocked['left']){
-              currentPiece.move(new Vector3(-xSpeed, 0,0));
-            }
-            break;
-          }
-        case 68://d
-          {
-            if(!currentPiece.collision_isBlocked['right']){
-              currentPiece.move(new Vector3(xSpeed, 0,0));
-            }
-            break;
-          }
-        case 87://w
-          {
-            if(!currentPiece.collision_isBlocked['up'])
-              currentPiece.move(new Vector3(0, ySpeed,0));
-            break;
-          }
-        case 83://s
-          {
-            if(!currentPiece.collision_isBlocked['down']){
-              currentPiece.move(new Vector3(0, -ySpeed,0));
-            }
-              
-            break;
-          }
-        case 74://j
-        
-        currentPiece.rotate(new Vector3(0,0,Math.PI/2));
-          break;
-        case 75://k
-        
-        currentPiece.rotate(new Vector3(0,0,-1*Math.PI/2));
-          break;
-        case 72://h temp set into board
-          {
-            currentPiece = Piece(7);
-            this.scene.add(currentPiece.mesh);
-            break;
-          }
-
-        default:
-           break;
-      }
-    }
-
     const animate = () => {
+      this.currentPiece.update();
+    
 
-      currentPiece.update();
-      
-      //console.log(this.currentPiece);
+    
       this.renderer.render( this.scene, this.camera );
       requestAnimationFrame( animate );
     };
@@ -140,7 +70,17 @@ class Tetris extends Component {
     animate();
   }
 
+  init(){
+    this.currentPiece = Piece(7);
+    this.scene.add(this.currentPiece.mesh);
+    let frame = BOARD.frame();
+    frame.position.add(new Vector3(-5,0,0))
 
+    this.scene.add(BOARD.levelFloor());   //grpimd
+    this.scene.add(BOARD.sky()); 
+    this.scene.add(frame);          
+    this.scene.add(new THREE.DirectionalLight(0xfffffff,3.0));
+  }
 
 
   newPiece(){
