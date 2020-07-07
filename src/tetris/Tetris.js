@@ -11,7 +11,8 @@ import { AmbientLight, Vector3 } from "three";
 import PieceFactory from './pieces/piece-factory';
 import Gizmo from './util';
 import gizmo from "./util";
-import GrassCube from './board/board';
+import * as BOARD from './board/board';
+
 
 
 
@@ -44,34 +45,35 @@ class Tetris extends Component {
     renderer.gammaFactor = 2.2;
     renderer.gammaOutput = true;
 
-
-    //scene.add( arrowHelper );
-
-    // document.body.appendChild( renderer.domElement );
-    // use ref as a mount point of the Three.js scene instead of the document.body
     this.mount.appendChild( renderer.domElement );
-
 
     const controls = new OrbitControls(camera, renderer.domElement);
     
 
     let piece = PieceFactory();
+    piece.move(0,15,0);
     
     // console.log(piece.meshs);
-
     // scene.add( ...piece.meshs);
     
     camera.position.y = 8.5;
     camera.position.x = 0.15;
     camera.position.z = 15;
+
+    //BOARD.levelFloor();
     scene.add(...piece.meshs);
+    scene.add(BOARD.levelFloor());
 
+    //frame
+    scene.add(BOARD.frame());
 
+    //skybox
+    scene.add(BOARD.sky());
+    
     const light = new THREE.DirectionalLight(0xfffffff,3.0);
     scene.add(light);
-    
+  
 
-    scene.add( ...GrassCube());
 
 
 
@@ -124,7 +126,9 @@ class Tetris extends Component {
 
     function newPiece(){
       let newPiece = PieceFactory(Math.floor(Math.random()*6));
+      newPiece.move(0,15,0);
       scene.add(...newPiece.meshs);
+ 
     
       return newPiece;
     }
@@ -137,9 +141,11 @@ class Tetris extends Component {
       console.log("camera z pos = " + camera.position.z);
       // required if controls.enableDamping or controls.autoRotate are set to true
       //controls.update();
+      console.log(scene.children);
     
       renderer.render( scene, camera );
     };
+    //
     animate();
 
 
