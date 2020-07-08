@@ -3,7 +3,6 @@ import * as THREE from 'three';
 import{Vector3} from 'three';
 
 class Piece{
-    
 
     constructor(pBlockPositions, pColor, pPos, pCollisionChecks){
         //class variables
@@ -26,24 +25,6 @@ class Piece{
         this.initRaycasters();
 
     }
-
-    // //initialization
-    // initClassVariables(){
-    //     this.mesh = new THREE.Object3D();
-    //     this.mesh.name = "cube";
-    //     console.log(this.blockPositions);
-    //     this.blockPositions.forEach((pos)=>{
-    //         let geometry = new BoxGeometry(1,1,1);
-    //         let material = new MeshBasicMaterial( { color: this.color } );
-    //         geometry.translate(
-    //             pos.toArray()[0],
-    //             pos.toArray()[1],
-    //             pos.toArray()[2]);
-    //         let mesh = new Mesh(geometry,material);
-    //         this.mesh.add(mesh);
-    //     });
-    //     this.mesh.position.add(this.position);
-    // }
 
     //initialization
     initClassVariables(){
@@ -259,78 +240,73 @@ const createPiece = (pieceType = 0) =>{
 
     switch(pieceType){
         case 0://T
-            {
-                //TODO
-                let blocks = [
-                    new Vector3(0,0,0),
-                    new Vector3(-1,0,0),
-                    new Vector3(1,0,0),
-                    new Vector3(0,-1,0)];            
-                   
-                let upCollisionChecks = [0,1,2];
-                let downCollisionChecks = [1,2,3];
-                let leftCollisionChecks = [1,3];
-                let rightCollisionChecks = [2,3];
-        
-                let collisionChecks = {
-                    'up' : upCollisionChecks,
-                    'down' : downCollisionChecks,
-                    'left' : leftCollisionChecks,
-                    'right': rightCollisionChecks
-                };
-        
-                retPiece = new Piece(blocks,T_color, new Vector3(0,18,0), collisionChecks);
-                break;
-            }
-        case 1://S
-            {
-                //TODO
-                let blocks = [
-                    new Vector3(0,0,0),
-                    new Vector3(-1,0,0),
-                    new Vector3(0,1,0),
-                    new Vector3(1,1,0)];
-                //sadf
-                let upCollisionChecks = [2,3,1];
-                let downCollisionChecks = [0,1,3];
-                let leftCollisionChecks = [1,2];
-                let rightCollisionChecks = [0,3];
-        
-                let collisionChecks = {
-                    'up' : upCollisionChecks,
-                    'down' : downCollisionChecks,
-                    'left' : leftCollisionChecks,
-                    'right': rightCollisionChecks
-                };
-        
-                retPiece = new Piece(blocks,S_color, new Vector3(0,18,0), collisionChecks);
-                break;
+        {
+            let blocks = [
+                new Vector3(0,0,0),
+                new Vector3(-1,0,0),
+                new Vector3(1,0,0),
+                new Vector3(0,-1,0)];            
                 
-            }
-        case 2://I
-            {
-                //TODO
-                let blocks = [
-                    new Vector3(0,0,0),
-                    new Vector3(-1,0,0),
-                    new Vector3(1,0,0),
-                    new Vector3(2,0,0)];
+            let upCollisionChecks = [0,1,2];
+            let downCollisionChecks = [1,2,3];
+            let leftCollisionChecks = [1,3];
+            let rightCollisionChecks = [2,3];
+    
+            let collisionChecks = {
+                'up' : upCollisionChecks,
+                'down' : downCollisionChecks,
+                'left' : leftCollisionChecks,
+                'right': rightCollisionChecks
+            };
+    
+            retPiece = new Piece(blocks,T_color, new Vector3(0,18,0), collisionChecks);
+            break;
+        }
+        case 1://S
+        {
+            let blocks = [
+                new Vector3(0,0,0),
+                new Vector3(-1,0,0),
+                new Vector3(0,1,0),
+                new Vector3(1,1,0)];
 
-                let upCollisionChecks = [0,1,2,3];
-                let downCollisionChecks = [0,1,2,3];
-                let leftCollisionChecks = [1];
-                let rightCollisionChecks = [3];
-        
-                let collisionChecks = {
-                    'up' : upCollisionChecks,
-                    'down' : downCollisionChecks,
-                    'left' : leftCollisionChecks,
-                    'right': rightCollisionChecks
-                };
-        
-                retPiece = new Piece(blocks,I_color, new Vector3(0,18,0), collisionChecks);
-                break;
-            }
+            let upCollisionChecks = [2,3,1];
+            let downCollisionChecks = [0,1,3];
+            let leftCollisionChecks = [1,2];
+            let rightCollisionChecks = [0,3];
+    
+            let collisionChecks = {
+                'up' : upCollisionChecks,
+                'down' : downCollisionChecks,
+                'left' : leftCollisionChecks,
+                'right': rightCollisionChecks
+            };
+            retPiece = new Piece(blocks,S_color, new Vector3(0,18,0), collisionChecks);
+            break;
+        }
+        case 2://I
+        {
+            let blocks = [
+                new Vector3(0,0,0),
+                new Vector3(-1,0,0),
+                new Vector3(1,0,0),
+                new Vector3(2,0,0)];
+
+            let upCollisionChecks = [0,1,2,3];
+            let downCollisionChecks = [0,1,2,3];
+            let leftCollisionChecks = [1];
+            let rightCollisionChecks = [3];
+    
+            let collisionChecks = {
+                'up' : upCollisionChecks,
+                'down' : downCollisionChecks,
+                'left' : leftCollisionChecks,
+                'right': rightCollisionChecks
+            };
+    
+            retPiece = new Piece(blocks,I_color, new Vector3(0,18,0), collisionChecks);
+            break;
+        }
         case 3://L
         {
             let blocks = [
@@ -367,11 +343,12 @@ const createPiece = (pieceType = 0) =>{
             let leftCollisionChecks = [1,3];
             let rightCollisionChecks = [2,3];
 
-            let collisionChecks = {};
-            collisionChecks['up'] = upCollisionChecks;
-            collisionChecks['down'] = downCollisionChecks;
-            collisionChecks['left'] = leftCollisionChecks;
-            collisionChecks['right'] = rightCollisionChecks;
+            let collisionChecks = {
+                'up' : upCollisionChecks,
+                'down' : downCollisionChecks,
+                'left' : leftCollisionChecks,
+                'right': rightCollisionChecks
+            };
 
             retPiece = new Piece(blocks,J_color, new Vector3(0,18,0), collisionChecks);
             break;
@@ -389,11 +366,12 @@ const createPiece = (pieceType = 0) =>{
             let leftCollisionChecks = [1,2];
             let rightCollisionChecks = [0,3];
 
-            let collisionChecks = {};
-            collisionChecks['up'] = upCollisionChecks;
-            collisionChecks['down'] = downCollisionChecks;
-            collisionChecks['left'] = leftCollisionChecks;
-            collisionChecks['right'] = rightCollisionChecks;
+            let collisionChecks = {
+                'up' : upCollisionChecks,
+                'down' : downCollisionChecks,
+                'left' : leftCollisionChecks,
+                'right': rightCollisionChecks
+            };
 
             retPiece = new Piece(blocks,Z_color, new Vector3(0,18,0), collisionChecks);
             break;
@@ -407,50 +385,40 @@ const createPiece = (pieceType = 0) =>{
                 new Vector3(0,-1,0)];//bot left
 
             let upCollisionChecks = [0,1];
-            upCollisionChecks.push(0);
-            upCollisionChecks.push(1);
+            let downCollisionChecks = [2,3];
+            let leftCollisionChecks = [0,3];
+            let rightCollisionChecks = [1,2];
 
-            let downCollisionChecks = [];
-            downCollisionChecks.push(2);
-            downCollisionChecks.push(3);
-
-            let leftCollisionChecks = [];
-            leftCollisionChecks.push(0);
-            leftCollisionChecks.push(3);
-
-            let rightCollisionChecks = [];
-            rightCollisionChecks.push(1);
-            rightCollisionChecks.push(2);
-
-            let collisionChecks = {};
-            collisionChecks['up'] = upCollisionChecks;
-            collisionChecks['down'] = downCollisionChecks;
-            collisionChecks['left'] = leftCollisionChecks;
-            collisionChecks['right'] = rightCollisionChecks;
+            let collisionChecks = {
+                'up' : upCollisionChecks,
+                'down' : downCollisionChecks,
+                'left' : leftCollisionChecks,
+                'right': rightCollisionChecks
+            };
 
             retPiece = new Piece(blocks,O_color, new Vector3(0,18,0), collisionChecks);
             break;
         }
         default ://single cube
         {
-        let blocks =[
-            new Vector3(0,0,0)
-        ]
-        
-        let upCollisionChecks = [0];
-        let downCollisionChecks = [0];
-        let leftCollisionChecks = [0];
-        let rightCollisionChecks = [0];
+            let blocks =[
+                new Vector3(0,0,0)
+            ]
+            
+            let upCollisionChecks = [0];
+            let downCollisionChecks = [0];
+            let leftCollisionChecks = [0];
+            let rightCollisionChecks = [0];
 
-        let collisionChecks = {
-            'up' : upCollisionChecks,
-            'down' : downCollisionChecks,
-            'left' : leftCollisionChecks,
-            'right': rightCollisionChecks
-        };
+            let collisionChecks = {
+                'up' : upCollisionChecks,
+                'down' : downCollisionChecks,
+                'left' : leftCollisionChecks,
+                'right': rightCollisionChecks
+            };
 
-        retPiece = new Piece(blocks,0xffffff, new Vector3(0,18,0), collisionChecks);
-        break;
+            retPiece = new Piece(blocks,0xffffff, new Vector3(0,18,0), collisionChecks);
+            break;
         }
     }
     
