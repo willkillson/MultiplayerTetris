@@ -315,7 +315,19 @@ const createPiece = (pieceType = 0) =>{
                 new Vector3(-1,0,0),
                 new Vector3(0,-1,0),
                 new Vector3(1,-1,0)];
-            retPiece = new Piece(blocks,Z_color);
+
+            let upCollisionChecks = [0,1,3];
+            let downCollisionChecks = [1,2,3];
+            let leftCollisionChecks = [1,2];
+            let rightCollisionChecks = [0,3];
+
+            let collisionChecks = {};
+            collisionChecks['up'] = upCollisionChecks;
+            collisionChecks['down'] = downCollisionChecks;
+            collisionChecks['left'] = leftCollisionChecks;
+            collisionChecks['right'] = rightCollisionChecks;
+
+            retPiece = new Piece(blocks,Z_color, new Vector3(0,18,0), collisionChecks);
             break;
         }
         case 6://O

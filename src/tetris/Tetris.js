@@ -72,7 +72,7 @@ class Tetris extends Component {
   }
 
   init(){
-    this.currentPiece = Piece(6);
+    this.currentPiece = Piece(5);
     this.scene.add(this.currentPiece.mesh);
     let frame = BOARD.frame();
     frame.position.add(new Vector3(-5,0,0))
