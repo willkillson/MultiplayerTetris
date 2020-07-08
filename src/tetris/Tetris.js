@@ -3,8 +3,8 @@ import React, { Component } from "react";
 import Mousetrap from 'mousetrap';
 
 import * as THREE from "three";
-//import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Vector3 } from "three";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 
 //local imports
@@ -30,24 +30,9 @@ class Tetris extends Component {
     this.camera.position.z = 15;
 
     //controls
+    this.initControls();
 
-    Mousetrap.bind('w',()=>{
-      this.currentPiece.instantDrop();
-    })
-    Mousetrap.bind('a',()=>{
-      this.currentPiece.moveLeft();
-    })
-    Mousetrap.bind('s',()=>{
-      this.currentPiece.moveDown();
-    })
-    Mousetrap.bind('d',()=>{
-      this.currentPiece.moveRight();
-    })
-    Mousetrap.bind('h',()=>{
-      this.currentPiece = Piece(Math.floor(Math.random()*6));
-      this.scene.add(this.currentPiece.mesh);
-    })
-
+    
 
 
   }
@@ -56,7 +41,7 @@ class Tetris extends Component {
   
   componentDidMount() {
     this.mount.appendChild( this.renderer.domElement ); //must be located in the componentDidMount()
-
+    this.controls = new OrbitControls (this.camera, this.renderer.domElement);
 
     this.init();
     const animate = () => {
@@ -82,6 +67,36 @@ class Tetris extends Component {
     this.scene.add(BOARD.sky()); 
     this.scene.add(frame);          
     this.scene.add(new THREE.DirectionalLight(0xfffffff,3.0));
+  }
+
+  initControls(){
+
+    Mousetrap.bind('w',()=>{
+      this.currentPiece.instantDrop();
+    })
+    Mousetrap.bind('a',()=>{
+      this.currentPiece.moveLeft();
+    })
+    Mousetrap.bind('s',()=>{
+      this.currentPiece.moveDown();
+    })
+    Mousetrap.bind('d',()=>{
+      this.currentPiece.moveRight();
+    })
+
+    Mousetrap.bind('j',()=>{
+      this.currentPiece.rotate(-Math.PI/2);
+    })
+
+    Mousetrap.bind('k',()=>{
+      this.currentPiece.rotate(Math.PI/2);
+    })
+
+    Mousetrap.bind('h',()=>{
+      this.currentPiece = Piece(Math.floor(Math.random()*6));
+      this.scene.add(this.currentPiece.mesh);
+    })
+
   }
 
   render() {

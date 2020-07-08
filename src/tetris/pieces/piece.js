@@ -147,7 +147,8 @@ class Piece{
     }
 
     rotate(angle) {
-        this.mesh.rotation.add(angle);     
+        this.mesh.rotation.z += angle;
+        console.log(this.mesh);
     };
 
     update(){
