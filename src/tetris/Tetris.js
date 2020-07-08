@@ -48,16 +48,17 @@ class Tetris extends Component {
       this.scene.add(this.currentPiece.mesh);
     })
 
-    this.init();
+
 
   }
 
 
   
   componentDidMount() {
-
     this.mount.appendChild( this.renderer.domElement ); //must be located in the componentDidMount()
 
+
+    this.init();
     const animate = () => {
       this.currentPiece.update();
     
@@ -71,7 +72,7 @@ class Tetris extends Component {
   }
 
   init(){
-    this.currentPiece = Piece(7);
+    this.currentPiece = Piece(6);
     this.scene.add(this.currentPiece.mesh);
     let frame = BOARD.frame();
     frame.position.add(new Vector3(-5,0,0))
@@ -81,15 +82,6 @@ class Tetris extends Component {
     this.scene.add(frame);          
     this.scene.add(new THREE.DirectionalLight(0xfffffff,3.0));
   }
-
-
-  newPiece(){
-    let newPiece = Piece(Math.floor(Math.random()*6));
-    newPiece.move(0,15,0);
-    this.scene.add(...newPiece.meshs);
-    return newPiece;
-  }
-
 
   render() {
     return (

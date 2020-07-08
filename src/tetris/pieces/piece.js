@@ -10,6 +10,15 @@ class Piece{
         this.color = pColor;
         this.blockPositions = pBlockPositions; 
         this.position = pPos;
+
+        /**
+         *      collision checks
+         * 
+         *  This is an object of arrays. It contains
+         *  'up', 'down', 'left', 'right' key:Arrays, where 
+         *  the arrays contain the block index positions that
+         *  require collision checks on the key's direction. 
+         */
         this.collisionChecks = pCollisionChecks;
 
         this.initClassVariables();
@@ -18,20 +27,39 @@ class Piece{
 
     }
 
+    // //initialization
+    // initClassVariables(){
+    //     this.mesh = new THREE.Object3D();
+    //     this.mesh.name = "cube";
+    //     console.log(this.blockPositions);
+    //     this.blockPositions.forEach((pos)=>{
+    //         let geometry = new BoxGeometry(1,1,1);
+    //         let material = new MeshBasicMaterial( { color: this.color } );
+    //         geometry.translate(
+    //             pos.toArray()[0],
+    //             pos.toArray()[1],
+    //             pos.toArray()[2]);
+    //         let mesh = new Mesh(geometry,material);
+    //         this.mesh.add(mesh);
+    //     });
+    //     this.mesh.position.add(this.position);
+    // }
+
     //initialization
     initClassVariables(){
         this.mesh = new THREE.Object3D();
         this.mesh.name = "cube";
-        this.blockPositions.forEach((pos)=>{
+
+        for(let i = 0;i< this.blockPositions.length;i++){
             let geometry = new BoxGeometry(1,1,1);
             let material = new MeshBasicMaterial( { color: this.color } );
-            geometry.translate(
-                pos.toArray()[0],
-                pos.toArray()[1],
-                pos.toArray()[2]);
-            let mesh = new Mesh(geometry,material);
-            this.mesh.add(mesh);
-        });
+            this.mesh.add(new Mesh(geometry,material));
+        }
+
+        for(let i = 0;i< this.blockPositions.length;i++){
+            this.mesh.children[i].position.add(this.blockPositions[i]);
+        }
+    
         this.mesh.position.add(this.position);
     }
 
@@ -48,17 +76,53 @@ class Piece{
     initRaycasters(){
         let near = 0;
         let far = 1;
+
+        /**
+         * Is an array of raycasters that are used 
+         * to determine if a direction is blocked.
+         */
         this.upRaycasters = [];
-        this.upRaycasters.push(new THREE.Raycaster(this.mesh.position,new Vector3(0,1,0),near,far));
-
         this.downRaycasters = [];
-        this.downRaycasters.push(new THREE.Raycaster(this.mesh.position,new Vector3(0,-1,0),near,far));
-
         this.leftRaycasters = [];
-        this.leftRaycasters.push(new THREE.Raycaster(this.mesh.position,new Vector3(-1,0,0),near,far));
-        
         this.rightRaycasters = [];
-        this.rightRaycasters.push(new THREE.Raycaster(this.mesh.position,new Vector3(1,0,0),near,far));
+
+        let upChecks = this.collisionChecks['up'];
+        let downChecks = this.collisionChecks['down'];
+        let leftChecks = this.collisionChecks['left'];
+        let rightChecks = this.collisionChecks['right'];
+
+        upChecks.forEach(check =>{
+            let pos = new Vector3(0,0,0);                   //calculate position of raycaster
+            pos.add(this.mesh.position);                    //the position of the group mesh
+            pos.add(this.mesh.children[check].position);    //plus the position of the individual cube
+            this.upRaycasters.push(new THREE.Raycaster(pos,new Vector3(0,1,0),near,far));
+        })
+
+        downChecks.forEach(check =>{
+            let pos = new Vector3(0,0,0);                   //calculate position of raycaster
+            pos.add(this.mesh.position);                    //the position of the group mesh
+            pos.add(this.mesh.children[check].position);    //plus the position of the individual cube
+            this.downRaycasters.push(new THREE.Raycaster(pos,new Vector3(0,-1,0),near,far));
+        })
+
+        
+        leftChecks.forEach(check =>{
+            let pos = new Vector3(0,0,0);                   //calculate position of raycaster
+            pos.add(this.mesh.position);                    //the position of the group mesh
+            pos.add(this.mesh.children[check].position);    //plus the position of the individual cube
+            this.leftRaycasters.push(new THREE.Raycaster(pos,new Vector3(-1,0,0),near,far));
+        })
+
+        //console.log(this.mesh.position);
+        //console.log(this.mesh.children);
+        rightChecks.forEach(check =>{
+            let pos = new Vector3(0,0,0);                   //calculate position of raycaster
+            pos.add(this.mesh.position);                    //the position of the group mesh
+            pos.add(this.mesh.children[check].position);    //plus the position of the individual cube
+            
+            this.rightRaycasters.push(new THREE.Raycaster(pos,new Vector3(1,0,0),near,far));
+        })
+
     }
 
     //mutators
@@ -68,6 +132,7 @@ class Piece{
     instantDrop(){
         while(!this.collision_isBlocked['down']){
             this.move(new Vector3(0,-1,0));
+            this.initRaycasters();
             this.checkCollisionDown();
         }
     }
@@ -111,6 +176,7 @@ class Piece{
     
     //collisions
     checkAllCollisions(){
+        this.initRaycasters();
 
         this.checkCollisionUp();
         this.checkCollisionDown();
@@ -255,11 +321,34 @@ const createPiece = (pieceType = 0) =>{
         case 6://O
             {
             let blocks = [
-                new Vector3(0,0,0),
-                new Vector3(1,0,0),
-                new Vector3(1,-1,0),
-                new Vector3(0,-1,0)];
-            retPiece = new Piece(blocks,O_color);
+                new Vector3(0,0,0),//top left
+                new Vector3(1,0,0),//top right
+                new Vector3(1,-1,0),//bot right
+                new Vector3(0,-1,0)];//bot left
+
+            let upCollisionChecks = [];
+            upCollisionChecks.push(0);
+            upCollisionChecks.push(1);
+
+            let downCollisionChecks = [];
+            downCollisionChecks.push(2);
+            downCollisionChecks.push(3);
+
+            let leftCollisionChecks = [];
+            leftCollisionChecks.push(0);
+            leftCollisionChecks.push(3);
+
+            let rightCollisionChecks = [];
+            rightCollisionChecks.push(1);
+            rightCollisionChecks.push(2);
+
+            let collisionChecks = {};
+            collisionChecks['up'] = upCollisionChecks;
+            collisionChecks['down'] = downCollisionChecks;
+            collisionChecks['left'] = leftCollisionChecks;
+            collisionChecks['right'] = rightCollisionChecks;
+
+            retPiece = new Piece(blocks,O_color, new Vector3(0,18,0), collisionChecks);
             break;
         }
         default ://single cube
