@@ -5,11 +5,12 @@ import{Vector3} from 'three';
 class Piece{
     
 
-    constructor(pDefaultBlockPositions, pColor, pPos){
+    constructor(pBlockPositions, pColor, pPos, pCollisionChecks){
         //class variables
         this.color = pColor;
-        this.defaultBlockPositions = pDefaultBlockPositions; 
+        this.blockPositions = pBlockPositions; 
         this.position = pPos;
+        this.collisionChecks = pCollisionChecks;
 
         this.initClassVariables();
         this.initCollisionVariables();
@@ -21,7 +22,7 @@ class Piece{
     initClassVariables(){
         this.mesh = new THREE.Object3D();
         this.mesh.name = "cube";
-        this.defaultBlockPositions.forEach((pos)=>{
+        this.blockPositions.forEach((pos)=>{
             let geometry = new BoxGeometry(1,1,1);
             let material = new MeshBasicMaterial( { color: this.color } );
             geometry.translate(
@@ -47,11 +48,17 @@ class Piece{
     initRaycasters(){
         let near = 0;
         let far = 1;
-        this.upRayCaster = new THREE.Raycaster(this.mesh.position,new Vector3(0,1,0),near,far);
-        this.downRayCaster = new THREE.Raycaster(this.mesh.position,new Vector3(0,-1,0),near,far);
+        this.upRaycasters = [];
+        this.upRaycasters.push(new THREE.Raycaster(this.mesh.position,new Vector3(0,1,0),near,far));
 
-        this.leftRayCaster = new THREE.Raycaster(this.mesh.position,new Vector3(-1,0,0),near,far);
-        this.rightRayCaster = new THREE.Raycaster(this.mesh.position,new Vector3(1,0,0),near,far);
+        this.downRaycasters = [];
+        this.downRaycasters.push(new THREE.Raycaster(this.mesh.position,new Vector3(0,-1,0),near,far));
+
+        this.leftRaycasters = [];
+        this.leftRaycasters.push(new THREE.Raycaster(this.mesh.position,new Vector3(-1,0,0),near,far));
+        
+        this.rightRaycasters = [];
+        this.rightRaycasters.push(new THREE.Raycaster(this.mesh.position,new Vector3(1,0,0),near,far));
     }
 
     //mutators
@@ -113,8 +120,11 @@ class Piece{
 
     checkCollisionUp(){
     
-      
-       let intersects = this.upRayCaster.intersectObjects(this.mesh.parent.children,true);
+        let intersects = [];
+        this.upRaycasters.forEach(raycaster => {
+            intersects.push(...raycaster.intersectObjects(this.mesh.parent.children,true));
+        });
+
        if(intersects.length===0){
            this.collision_isBlocked['up'] = false;
        }
@@ -124,7 +134,10 @@ class Piece{
     }
 
     checkCollisionDown(){
-        let intersects = this.downRayCaster.intersectObjects(this.mesh.parent.children,true);
+        let intersects = [];
+        this.downRaycasters.forEach(raycaster => {
+            intersects.push(...raycaster.intersectObjects(this.mesh.parent.children,true));
+        });
         if(intersects.length===0){
             this.collision_isBlocked['down'] = false;
         }
@@ -136,7 +149,10 @@ class Piece{
     }
 
     checkCollisionLeft(){
-        let intersects = this.leftRayCaster.intersectObjects(this.mesh.parent.children,true);
+        let intersects = [];
+        this.leftRaycasters.forEach(raycaster => {
+            intersects.push(...raycaster.intersectObjects(this.mesh.parent.children,true));
+        });
         if(intersects.length===0){
             this.collision_isBlocked['left'] = false;
         }
@@ -147,8 +163,10 @@ class Piece{
     }
 
     checkCollisionRight(){
-        let intersects = this.rightRayCaster.intersectObjects(this.mesh.parent.children,true);
-
+        let intersects = [];
+        this.rightRaycasters.forEach(raycaster => {
+            intersects.push(...raycaster.intersectObjects(this.mesh.parent.children,true));
+        });
         if(intersects.length===0){
             this.collision_isBlocked['right'] = false;
         }
@@ -249,7 +267,26 @@ const createPiece = (pieceType = 0) =>{
                 let blocks =[
                     new Vector3(0,0,0)
                 ]
-                retPiece = new Piece(blocks,0xffffff, new Vector3(0,18,0));
+                
+                let upCollisionChecks = [];
+                upCollisionChecks.push(0);
+
+                let downCollisionChecks = [];
+                downCollisionChecks.push(0);
+
+                let leftCollisionChecks = [];
+                leftCollisionChecks.push(0);
+
+                let rightCollisionChecks = [];
+                rightCollisionChecks.push(0);
+
+                let collisionChecks = {};
+                collisionChecks['up'] = upCollisionChecks;
+                collisionChecks['down'] = downCollisionChecks;
+                collisionChecks['left'] = leftCollisionChecks;
+                collisionChecks['right'] = rightCollisionChecks;
+
+                retPiece = new Piece(blocks,0xffffff, new Vector3(0,18,0), collisionChecks);
                 break;
         }
     }
