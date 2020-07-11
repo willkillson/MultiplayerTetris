@@ -3,11 +3,10 @@ import * as THREE from 'three';
 import{Vector3} from 'three';
 
 class Piece{
-    constructor(pBlockPositions, pColor, pPos, pBlockNormals){
+    constructor(pBlockPositions, pColor, pPos){
         //class variables
         this.color = pColor;
         this.blockPositions = pBlockPositions; 
-        this.blockNormals = pBlockNormals;
         this.startingPosition = pPos;
 
         this.initClassVariables();
@@ -34,6 +33,17 @@ class Piece{
         
         //move the group object to its starting position
         this.mesh.position.add(this.startingPosition);
+
+        //block normals for calculating each faces normal as it changes
+        this.blockNormals = [];
+        this.blockPositions.forEach((block)=>{
+            this.blockNormals.push(new Ray(block, new Vector3(-1,0,0)));
+            this.blockNormals.push(new Ray(block, new Vector3(1,0,0)));
+            this.blockNormals.push(new Ray(block, new Vector3(0,-1,0)));
+            this.blockNormals.push(new Ray(block, new Vector3(0,1,0)));
+            this.blockNormals.push(new Ray(block, new Vector3(0,0,-1)));
+            this.blockNormals.push(new Ray(block, new Vector3(0,0,1)));
+        })
     }
 
     initCollisionVariables(){
@@ -174,6 +184,13 @@ class Piece{
         }
     }
 
+
+    moveOut(){
+        if(!this.collision_isBlocked['out']){
+            this.move(new Vector3(0,0,1));
+        }
+    }
+
     move(mov){
         this.mesh.position.add(mov);
     }
@@ -204,6 +221,8 @@ class Piece{
         this.checkCollisionDown();
         this.checkCollisionLeft();
         this.checkCollisionRight();
+        this.checkCollisionIn();
+        this.checkCollisionOut();
     }
 
     checkCollisionUp(){
@@ -297,6 +316,52 @@ class Piece{
 
     }
 
+    checkCollisionIn(){
+        let allIntersections = [];
+        this.z_pos_rcs.forEach((ray) => {
+            let rayCaster = new Raycaster(ray.origin,ray.direction,0.1,1);
+            allIntersections.push(...rayCaster.intersectObjects(this.mesh.parent.children,true));
+        });
+        //remove all the intersections with the pieces self
+        let intersects = [];
+        allIntersections.forEach((intersection)=>{
+            if(intersection.object.parent.uuid!==this.mesh.uuid){
+                intersects.push(intersection);
+            }
+        });
+
+       if(intersects.length===0){
+           this.collision_isBlocked['in'] = false;
+       }
+       else{
+           this.collision_isBlocked['in'] = true;
+       }
+
+    }
+
+    checkCollisionOut(){
+        let allIntersections = [];
+        this.z_neg_rcs.forEach((ray) => {
+            let rayCaster = new Raycaster(ray.origin,ray.direction,0.1,1);
+            allIntersections.push(...rayCaster.intersectObjects(this.mesh.parent.children,true));
+        });
+        //remove all the intersections with the pieces self
+        let intersects = [];
+        allIntersections.forEach((intersection)=>{
+            if(intersection.object.parent.uuid!==this.mesh.uuid){
+                intersects.push(intersection);
+            }
+        });
+
+       if(intersects.length===0){
+           this.collision_isBlocked['out'] = false;
+       }
+       else{
+           this.collision_isBlocked['out'] = true;
+       }
+
+    }
+
 }
 
 
@@ -320,17 +385,7 @@ const createPiece = (pieceType = 0) =>{
                 new Vector3(-1,0,0),
                 new Vector3(1,0,0),
                 new Vector3(0,-1,0)];            
-                
-            let blockNormals = [];
-            blocks.forEach((block)=>{
-                blockNormals.push(new Ray(block, new Vector3(-1,0,0)));
-                blockNormals.push(new Ray(block, new Vector3(1,0,0)));
-                blockNormals.push(new Ray(block, new Vector3(0,-1,0)));
-                blockNormals.push(new Ray(block, new Vector3(0,1,0)));
-                blockNormals.push(new Ray(block, new Vector3(0,0,-1)));
-                blockNormals.push(new Ray(block, new Vector3(0,0,1)));
-            })
-            retPiece = new Piece(blocks,T_color, new Vector3(0,18,0), blockNormals);
+            retPiece = new Piece(blocks,T_color, new Vector3(0,18,0));
             break;
         }
         case 1://S
@@ -340,18 +395,7 @@ const createPiece = (pieceType = 0) =>{
                 new Vector3(-1,0,0),
                 new Vector3(0,1,0),
                 new Vector3(1,1,0)];
-
-            let blockNormals = [];
-            blocks.forEach((block)=>{
-                blockNormals.push(new Ray(block, new Vector3(-1,0,0)));
-                blockNormals.push(new Ray(block, new Vector3(1,0,0)));
-                blockNormals.push(new Ray(block, new Vector3(0,-1,0)));
-                blockNormals.push(new Ray(block, new Vector3(0,1,0)));
-                blockNormals.push(new Ray(block, new Vector3(0,0,-1)));
-                blockNormals.push(new Ray(block, new Vector3(0,0,1)));
-            })
-
-            retPiece = new Piece(blocks,S_color, new Vector3(0,18,0), blockNormals);
+            retPiece = new Piece(blocks,S_color, new Vector3(0,18,0));
             break;
         }
         case 2://I
@@ -361,18 +405,7 @@ const createPiece = (pieceType = 0) =>{
                 new Vector3(-1,0,0),
                 new Vector3(1,0,0),
                 new Vector3(2,0,0)];
-
-            let blockNormals = [];
-            blocks.forEach((block)=>{
-                blockNormals.push(new Ray(block, new Vector3(-1,0,0)));
-                blockNormals.push(new Ray(block, new Vector3(1,0,0)));
-                blockNormals.push(new Ray(block, new Vector3(0,-1,0)));
-                blockNormals.push(new Ray(block, new Vector3(0,1,0)));
-                blockNormals.push(new Ray(block, new Vector3(0,0,-1)));
-                blockNormals.push(new Ray(block, new Vector3(0,0,1)));
-            })
-     
-            retPiece = new Piece(blocks,I_color, new Vector3(0,18,0), blockNormals);
+            retPiece = new Piece(blocks,I_color, new Vector3(0,18,0));
             break;
         }
         case 3://L
@@ -382,18 +415,7 @@ const createPiece = (pieceType = 0) =>{
                 new Vector3(1,0,0),
                 new Vector3(-1,0,0),
                 new Vector3(-1,-1,0)];
-            
-            let blockNormals = [];
-            blocks.forEach((block)=>{
-                blockNormals.push(new Ray(block, new Vector3(-1,0,0)));
-                blockNormals.push(new Ray(block, new Vector3(1,0,0)));
-                blockNormals.push(new Ray(block, new Vector3(0,-1,0)));
-                blockNormals.push(new Ray(block, new Vector3(0,1,0)));
-                blockNormals.push(new Ray(block, new Vector3(0,0,-1)));
-                blockNormals.push(new Ray(block, new Vector3(0,0,1)));
-            })
-
-            retPiece = new Piece(blocks,L_color, new Vector3(0,18,0), blockNormals);
+            retPiece = new Piece(blocks,L_color, new Vector3(0,18,0));
             break;
         }
         case 4://J
@@ -403,18 +425,8 @@ const createPiece = (pieceType = 0) =>{
                 new Vector3(-1,0,0),
                 new Vector3(1,0,0),
                 new Vector3(1,-1,0)]; 
-            
-            let blockNormals = [];
-            blocks.forEach((block)=>{
-                blockNormals.push(new Ray(block, new Vector3(-1,0,0)));
-                blockNormals.push(new Ray(block, new Vector3(1,0,0)));
-                blockNormals.push(new Ray(block, new Vector3(0,-1,0)));
-                blockNormals.push(new Ray(block, new Vector3(0,1,0)));
-                blockNormals.push(new Ray(block, new Vector3(0,0,-1)));
-                blockNormals.push(new Ray(block, new Vector3(0,0,1)));
-            })
 
-            retPiece = new Piece(blocks,J_color, new Vector3(0,18,0), blockNormals);
+            retPiece = new Piece(blocks,J_color, new Vector3(0,18,0));
             break;
         }
         case 5://Z
@@ -425,17 +437,7 @@ const createPiece = (pieceType = 0) =>{
                 new Vector3(0,-1,0),
                 new Vector3(1,-1,0)];
 
-            let blockNormals = [];
-            blocks.forEach((block)=>{
-                blockNormals.push(new Ray(block, new Vector3(-1,0,0)));
-                blockNormals.push(new Ray(block, new Vector3(1,0,0)));
-                blockNormals.push(new Ray(block, new Vector3(0,-1,0)));
-                blockNormals.push(new Ray(block, new Vector3(0,1,0)));
-                blockNormals.push(new Ray(block, new Vector3(0,0,-1)));
-                blockNormals.push(new Ray(block, new Vector3(0,0,1)));
-            })
-
-            retPiece = new Piece(blocks,Z_color, new Vector3(0,18,0), blockNormals);
+            retPiece = new Piece(blocks,Z_color, new Vector3(0,18,0));
             break;
         }
         case 6://O
@@ -445,37 +447,40 @@ const createPiece = (pieceType = 0) =>{
                 new Vector3(1,0,0),//top right
                 new Vector3(1,-1,0),//bot right
                 new Vector3(0,-1,0)];//bot left
-
-            let blockNormals = [];
-            blocks.forEach((block)=>{
-                blockNormals.push(new Ray(block, new Vector3(-1,0,0)));
-                blockNormals.push(new Ray(block, new Vector3(1,0,0)));
-                blockNormals.push(new Ray(block, new Vector3(0,-1,0)));
-                blockNormals.push(new Ray(block, new Vector3(0,1,0)));
-                blockNormals.push(new Ray(block, new Vector3(0,0,-1)));
-                blockNormals.push(new Ray(block, new Vector3(0,0,1)));
-            })
-
-            retPiece = new Piece(blocks,O_color, new Vector3(0,18,0), blockNormals);
+            retPiece = new Piece(blocks,O_color, new Vector3(0,18,0));
             break;
         }
+        case 7://RANDOM
+        {
+        let blocks = [];
+        blocks.push(new Vector3(0,0,-1));     
+        blocks.push(new Vector3(0,0,1));     
+        blocks.push(new Vector3(1,0,0));     
+        blocks.push(new Vector3(-1,0,0));     
+        //
+
+        retPiece = new Piece(blocks,O_color, new Vector3(0,18,0));
+        break;
+        }
+        case 8://RANDOM
+        {
+        let blocks = [];
+        blocks.push(new Vector3(0,0,0));     
+        blocks.push(new Vector3(1,1,1));     
+        blocks.push(new Vector3(1,0,1));     
+        blocks.push(new Vector3(0,0,1));     
+        //
+
+        retPiece = new Piece(blocks,O_color, new Vector3(0,18,0));
+        break;
+
+        }   
         default ://single cube
         {
             let blocks =[
                 new Vector3(0,0,0)
             ]
-            
-            let blockNormals = [];
-            blocks.forEach((block)=>{
-                blockNormals.push(new Ray(block, new Vector3(-1,0,0)));
-                blockNormals.push(new Ray(block, new Vector3(1,0,0)));
-                blockNormals.push(new Ray(block, new Vector3(0,-1,0)));
-                blockNormals.push(new Ray(block, new Vector3(0,1,0)));
-                blockNormals.push(new Ray(block, new Vector3(0,0,-1)));
-                blockNormals.push(new Ray(block, new Vector3(0,0,1)));
-            })
-
-            retPiece = new Piece(blocks,0xffffff, new Vector3(0,18,0), blockNormals);
+            retPiece = new Piece(blocks,0xffffff, new Vector3(0,18,0));
             break;
         }
     }
