@@ -28,7 +28,6 @@ class Tetris extends Component {
     //controls
     Controls(this);
 
-
   }
 
   componentDidMount() {
@@ -51,11 +50,28 @@ class Tetris extends Component {
     animate();
   }
 
-
-
   init(){
 
+
+    let piece1 = Piece();   
+    let piece3 = Piece();   
+    this.scene.add(piece3.mesh);         
+    this.scene.add(piece1.mesh);     
+
+    piece1.moveIn();
+    piece1.moveIn();
+    piece1.rotate(Math.PI/2);
+    piece1.rotate(Math.PI/2);
+    piece1.moveUp();
+
+
+    piece3.moveIn();
+    piece3.moveIn();
+    piece3.moveDown();
+
+
     this.currentPiece = Piece(2);
+
     this.scene.add(this.currentPiece.mesh);
     let frame = BOARD.frame();
     frame.position.add(new Vector3(-5,0,0))
