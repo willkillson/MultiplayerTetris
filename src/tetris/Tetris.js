@@ -95,6 +95,8 @@ class Tetris extends Component {
   render() {
     return (
       <div>
+        <h5>Controls: w,a,s,d,q,e,j,h</h5>
+        <h5>Rotation collision not in just yet.</h5>
         <div ref={ref => (this.mount = ref)} />
       </div>
     )

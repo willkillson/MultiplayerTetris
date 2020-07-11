@@ -35,7 +35,7 @@ const initControls = (props) =>{
       })
   
       Mousetrap.bind('h',()=>{
-        props.currentPiece = Piece(Math.floor(Math.random()*6));
+        props.currentPiece = Piece(8);
         props.scene.add(props.currentPiece.mesh);
       })
 }
