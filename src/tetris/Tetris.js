@@ -1,99 +1,105 @@
 import React, { Component } from "react";
-import ReactDOM from "react-dom";
-
 import * as THREE from "three";
+import { Vector3 } from "three";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
-import PieceFactory from './pieces/piece-factory';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+//local imports
+import Piece from './pieces/piece'
+import * as BOARD from './board/board';
+import Controls from "./Controls";
 
 
-const zMax = 30;
-//
 class Tetris extends Component {
-  componentDidMount() {
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
-    const renderer = new THREE.WebGLRenderer();
-    renderer.setSize( window.innerWidth, window.innerHeight );
-    // document.body.appendChild( renderer.domElement );
-    // use ref as a mount point of the Three.js scene instead of the document.body
-    this.mount.appendChild( renderer.domElement );
 
+  constructor(){
+    super();
 
+    this.renderer = new THREE.WebGLRenderer();
+    this.scene = new THREE.Scene();
+    this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+    this.renderer.setSize( window.innerWidth*0.75, window.innerHeight*0.75 );
+    this.renderer.gammaFactor = 2.2;
     
+    //camera position
+    this.camera.position.y = 8.5;
+    this.camera.position.x = 0.15;
+    this.camera.position.z = 15;
 
-
-    
-    // console.log(piece.meshs);
-
-    // scene.add( ...piece.meshs);
-
-    let currentCamera = 20;
-    let zoom = false;
-    
-    camera.position.z = currentCamera;
-
-    let pieces = [];
-
-    for(let i = 0;i<10;i++){
-      pieces.push(PieceFactory('T'));
-      pieces.push(PieceFactory('S'));
-      pieces.push(PieceFactory('I'));
-      pieces.push(PieceFactory('L'));
-      pieces.push(PieceFactory('J'));
-      pieces.push(PieceFactory('Z'));
-      pieces.push(PieceFactory('O'));
-    }
-
-
-    console.log(pieces);
-    pieces.forEach((piece)=>{
-      scene.add(...piece.meshs);
-    })
-    
-
-    const animate = function () {
-      requestAnimationFrame( animate );
-
-      pieces.forEach((piece)=>{
-        piece.update();
-      })
-
-      if(zoom){
-        currentCamera += -0.1;
-            
-        camera.position.z = currentCamera;
-        console.log("zooming");
-      }
-      else{
-        currentCamera += 0.1;
-        camera.position.z = currentCamera;
-        console.log("not zooming");
-      }
-
-      if(currentCamera>zMax){
-        zoom= true;
-      }
-      if(currentCamera<10){
-        zoom = false;
-      }
-    
-      renderer.render( scene, camera );
-    };
-    animate();
-
+    //controls
+    Controls(this);
 
   }
+
+  componentDidMount() {
+    this.mount.appendChild( this.renderer.domElement ); //must be located in the componentDidMount()
+    this.controls = new OrbitControls (this.camera, this.renderer.domElement);
+
+    this.init();
+
+    ////////////MainGameLoop
+    const animate = () => {
+
+      this.update();
+
+      this.draw();
+
+      this.renderer.render( this.scene, this.camera );
+      requestAnimationFrame( animate );
+    };
+
+    animate();
+  }
+
+  init(){
+
+
+    let piece1 = Piece();   
+    let piece3 = Piece();   
+    this.scene.add(piece3.mesh);         
+    this.scene.add(piece1.mesh);     
+
+    piece1.moveIn();
+    piece1.moveIn();
+    piece1.rotateCCW(Math.PI/2);
+    piece1.rotateCCW(Math.PI/2);
+    piece1.moveUp();
+
+
+    piece3.moveIn();
+    piece3.moveIn();
+    piece3.moveDown();
+
+
+    this.currentPiece = Piece(2);
+
+    this.scene.add(this.currentPiece.mesh);
+    let frame = BOARD.frame();
+    frame.position.add(new Vector3(-5,0,0))
+
+    this.scene.add(BOARD.levelFloor());   //grpimd
+    this.scene.add(BOARD.sky()); 
+    this.scene.add(frame);          
+    this.scene.add(new THREE.DirectionalLight(0xfffffff,3.0));
+  }
+
+  update(){
+
+    this.currentPiece.update();
+
+  }
+
+  draw(){
+
+  }
+
   render() {
     return (
-
       <div>
-        <h1>HelloWorld!</h1>
         <div ref={ref => (this.mount = ref)} />
       </div>
-      
     )
   }
+
 }
 
 export default Tetris;
