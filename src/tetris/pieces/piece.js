@@ -3,7 +3,6 @@ import * as THREE from 'three';
 import{Vector3} from 'three';
 
 class Piece{
-
     constructor(pBlockPositions, pColor, pPos, pBlockNormals){
         //class variables
         this.color = pColor;
@@ -14,7 +13,6 @@ class Piece{
         this.initClassVariables();
         this.initCollisionVariables();
         this.initRaycasters();
-
     }
 
     //initialization
@@ -67,8 +65,13 @@ class Piece{
              
              let rotatedDirection = new Vector3(dir.x,dir.y,dir.z);
              let rotatedPosition = new Vector3(origin.x,origin.y,origin.z);
+
+           
              
              rotatedDirection = rotatedDirection.applyQuaternion(this.mesh.quaternion);
+             rotatedDirection.x = Math.round(rotatedDirection.x);
+             rotatedDirection.y = Math.round(rotatedDirection.y);
+             rotatedDirection.z = Math.round(rotatedDirection.z);
              rotatedPosition = rotatedPosition.applyQuaternion(this.mesh.quaternion);
              rotatedPosition.add(this.mesh.position);
  
@@ -106,6 +109,20 @@ class Piece{
                      this.z_neg_rcs.push(rotatedRay);//OUT
                  }
         }        
+
+        console.log("                        ");
+        console.log("this.x_neg_rcs");
+        console.log(this.x_neg_rcs);
+        console.log("this.x_pos_rcs");
+        console.log(this.x_pos_rcs);
+        console.log("this.y_pos_rcs");
+        console.log(this.y_pos_rcs);
+        console.log("this.y_neg_rcs");
+        console.log(this.y_neg_rcs);
+        console.log("this.z_pos_rcs");
+        console.log(this.z_pos_rcs);
+        console.log("this.z_neg_rcs");
+        console.log(this.z_neg_rcs);
 
     }
 
@@ -190,36 +207,48 @@ class Piece{
     }
 
     checkCollisionUp(){
-        let intersects = [];
+        let allIntersections = [];
         this.y_pos_rcs.forEach((ray) => {
             let rayCaster = new Raycaster(ray.origin,ray.direction,0.1,1);
-            intersects.push(...rayCaster.intersectObjects(this.mesh.parent.children,true));
+            allIntersections.push(...rayCaster.intersectObjects(this.mesh.parent.children,true));
         });
-
+        //remove all the intersections with the pieces self
+        let intersects = [];
+        allIntersections.forEach((intersection)=>{
+            if(intersection.object.parent.uuid!==this.mesh.uuid){
+                intersects.push(intersection);
+            }
+        });
        if(intersects.length===0){
            this.collision_isBlocked['up'] = false;
        }
        else{
            this.collision_isBlocked['up'] = true;
        }
-       console.log(intersects);
+
     
     }
 
     checkCollisionDown(){
-        let intersects = [];
+        let allIntersections = [];
         this.y_neg_rcs.forEach((ray) => {
             let rayCaster = new Raycaster(ray.origin,ray.direction,0.1,1);
-            intersects.push(...rayCaster.intersectObjects(this.mesh.parent.children,true));
+            allIntersections.push(...rayCaster.intersectObjects(this.mesh.parent.children,true));
         });
-
+        //remove all the intersections with the pieces self
+        let intersects = [];
+        allIntersections.forEach((intersection)=>{
+            if(intersection.object.parent.uuid!==this.mesh.uuid){
+                intersects.push(intersection);
+            }
+        });
        if(intersects.length===0){
            this.collision_isBlocked['down'] = false;
        }
        else{
            this.collision_isBlocked['down'] = true;
        }
-       console.log(intersects);
+
     }
 
     checkCollisionLeft(){
@@ -242,7 +271,7 @@ class Piece{
        else{
            this.collision_isBlocked['left'] = true;
        }
-       console.log(intersects);
+
     }
 
     checkCollisionRight(){
@@ -265,7 +294,7 @@ class Piece{
        else{
            this.collision_isBlocked['right'] = true;
        }
-       console.log(intersects);
+
     }
 
 }
@@ -292,19 +321,16 @@ const createPiece = (pieceType = 0) =>{
                 new Vector3(1,0,0),
                 new Vector3(0,-1,0)];            
                 
-            let upCollisionChecks = [0,1,2];
-            let downCollisionChecks = [1,2,3];
-            let leftCollisionChecks = [1,3];
-            let rightCollisionChecks = [2,3];
-    
-            let collisionChecks = {
-                'up' : upCollisionChecks,
-                'down' : downCollisionChecks,
-                'left' : leftCollisionChecks,
-                'right': rightCollisionChecks
-            };
-    
-            retPiece = new Piece(blocks,T_color, new Vector3(0,18,0), collisionChecks);
+            let blockNormals = [];
+            blocks.forEach((block)=>{
+                blockNormals.push(new Ray(block, new Vector3(-1,0,0)));
+                blockNormals.push(new Ray(block, new Vector3(1,0,0)));
+                blockNormals.push(new Ray(block, new Vector3(0,-1,0)));
+                blockNormals.push(new Ray(block, new Vector3(0,1,0)));
+                blockNormals.push(new Ray(block, new Vector3(0,0,-1)));
+                blockNormals.push(new Ray(block, new Vector3(0,0,1)));
+            })
+            retPiece = new Piece(blocks,T_color, new Vector3(0,18,0), blockNormals);
             break;
         }
         case 1://S
@@ -315,18 +341,17 @@ const createPiece = (pieceType = 0) =>{
                 new Vector3(0,1,0),
                 new Vector3(1,1,0)];
 
-            let upCollisionChecks = [2,3,1];
-            let downCollisionChecks = [0,1,3];
-            let leftCollisionChecks = [1,2];
-            let rightCollisionChecks = [0,3];
-    
-            let collisionChecks = {
-                'up' : upCollisionChecks,
-                'down' : downCollisionChecks,
-                'left' : leftCollisionChecks,
-                'right': rightCollisionChecks
-            };
-            retPiece = new Piece(blocks,S_color, new Vector3(0,18,0), collisionChecks);
+            let blockNormals = [];
+            blocks.forEach((block)=>{
+                blockNormals.push(new Ray(block, new Vector3(-1,0,0)));
+                blockNormals.push(new Ray(block, new Vector3(1,0,0)));
+                blockNormals.push(new Ray(block, new Vector3(0,-1,0)));
+                blockNormals.push(new Ray(block, new Vector3(0,1,0)));
+                blockNormals.push(new Ray(block, new Vector3(0,0,-1)));
+                blockNormals.push(new Ray(block, new Vector3(0,0,1)));
+            })
+
+            retPiece = new Piece(blocks,S_color, new Vector3(0,18,0), blockNormals);
             break;
         }
         case 2://I
@@ -338,7 +363,6 @@ const createPiece = (pieceType = 0) =>{
                 new Vector3(2,0,0)];
 
             let blockNormals = [];
-
             blocks.forEach((block)=>{
                 blockNormals.push(new Ray(block, new Vector3(-1,0,0)));
                 blockNormals.push(new Ray(block, new Vector3(1,0,0)));
@@ -359,19 +383,17 @@ const createPiece = (pieceType = 0) =>{
                 new Vector3(-1,0,0),
                 new Vector3(-1,-1,0)];
             
-            let upCollisionChecks = [0,1,2];
-            let downCollisionChecks = [3,0,1];
-            let leftCollisionChecks = [2,3];
-            let rightCollisionChecks = [1,3];
-    
-            let collisionChecks = {
-                'up' : upCollisionChecks,
-                'down' : downCollisionChecks,
-                'left' : leftCollisionChecks,
-                'right': rightCollisionChecks
-            };
-    
-            retPiece = new Piece(blocks,L_color, new Vector3(0,18,0), collisionChecks);
+            let blockNormals = [];
+            blocks.forEach((block)=>{
+                blockNormals.push(new Ray(block, new Vector3(-1,0,0)));
+                blockNormals.push(new Ray(block, new Vector3(1,0,0)));
+                blockNormals.push(new Ray(block, new Vector3(0,-1,0)));
+                blockNormals.push(new Ray(block, new Vector3(0,1,0)));
+                blockNormals.push(new Ray(block, new Vector3(0,0,-1)));
+                blockNormals.push(new Ray(block, new Vector3(0,0,1)));
+            })
+
+            retPiece = new Piece(blocks,L_color, new Vector3(0,18,0), blockNormals);
             break;
         }
         case 4://J
@@ -382,19 +404,17 @@ const createPiece = (pieceType = 0) =>{
                 new Vector3(1,0,0),
                 new Vector3(1,-1,0)]; 
             
-            let upCollisionChecks = [0,1,2];
-            let downCollisionChecks = [0,1,3];
-            let leftCollisionChecks = [1,3];
-            let rightCollisionChecks = [2,3];
+            let blockNormals = [];
+            blocks.forEach((block)=>{
+                blockNormals.push(new Ray(block, new Vector3(-1,0,0)));
+                blockNormals.push(new Ray(block, new Vector3(1,0,0)));
+                blockNormals.push(new Ray(block, new Vector3(0,-1,0)));
+                blockNormals.push(new Ray(block, new Vector3(0,1,0)));
+                blockNormals.push(new Ray(block, new Vector3(0,0,-1)));
+                blockNormals.push(new Ray(block, new Vector3(0,0,1)));
+            })
 
-            let collisionChecks = {
-                'up' : upCollisionChecks,
-                'down' : downCollisionChecks,
-                'left' : leftCollisionChecks,
-                'right': rightCollisionChecks
-            };
-
-            retPiece = new Piece(blocks,J_color, new Vector3(0,18,0), collisionChecks);
+            retPiece = new Piece(blocks,J_color, new Vector3(0,18,0), blockNormals);
             break;
         }
         case 5://Z
@@ -405,19 +425,17 @@ const createPiece = (pieceType = 0) =>{
                 new Vector3(0,-1,0),
                 new Vector3(1,-1,0)];
 
-            let upCollisionChecks = [0,1,3];
-            let downCollisionChecks = [1,2,3];
-            let leftCollisionChecks = [1,2];
-            let rightCollisionChecks = [0,3];
+            let blockNormals = [];
+            blocks.forEach((block)=>{
+                blockNormals.push(new Ray(block, new Vector3(-1,0,0)));
+                blockNormals.push(new Ray(block, new Vector3(1,0,0)));
+                blockNormals.push(new Ray(block, new Vector3(0,-1,0)));
+                blockNormals.push(new Ray(block, new Vector3(0,1,0)));
+                blockNormals.push(new Ray(block, new Vector3(0,0,-1)));
+                blockNormals.push(new Ray(block, new Vector3(0,0,1)));
+            })
 
-            let collisionChecks = {
-                'up' : upCollisionChecks,
-                'down' : downCollisionChecks,
-                'left' : leftCollisionChecks,
-                'right': rightCollisionChecks
-            };
-
-            retPiece = new Piece(blocks,Z_color, new Vector3(0,18,0), collisionChecks);
+            retPiece = new Piece(blocks,Z_color, new Vector3(0,18,0), blockNormals);
             break;
         }
         case 6://O
@@ -428,19 +446,17 @@ const createPiece = (pieceType = 0) =>{
                 new Vector3(1,-1,0),//bot right
                 new Vector3(0,-1,0)];//bot left
 
-            let upCollisionChecks = [0,1];
-            let downCollisionChecks = [2,3];
-            let leftCollisionChecks = [0,3];
-            let rightCollisionChecks = [1,2];
+            let blockNormals = [];
+            blocks.forEach((block)=>{
+                blockNormals.push(new Ray(block, new Vector3(-1,0,0)));
+                blockNormals.push(new Ray(block, new Vector3(1,0,0)));
+                blockNormals.push(new Ray(block, new Vector3(0,-1,0)));
+                blockNormals.push(new Ray(block, new Vector3(0,1,0)));
+                blockNormals.push(new Ray(block, new Vector3(0,0,-1)));
+                blockNormals.push(new Ray(block, new Vector3(0,0,1)));
+            })
 
-            let collisionChecks = {
-                'up' : upCollisionChecks,
-                'down' : downCollisionChecks,
-                'left' : leftCollisionChecks,
-                'right': rightCollisionChecks
-            };
-
-            retPiece = new Piece(blocks,O_color, new Vector3(0,18,0), collisionChecks);
+            retPiece = new Piece(blocks,O_color, new Vector3(0,18,0), blockNormals);
             break;
         }
         default ://single cube
@@ -449,19 +465,17 @@ const createPiece = (pieceType = 0) =>{
                 new Vector3(0,0,0)
             ]
             
-            let upCollisionChecks = [0];
-            let downCollisionChecks = [0];
-            let leftCollisionChecks = [0];
-            let rightCollisionChecks = [0];
+            let blockNormals = [];
+            blocks.forEach((block)=>{
+                blockNormals.push(new Ray(block, new Vector3(-1,0,0)));
+                blockNormals.push(new Ray(block, new Vector3(1,0,0)));
+                blockNormals.push(new Ray(block, new Vector3(0,-1,0)));
+                blockNormals.push(new Ray(block, new Vector3(0,1,0)));
+                blockNormals.push(new Ray(block, new Vector3(0,0,-1)));
+                blockNormals.push(new Ray(block, new Vector3(0,0,1)));
+            })
 
-            let collisionChecks = {
-                'up' : upCollisionChecks,
-                'down' : downCollisionChecks,
-                'left' : leftCollisionChecks,
-                'right': rightCollisionChecks
-            };
-
-            retPiece = new Piece(blocks,0xffffff, new Vector3(0,18,0), collisionChecks);
+            retPiece = new Piece(blocks,0xffffff, new Vector3(0,18,0), blockNormals);
             break;
         }
     }
