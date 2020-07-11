@@ -1,14 +1,14 @@
-import {BoxGeometry, MeshBasicMaterial, Mesh, Raycaster} from "three";
+import {BoxGeometry, MeshBasicMaterial, Mesh, Raycaster, Ray} from "three";
 import * as THREE from 'three';
 import{Vector3} from 'three';
 
 class Piece{
 
-    constructor(pBlockPositions, pColor, pPos, pRaycasters){
+    constructor(pBlockPositions, pColor, pPos, pBlockNormals){
         //class variables
         this.color = pColor;
         this.blockPositions = pBlockPositions; 
-        this.raycasters = pRaycasters;
+        this.blockNormals = pBlockNormals;
         this.startingPosition = pPos;
 
         this.initClassVariables();
@@ -51,8 +51,61 @@ class Piece{
     }
 
     initRaycasters(){
+
+        this.x_neg_rcs = [];//collect all same facing raycasters
+        this.x_pos_rcs = [];
+        this.y_pos_rcs = [];
+        this.y_neg_rcs = [];
+        this.z_pos_rcs = [];
+        this.z_neg_rcs = [];      
+         
+        for(let i = 0;i< this.blockNormals.length;i++){
+             //apply the rotation to the raycasters direction
+             let ray = this.blockNormals[i];
+             let origin = ray.origin;
+             let dir = ray.direction;
+             
+             let rotatedDirection = new Vector3(dir.x,dir.y,dir.z);
+             let rotatedPosition = new Vector3(origin.x,origin.y,origin.z);
+             
+             rotatedDirection = rotatedDirection.applyQuaternion(this.mesh.quaternion);
+             rotatedPosition = rotatedPosition.applyQuaternion(this.mesh.quaternion);
+             rotatedPosition.add(this.mesh.position);
  
-        //TODO
+             let rotatedRay = new Ray(rotatedPosition,rotatedDirection);
+             //then check which direction it is now facing
+ 
+             if(rotatedRay.direction.x === -1 &&
+             rotatedRay.direction.y === 0 &&
+             rotatedRay.direction.z === 0){
+                this.x_neg_rcs.push(rotatedRay);//LEFT
+             }
+             if(rotatedRay.direction.x === 1 &&
+                 rotatedRay.direction.y === 0 &&
+                 rotatedRay.direction.z === 0){
+                     this.x_pos_rcs.push(rotatedRay);//RIGHT
+                 }
+             if(rotatedRay.direction.x === 0 &&
+                 rotatedRay.direction.y === 1 &&
+                 rotatedRay.direction.z === 0){
+                     this.y_pos_rcs.push(rotatedRay);//UP
+                 }
+             if(rotatedRay.direction.x === 0 &&
+                 rotatedRay.direction.y === -1 &&
+                 rotatedRay.direction.z === 0){
+                     this.y_neg_rcs.push(rotatedRay);//DOWN
+                 }
+             if(rotatedRay.direction.x === 0 &&
+                 rotatedRay.direction.y === 0 &&
+                 rotatedRay.direction.z === -1){
+                     this.z_pos_rcs.push(rotatedRay);//IN
+                 }
+             if(rotatedRay.direction.x === 0 &&
+                 rotatedRay.direction.y === 0 &&
+                 rotatedRay.direction.z === 1){
+                     this.z_neg_rcs.push(rotatedRay);//OUT
+                 }
+        }        
 
     }
 
@@ -93,20 +146,32 @@ class Piece{
     }
 
     moveIn(){
-        this.move(new Vector3(0,0,-1));
+        if(!this.collision_isBlocked['in']){
+            this.move(new Vector3(0,0,-1));
+        }
     }
 
     moveOut(){
-        this.move(new Vector3(0,0,1));
+        if(!this.collision_isBlocked['out']){
+            this.move(new Vector3(0,0,1));
+        }
     }
 
     move(mov){
         this.mesh.position.add(mov);
     }
 
-    rotate(angle) {
-        this.mesh.rotation.z += angle;
-        console.log(this.mesh);
+    rotateCCW() {
+        if(!this.collision_isBlocked['ccw']){
+            this.mesh.rotation.z += Math.PI/2;
+            //this.move(new Vector3(0,0,1));
+        }
+    };
+
+    rotateCW() {
+        if(!this.collision_isBlocked['cw']){
+            //this.move(new Vector3(0,0,1));
+        }
     };
 
     update(){
@@ -125,19 +190,82 @@ class Piece{
     }
 
     checkCollisionUp(){
+        let intersects = [];
+        this.y_pos_rcs.forEach((ray) => {
+            let rayCaster = new Raycaster(ray.origin,ray.direction,0.1,1);
+            intersects.push(...rayCaster.intersectObjects(this.mesh.parent.children,true));
+        });
+
+       if(intersects.length===0){
+           this.collision_isBlocked['up'] = false;
+       }
+       else{
+           this.collision_isBlocked['up'] = true;
+       }
+       console.log(intersects);
     
     }
 
     checkCollisionDown(){
- 
+        let intersects = [];
+        this.y_neg_rcs.forEach((ray) => {
+            let rayCaster = new Raycaster(ray.origin,ray.direction,0.1,1);
+            intersects.push(...rayCaster.intersectObjects(this.mesh.parent.children,true));
+        });
+
+       if(intersects.length===0){
+           this.collision_isBlocked['down'] = false;
+       }
+       else{
+           this.collision_isBlocked['down'] = true;
+       }
+       console.log(intersects);
     }
 
     checkCollisionLeft(){
- 
+        let allIntersections = [];
+        this.x_neg_rcs.forEach((ray) => {
+            let rayCaster = new Raycaster(ray.origin,ray.direction,0.1,1);
+            allIntersections.push(...rayCaster.intersectObjects(this.mesh.parent.children,true));
+        });
+        //remove all the intersections with the pieces self
+        let intersects = [];
+        allIntersections.forEach((intersection)=>{
+            if(intersection.object.parent.uuid!==this.mesh.uuid){
+                intersects.push(intersection);
+            }
+        });
+
+       if(intersects.length===0){
+           this.collision_isBlocked['left'] = false;
+       }
+       else{
+           this.collision_isBlocked['left'] = true;
+       }
+       console.log(intersects);
     }
 
     checkCollisionRight(){
- 
+        let allIntersections = [];
+        this.x_pos_rcs.forEach((ray) => {
+            let rayCaster = new Raycaster(ray.origin,ray.direction,0.1,1);
+            allIntersections.push(...rayCaster.intersectObjects(this.mesh.parent.children,true));
+        });
+        //remove all the intersections with the pieces self
+        let intersects = [];
+        allIntersections.forEach((intersection)=>{
+            if(intersection.object.parent.uuid!==this.mesh.uuid){
+                intersects.push(intersection);
+            }
+        });
+
+       if(intersects.length===0){
+           this.collision_isBlocked['right'] = false;
+       }
+       else{
+           this.collision_isBlocked['right'] = true;
+       }
+       console.log(intersects);
     }
 
 }
@@ -209,18 +337,18 @@ const createPiece = (pieceType = 0) =>{
                 new Vector3(1,0,0),
                 new Vector3(2,0,0)];
 
-            let raycasters = [];
+            let blockNormals = [];
 
             blocks.forEach((block)=>{
-                raycasters.push(new Raycaster(block, new Vector3(-1,0,0),0,1));
-                raycasters.push(new Raycaster(block, new Vector3(1,0,0),0,1));
-                raycasters.push(new Raycaster(block, new Vector3(0,-1,0),0,1));
-                raycasters.push(new Raycaster(block, new Vector3(0,1,0),0,1));
-                raycasters.push(new Raycaster(block, new Vector3(0,0,-1),0,1));
-                raycasters.push(new Raycaster(block, new Vector3(0,0,1),0,1));
+                blockNormals.push(new Ray(block, new Vector3(-1,0,0)));
+                blockNormals.push(new Ray(block, new Vector3(1,0,0)));
+                blockNormals.push(new Ray(block, new Vector3(0,-1,0)));
+                blockNormals.push(new Ray(block, new Vector3(0,1,0)));
+                blockNormals.push(new Ray(block, new Vector3(0,0,-1)));
+                blockNormals.push(new Ray(block, new Vector3(0,0,1)));
             })
      
-            retPiece = new Piece(blocks,I_color, new Vector3(0,18,0), raycasters);
+            retPiece = new Piece(blocks,I_color, new Vector3(0,18,0), blockNormals);
             break;
         }
         case 3://L

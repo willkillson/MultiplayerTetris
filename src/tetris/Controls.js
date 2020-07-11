@@ -18,7 +18,7 @@ const initControls = (props) =>{
       })
   
       Mousetrap.bind('j',()=>{
-        props.currentPiece.rotate(-Math.PI/2);
+        props.currentPiece.rotateCCW();
       })
 
       Mousetrap.bind('e',()=>{
@@ -30,7 +30,8 @@ const initControls = (props) =>{
       })
   
       Mousetrap.bind('k',()=>{
-        props.currentPiece.rotate(Math.PI/2);
+        
+        props.currentPiece.rotateCW();
       })
   
       Mousetrap.bind('h',()=>{

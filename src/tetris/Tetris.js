@@ -60,8 +60,8 @@ class Tetris extends Component {
 
     piece1.moveIn();
     piece1.moveIn();
-    piece1.rotate(Math.PI/2);
-    piece1.rotate(Math.PI/2);
+    piece1.rotateCCW(Math.PI/2);
+    piece1.rotateCCW(Math.PI/2);
     piece1.moveUp();
 
 
