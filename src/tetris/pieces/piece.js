@@ -1,24 +1,15 @@
-import {BoxGeometry, MeshBasicMaterial, Mesh} from "three";
+import {BoxGeometry, MeshBasicMaterial, Mesh, Raycaster} from "three";
 import * as THREE from 'three';
 import{Vector3} from 'three';
 
 class Piece{
 
-    constructor(pBlockPositions, pColor, pPos, pCollisionChecks){
+    constructor(pBlockPositions, pColor, pPos, pRaycasters){
         //class variables
         this.color = pColor;
         this.blockPositions = pBlockPositions; 
-        this.position = pPos;
-
-        /**
-         *      collision checks
-         * 
-         *  This is an object of arrays. It contains
-         *  'up', 'down', 'left', 'right' key:Arrays, where 
-         *  the arrays contain the block index positions that
-         *  require collision checks on the key's direction. 
-         */
-        this.collisionChecks = pCollisionChecks;
+        this.raycasters = pRaycasters;
+        this.startingPosition = pPos;
 
         this.initClassVariables();
         this.initCollisionVariables();
@@ -31,17 +22,20 @@ class Piece{
         this.mesh = new THREE.Object3D();
         this.mesh.name = "cube";
 
+        //create the blocks
         for(let i = 0;i< this.blockPositions.length;i++){
             let geometry = new BoxGeometry(1,1,1);
             let material = new MeshBasicMaterial( { color: this.color } );
             this.mesh.add(new Mesh(geometry,material));
         }
 
+        //put the blocks where it needs to go
         for(let i = 0;i< this.blockPositions.length;i++){
             this.mesh.children[i].position.add(this.blockPositions[i]);
         }
-    
-        this.mesh.position.add(this.position);
+        
+        //move the group object to its starting position
+        this.mesh.position.add(this.startingPosition);
     }
 
     initCollisionVariables(){
@@ -50,59 +44,15 @@ class Piece{
         this.collision_isBlocked['down'] = false;
         this.collision_isBlocked['left'] = false;
         this.collision_isBlocked['right'] = false;
+        this.collision_isBlocked['in'] = false;
+        this.collision_isBlocked['out'] = false;
         this.collision_isBlocked['cw'] = false;
         this.collision_isBlocked['ccw'] = false;
     }
 
     initRaycasters(){
-        let near = 0;
-        let far = 1;
-
-        /**
-         * Is an array of raycasters that are used 
-         * to determine if a direction is blocked.
-         */
-        this.upRaycasters = [];
-        this.downRaycasters = [];
-        this.leftRaycasters = [];
-        this.rightRaycasters = [];
-
-        let upChecks = this.collisionChecks['up'];
-        let downChecks = this.collisionChecks['down'];
-        let leftChecks = this.collisionChecks['left'];
-        let rightChecks = this.collisionChecks['right'];
-
-        upChecks.forEach(check =>{
-            let pos = new Vector3(0,0,0);                   //calculate position of raycaster
-            pos.add(this.mesh.position);                    //the position of the group mesh
-            pos.add(this.mesh.children[check].position);    //plus the position of the individual cube
-            this.upRaycasters.push(new THREE.Raycaster(pos,new Vector3(0,1,0),near,far));
-        })
-
-        downChecks.forEach(check =>{
-            let pos = new Vector3(0,0,0);                   //calculate position of raycaster
-            pos.add(this.mesh.position);                    //the position of the group mesh
-            pos.add(this.mesh.children[check].position);    //plus the position of the individual cube
-            this.downRaycasters.push(new THREE.Raycaster(pos,new Vector3(0,-1,0),near,far));
-        })
-
-        
-        leftChecks.forEach(check =>{
-            let pos = new Vector3(0,0,0);                   //calculate position of raycaster
-            pos.add(this.mesh.position);                    //the position of the group mesh
-            pos.add(this.mesh.children[check].position);    //plus the position of the individual cube
-            this.leftRaycasters.push(new THREE.Raycaster(pos,new Vector3(-1,0,0),near,far));
-        })
-
-        //console.log(this.mesh.position);
-        //console.log(this.mesh.children);
-        rightChecks.forEach(check =>{
-            let pos = new Vector3(0,0,0);                   //calculate position of raycaster
-            pos.add(this.mesh.position);                    //the position of the group mesh
-            pos.add(this.mesh.children[check].position);    //plus the position of the individual cube
-            
-            this.rightRaycasters.push(new THREE.Raycaster(pos,new Vector3(1,0,0),near,far));
-        })
+ 
+        //TODO
 
     }
 
@@ -176,59 +126,17 @@ class Piece{
 
     checkCollisionUp(){
     
-        let intersects = [];
-        this.upRaycasters.forEach(raycaster => {
-            intersects.push(...raycaster.intersectObjects(this.mesh.parent.children,true));
-        });
-
-       if(intersects.length===0){
-           this.collision_isBlocked['up'] = false;
-       }
-       else{
-           this.collision_isBlocked['up'] = true;
-       }
     }
 
     checkCollisionDown(){
-        let intersects = [];
-        this.downRaycasters.forEach(raycaster => {
-            intersects.push(...raycaster.intersectObjects(this.mesh.parent.children,true));
-        });
-        if(intersects.length===0){
-            this.collision_isBlocked['down'] = false;
-        }
-        else{
-            this.collision_isBlocked['down'] = true;
-        }
-
  
     }
 
     checkCollisionLeft(){
-        let intersects = [];
-        this.leftRaycasters.forEach(raycaster => {
-            intersects.push(...raycaster.intersectObjects(this.mesh.parent.children,true));
-        });
-        if(intersects.length===0){
-            this.collision_isBlocked['left'] = false;
-        }
-        else{
-            this.collision_isBlocked['left'] = true;
-        }
  
     }
 
     checkCollisionRight(){
-        let intersects = [];
-        this.rightRaycasters.forEach(raycaster => {
-            intersects.push(...raycaster.intersectObjects(this.mesh.parent.children,true));
-        });
-        if(intersects.length===0){
-            this.collision_isBlocked['right'] = false;
-        }
-        else{
-            this.collision_isBlocked['right'] = true;
-        }
  
     }
 
@@ -301,19 +209,18 @@ const createPiece = (pieceType = 0) =>{
                 new Vector3(1,0,0),
                 new Vector3(2,0,0)];
 
-            let upCollisionChecks = [0,1,2,3];
-            let downCollisionChecks = [0,1,2,3];
-            let leftCollisionChecks = [1];
-            let rightCollisionChecks = [3];
-    
-            let collisionChecks = {
-                'up' : upCollisionChecks,
-                'down' : downCollisionChecks,
-                'left' : leftCollisionChecks,
-                'right': rightCollisionChecks
-            };
-    
-            retPiece = new Piece(blocks,I_color, new Vector3(0,18,0), collisionChecks);
+            let raycasters = [];
+
+            blocks.forEach((block)=>{
+                raycasters.push(new Raycaster(block, new Vector3(-1,0,0),0,1));
+                raycasters.push(new Raycaster(block, new Vector3(1,0,0),0,1));
+                raycasters.push(new Raycaster(block, new Vector3(0,-1,0),0,1));
+                raycasters.push(new Raycaster(block, new Vector3(0,1,0),0,1));
+                raycasters.push(new Raycaster(block, new Vector3(0,0,-1),0,1));
+                raycasters.push(new Raycaster(block, new Vector3(0,0,1),0,1));
+            })
+     
+            retPiece = new Piece(blocks,I_color, new Vector3(0,18,0), raycasters);
             break;
         }
         case 3://L
