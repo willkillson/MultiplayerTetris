@@ -142,6 +142,14 @@ class Piece{
         }
     }
 
+    moveIn(){
+        this.move(new Vector3(0,0,-1));
+    }
+
+    moveOut(){
+        this.move(new Vector3(0,0,1));
+    }
+
     move(mov){
         this.mesh.position.add(mov);
     }

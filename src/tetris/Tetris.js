@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 
-import Mousetrap from 'mousetrap';
+
 
 import * as THREE from "three";
 import { Vector3 } from "three";
@@ -11,6 +11,8 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 import Piece from './pieces/piece'
 import * as BOARD from './board/board';
+import Controls from './Controls';
+import initControls from "./Controls";
 
 
 class Tetris extends Component {
@@ -30,17 +32,10 @@ class Tetris extends Component {
     this.camera.position.z = 15;
 
     //controls
-    this.initControls();
-
-    
-
+    initControls(this);
 
   }
 
-  
-
-
-  
   componentDidMount() {
     this.mount.appendChild( this.renderer.domElement ); //must be located in the componentDidMount()
     this.controls = new OrbitControls (this.camera, this.renderer.domElement);
@@ -126,7 +121,12 @@ class Tetris extends Component {
 
     let delta = 0;
     const animate = () => {
+      ////////////MainGameLoop
+      
+
       this.currentPiece.update();
+      //this.currentPiece.rotate(-Math.PI/2);
+      //this.currentPiece.mesh.geometry.computeVertexNormals();
 
       delta += 0.1;
         //uniform
@@ -140,6 +140,8 @@ class Tetris extends Component {
     
       this.renderer.render( this.scene, this.camera );
       requestAnimationFrame( animate );
+
+
     };
 
     animate();
@@ -147,7 +149,7 @@ class Tetris extends Component {
 
   init(){
     
-    this.currentPiece = Piece(Math.floor(Math.random()*6));
+    this.currentPiece = Piece(2);
     this.scene.add(this.currentPiece.mesh);
     let frame = BOARD.frame();
     frame.position.add(new Vector3(-5,0,0))
@@ -158,40 +160,9 @@ class Tetris extends Component {
     this.scene.add(new THREE.DirectionalLight(0xfffffff,3.0));
   }
 
-  initControls(){
-
-    Mousetrap.bind('w',()=>{
-      this.currentPiece.instantDrop();
-    })
-    Mousetrap.bind('a',()=>{
-      this.currentPiece.moveLeft();
-    })
-    Mousetrap.bind('s',()=>{
-      this.currentPiece.moveDown();
-    })
-    Mousetrap.bind('d',()=>{
-      this.currentPiece.moveRight();
-    })
-
-    Mousetrap.bind('j',()=>{
-      this.currentPiece.rotate(-Math.PI/2);
-    })
-
-    Mousetrap.bind('k',()=>{
-      this.currentPiece.rotate(Math.PI/2);
-    })
-
-    Mousetrap.bind('h',()=>{
-      this.currentPiece = Piece(Math.floor(Math.random()*6));
-      this.scene.add(this.currentPiece.mesh);
-    })
-
-  }
-
   render() {
     return (
       <div>
-        <h1>HelloWorld!</h1>
         <div ref={ref => (this.mount = ref)} />
       </div>
     )
