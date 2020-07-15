@@ -475,7 +475,7 @@ const createPiece = (pieceType = 0, defaultPosition = new Vector3(0,18,0)) =>{
         break;
 
         }   
-        default ://single cube
+        case 9://single cube
         {
             let blocks =[
                 new Vector3(0,0,0)
