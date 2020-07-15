@@ -365,7 +365,7 @@ class Piece{
 }
 
 
-const createPiece = (pieceType = 0) =>{
+const createPiece = (pieceType = 0, defaultPosition = new Vector3(0,18,0)) =>{
 
     const I_color = 0xffa500;
     const T_color = 0xadd8e6;
@@ -385,7 +385,7 @@ const createPiece = (pieceType = 0) =>{
                 new Vector3(-1,0,0),
                 new Vector3(1,0,0),
                 new Vector3(0,-1,0)];            
-            retPiece = new Piece(blocks,T_color, new Vector3(0,18,0));
+            retPiece = new Piece(blocks,T_color, defaultPosition);
             break;
         }
         case 1://S
@@ -395,7 +395,7 @@ const createPiece = (pieceType = 0) =>{
                 new Vector3(-1,0,0),
                 new Vector3(0,1,0),
                 new Vector3(1,1,0)];
-            retPiece = new Piece(blocks,S_color, new Vector3(0,18,0));
+            retPiece = new Piece(blocks,S_color, defaultPosition);
             break;
         }
         case 2://I
@@ -405,7 +405,7 @@ const createPiece = (pieceType = 0) =>{
                 new Vector3(-1,0,0),
                 new Vector3(1,0,0),
                 new Vector3(2,0,0)];
-            retPiece = new Piece(blocks,I_color, new Vector3(0,18,0));
+            retPiece = new Piece(blocks,I_color, defaultPosition);
             break;
         }
         case 3://L
@@ -415,7 +415,7 @@ const createPiece = (pieceType = 0) =>{
                 new Vector3(1,0,0),
                 new Vector3(-1,0,0),
                 new Vector3(-1,-1,0)];
-            retPiece = new Piece(blocks,L_color, new Vector3(0,18,0));
+            retPiece = new Piece(blocks,L_color, defaultPosition);
             break;
         }
         case 4://J
@@ -426,7 +426,7 @@ const createPiece = (pieceType = 0) =>{
                 new Vector3(1,0,0),
                 new Vector3(1,-1,0)]; 
 
-            retPiece = new Piece(blocks,J_color, new Vector3(0,18,0));
+            retPiece = new Piece(blocks,J_color, defaultPosition);
             break;
         }
         case 5://Z
@@ -437,7 +437,7 @@ const createPiece = (pieceType = 0) =>{
                 new Vector3(0,-1,0),
                 new Vector3(1,-1,0)];
 
-            retPiece = new Piece(blocks,Z_color, new Vector3(0,18,0));
+            retPiece = new Piece(blocks,Z_color, defaultPosition);
             break;
         }
         case 6://O
@@ -447,7 +447,7 @@ const createPiece = (pieceType = 0) =>{
                 new Vector3(1,0,0),//top right
                 new Vector3(1,-1,0),//bot right
                 new Vector3(0,-1,0)];//bot left
-            retPiece = new Piece(blocks,O_color, new Vector3(0,18,0));
+            retPiece = new Piece(blocks,O_color, defaultPosition);
             break;
         }
         case 7://RANDOM
@@ -459,7 +459,7 @@ const createPiece = (pieceType = 0) =>{
         blocks.push(new Vector3(-1,0,0));     
         //
 
-        retPiece = new Piece(blocks,O_color, new Vector3(0,18,0));
+        retPiece = new Piece(blocks,O_color, defaultPosition);
         break;
         }
         case 8://RANDOM
@@ -471,7 +471,7 @@ const createPiece = (pieceType = 0) =>{
         blocks.push(new Vector3(0,0,1));     
         //
 
-        retPiece = new Piece(blocks,O_color, new Vector3(0,18,0));
+        retPiece = new Piece(blocks,O_color, defaultPosition);
         break;
 
         }   
@@ -480,7 +480,7 @@ const createPiece = (pieceType = 0) =>{
             let blocks =[
                 new Vector3(0,0,0)
             ]
-            retPiece = new Piece(blocks,0xffffff, new Vector3(0,18,0));
+            retPiece = new Piece(blocks,0xffffff, defaultPosition);
             break;
         }
     }
