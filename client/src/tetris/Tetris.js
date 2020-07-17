@@ -9,6 +9,10 @@ import * as BOARD from './board/board';
 import Controls from "./Controls";
 import { Quaternion } from "three/build/three.module";
 
+import io from "socket.io-client";
+let socket = io('http://localhost:80');
+
+socket.emit('join', 'hello world from client');
 
 class Tetris extends Component {
 
