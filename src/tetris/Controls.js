@@ -4,8 +4,8 @@ import Piece from './pieces/piece'
 const initControls = (props) =>{
 
     Mousetrap.bind('w',()=>{
-        //this.currentPiece.instantDrop();
-        props.currentPiece.moveUp();
+        props.currentPiece.instantDrop();
+        //props.currentPiece.moveUp();
       })
       Mousetrap.bind('a',()=>{
         props.currentPiece.moveLeft();
@@ -35,7 +35,7 @@ const initControls = (props) =>{
       })
   
       Mousetrap.bind('h',()=>{
-        props.currentPiece = Piece(8);
+        props.currentPiece = Piece(Math.floor(Math.random()*7));
         props.scene.add(props.currentPiece.mesh);
       })
 }

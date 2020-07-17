@@ -7,6 +7,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Piece from './pieces/piece'
 import * as BOARD from './board/board';
 import Controls from "./Controls";
+import { Quaternion } from "three/build/three.module";
 
 
 class Tetris extends Component {
@@ -16,18 +17,16 @@ class Tetris extends Component {
 
     this.renderer = new THREE.WebGLRenderer();
     this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
-    this.renderer.setSize( window.innerWidth*0.75, window.innerHeight*0.75 );
+    this.camera = new THREE.PerspectiveCamera( 90, window.innerWidth/window.innerHeight, 0.1, 1000 );
+    this.renderer.setSize( window.innerWidth*0.90, window.innerHeight*0.90 );
     this.renderer.gammaFactor = 2.2;
     
     //camera position
-    this.camera.position.y = 8.5;
-    this.camera.position.x = 0.15;
+    this.camera.position.y = 10;
+    this.camera.position.x = 0;
     this.camera.position.z = 15;
 
-    //controls
     Controls(this);
-
   }
 
   componentDidMount() {
@@ -84,7 +83,6 @@ class Tetris extends Component {
     return (
       <div>
         <h5>Controls: w,a,s,d,q,e,j,h</h5>
-        <h5>Rotation collision not in just yet.</h5>
         <div ref={ref => (this.mount = ref)} />
       </div>
     )

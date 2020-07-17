@@ -184,35 +184,19 @@ class Piece{
     }
 
     rotateCCW() {
-
-   
+        
         let rotCCW = new THREE.Quaternion(0,0,0,0);
         rotCCW.setFromAxisAngle(new THREE.Vector3(0,0,1), Math.PI/2);
-
-        let rotCW = new THREE.Quaternion(0,0,0,0);
-        rotCW.setFromAxisAngle(new THREE.Vector3(0,0,1), -Math.PI/2);
-
 
         let cMesh = this.mesh.clone(true);
         let scene = this.mesh.parent;
         let uuid = this.mesh.uuid;
 
-
-        let obj = new Object3D();
-        this.mesh.children.forEach((child)=>{
-            let innerObject = new Object3D();
-            innerObject.position.set(child.position.x,child.position.y,child.position.z);
-            obj.add(innerObject);
-        })
-
         let decision = this.checkCollisionIntersections(uuid, cMesh, scene,rotCCW);
+
         if(!decision){
             this.mesh.applyQuaternion(rotCCW);
         }
-
-
-
-
 
     };
 
@@ -220,7 +204,16 @@ class Piece{
 
         let rotCW = new THREE.Quaternion(0,0,0,0);
         rotCW.setFromAxisAngle(new THREE.Vector3(0,0,1), -Math.PI/2);
-        this.mesh.applyQuaternion(rotCW);
+
+        let cMesh = this.mesh.clone(true);
+        let scene = this.mesh.parent;
+        let uuid = this.mesh.uuid;
+
+        let decision = this.checkCollisionIntersections(uuid, cMesh, scene,rotCW);
+        
+        if(!decision){
+            this.mesh.applyQuaternion(rotCW);
+        }
     };
 
     update(){
