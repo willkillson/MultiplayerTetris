@@ -1,6 +1,7 @@
-import {BoxGeometry, MeshBasicMaterial, Mesh, Raycaster, Ray} from "three";
+import {BoxGeometry, MeshBasicMaterial, Mesh, Raycaster, Ray, Quaternion} from "three";
 import * as THREE from 'three';
 import{Vector3} from 'three';
+import { Object3D } from "three/build/three.module";
 
 class Piece{
     constructor(pBlockPositions, pColor, pPos){
@@ -120,19 +121,6 @@ class Piece{
                  }
         }        
 
-        console.log("                        ");
-        console.log("this.x_neg_rcs");
-        console.log(this.x_neg_rcs);
-        console.log("this.x_pos_rcs");
-        console.log(this.x_pos_rcs);
-        console.log("this.y_pos_rcs");
-        console.log(this.y_pos_rcs);
-        console.log("this.y_neg_rcs");
-        console.log(this.y_neg_rcs);
-        console.log("this.z_pos_rcs");
-        console.log(this.z_pos_rcs);
-        console.log("this.z_neg_rcs");
-        console.log(this.z_neg_rcs);
 
     }
 
@@ -196,24 +184,107 @@ class Piece{
     }
 
     rotateCCW() {
-        if(!this.collision_isBlocked['ccw']){
-            this.mesh.rotation.z += Math.PI/2;
-            //this.move(new Vector3(0,0,1));
+
+   
+        let rotCCW = new THREE.Quaternion(0,0,0,0);
+        rotCCW.setFromAxisAngle(new THREE.Vector3(0,0,1), Math.PI/2);
+
+        let rotCW = new THREE.Quaternion(0,0,0,0);
+        rotCW.setFromAxisAngle(new THREE.Vector3(0,0,1), -Math.PI/2);
+
+
+        let cMesh = this.mesh.clone(true);
+        let scene = this.mesh.parent;
+        let uuid = this.mesh.uuid;
+
+
+        let obj = new Object3D();
+        this.mesh.children.forEach((child)=>{
+            let innerObject = new Object3D();
+            innerObject.position.set(child.position.x,child.position.y,child.position.z);
+            obj.add(innerObject);
+        })
+
+        let decision = this.checkCollisionIntersections(uuid, cMesh, scene,rotCCW);
+        if(!decision){
+            this.mesh.applyQuaternion(rotCCW);
         }
+
+
+
+
+
     };
 
     rotateCW() {
-        if(!this.collision_isBlocked['cw']){
-            //this.move(new Vector3(0,0,1));
-        }
+
+        let rotCW = new THREE.Quaternion(0,0,0,0);
+        rotCW.setFromAxisAngle(new THREE.Vector3(0,0,1), -Math.PI/2);
+        this.mesh.applyQuaternion(rotCW);
     };
 
     update(){
         this.checkAllCollisions();
+
+        //this.checkCollisionIntersections(rot);
         //checkAllCollisions();
     }
     
     //collisions
+    checkCollisionIntersections(pUUID, pMesh,pScene, pRot){
+
+        let scene = pScene;
+        let uuid =pUUID;
+        
+        let allBlocks = [];
+        scene.children.forEach(child=>{
+            child.children.forEach( subChild=>{
+  
+                if(subChild.parent.uuid!==uuid){
+                    let box = new THREE.Box3().setFromObject(subChild);
+                    allBlocks.push(box);
+                }
+            })
+        });
+
+        let intersects = false;
+
+        pMesh.applyQuaternion(pRot);
+        pMesh.updateMatrixWorld(true); //Updates the global transform of the object and its descendants.
+
+
+        pMesh.children.forEach((child)=>{
+    
+            //let currentBox = new THREE.Box3().setFromObject(child.applyQuaternion(pMesh.quaternion));
+
+            let  currentBox= new THREE.Box3().setFromObject(child);
+
+           //console.log(currentBox);
+     
+
+
+            currentBox.max.x = parseFloat(currentBox.max.x.toFixed(2));
+            currentBox.max.y = parseFloat(currentBox.max.y.toFixed(2));
+            currentBox.max.z = parseFloat(currentBox.max.z.toFixed(2));
+
+            currentBox.min.x = parseFloat(currentBox.min.x.toFixed(2));
+            currentBox.min.y = parseFloat(currentBox.min.y.toFixed(2));
+            currentBox.min.z = parseFloat(currentBox.min.z.toFixed(2));
+
+            allBlocks.forEach(block=>{
+
+                 if(currentBox.containsBox(block)){
+                     console.log(currentBox);
+                     console.log(block);
+                    intersects=true;
+                }
+            });
+        });
+
+        //console.log(intersects);
+        return intersects;
+    }
+
     checkAllCollisions(){
         this.initRaycasters();
 
@@ -473,8 +544,15 @@ const createPiece = (pieceType = 0, defaultPosition = new Vector3(0,18,0)) =>{
 
         retPiece = new Piece(blocks,O_color, defaultPosition);
         break;
-
-        }   
+        }                
+        case 9 ://single cube
+        {
+            let blocks =[
+                new Vector3(0,0,0)
+            ]
+            retPiece = new Piece(blocks,0xffffff, defaultPosition);
+            break;
+        }
         default ://single cube
         {
             let blocks =[

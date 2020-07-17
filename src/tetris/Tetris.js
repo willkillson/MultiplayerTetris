@@ -53,26 +53,14 @@ class Tetris extends Component {
   init(){
 
 
-    let piece1 = Piece();   
-    let piece3 = Piece();   
-    this.scene.add(piece3.mesh);         
+    let piece1 = Piece(9, new THREE.Vector3(0,5,0));   //single cube
+    this.currentPiece =  Piece(2, new THREE.Vector3(0,6,0));   //I piece
+
+    
+    this.scene.add(this.currentPiece.mesh);         
     this.scene.add(piece1.mesh);     
 
-    piece1.moveIn();
-    piece1.moveIn();
-    piece1.rotateCCW(Math.PI/2);
-    piece1.rotateCCW(Math.PI/2);
-    piece1.moveUp();
 
-
-    piece3.moveIn();
-    piece3.moveIn();
-    piece3.moveDown();
-
-
-    this.currentPiece = Piece(2);
-
-    this.scene.add(this.currentPiece.mesh);
     let frame = BOARD.frame();
     frame.position.add(new Vector3(-5,0,0))
 
