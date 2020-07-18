@@ -30,12 +30,14 @@ io.on('connection', (client)=>{
 
   users[client.id] = clientInfo;
 
-  console.log('Client '+client.id + ' connected.');
+  let time = formatedTime();
+  console.log(time + ' Client '+client.id + ' connected.');
 
   client.on('disconnect',()=>{
     userCount--;
     //delete users[client.id];
-    console.log('Client '+client.id + ' disconnected.');
+    time = formatedTime();
+    console.log(time + ' Client '+client.id + ' disconnected.');
     client.removeAllListeners();
   })
 
@@ -79,10 +81,7 @@ setInterval(()=>{
   io.sockets.emit('UPDATE', JSON.stringify(users));
 },100);
 
-setInterval(()=>{
-  console.log(users); 
-  
-},10000);
+
 
 
 
@@ -145,4 +144,16 @@ function onListening() {
   var bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port;
+}
+
+
+function formatedTime(){
+  //https://www.toptal.com/software/definitive-guide-to-datetime-manipulation
+  let currentDate = new Date();
+  let hours = currentDate.getHours();
+  let minutes = currentDate.getMinutes();
+  let seconds = currentDate.getSeconds();
+
+  let formattedTime = hours +':'+ minutes+':'+ seconds;
+  return formattedTime
 }
