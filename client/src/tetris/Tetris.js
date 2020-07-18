@@ -10,15 +10,16 @@ import Controls from "./Controls";
 import { Quaternion } from "three/build/three.module";
 
 import io from "socket.io-client";
-let socket = io('http://localhost:80');
 
-socket.emit('join', 'hello world from client');
 
 class Tetris extends Component {
 
   constructor(){
     super();
-
+    //
+    this.networkInfo = {};
+    this.clientId = null;
+    this.socket = null;
     this.renderer = new THREE.WebGLRenderer();
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera( 90, window.innerWidth/window.innerHeight, 0.1, 1000 );
@@ -29,6 +30,9 @@ class Tetris extends Component {
     this.camera.position.y = 10;
     this.camera.position.x = 0;
     this.camera.position.z = 15;
+
+    //default game values
+    this.currentPiece = null;
 
     Controls(this);
   }
@@ -54,15 +58,91 @@ class Tetris extends Component {
   }
 
   init(){
-
-
-    let piece1 = Piece(9, new THREE.Vector3(0,5,0));   //single cube
-    this.currentPiece =  Piece(2, new THREE.Vector3(0,6,0));   //I piece
-
+    //SETUP NETWORK
+    this.socket = io('http://69.254.195.147:80');
     
-    this.scene.add(this.currentPiece.mesh);         
-    this.scene.add(piece1.mesh);     
+    this.socket.on('onconnected',(data)=>{
+      this.clientId = data.id;
+    })
 
+    this.socket.emit('join', 'hello world from client');
+
+    this.socket.on('UPDATE',(info)=>{
+
+  
+
+
+      this.networkInfo = JSON.parse(info);
+
+      //console.log(this.networkInfo);
+
+      let ootherInfo = JSON.parse(info);
+      delete ootherInfo[this.clientId];//remove our data from the list
+      let otherInfo = Object.entries(ootherInfo);//convert our json object into an array of arrays without our piece in it.
+
+      //HANDLE OTHER PLAYERS PIECE's
+      for(let i = 0;i< otherInfo.length;i++){
+        let player = otherInfo[i];
+        let playerId = player[0];
+        let playersCurrentPiece = player[1];
+
+       
+        //check if the piece is already created  in the scene
+        let isInTheScene = false;
+        let childParent = null;//this is our big object
+
+        this.scene.children.forEach(child=>{
+          //console.log(this.scene);
+          //console.log(child.parent);
+          if(child.name===playerId){
+            isInTheScene=true;
+            childParent = child;
+            //console.log(childParent)
+          }
+        })
+        
+
+
+        //use that condition to create the piece
+        if(!isInTheScene){
+          let otherPiece= Piece( playersCurrentPiece['piece_type']);
+          otherPiece.mesh.name = playerId;
+          otherPiece.mesh.position.x = playersCurrentPiece.position_x;
+          otherPiece.mesh.position.y = playersCurrentPiece.position_y;
+          otherPiece.mesh.position.z = playersCurrentPiece.position_z;
+          this.scene.add(otherPiece.mesh);
+          
+        }else{
+          //we need to find the piece in the scene, so we can update its position
+          childParent.position.x = playersCurrentPiece.position_x;
+          childParent.position.y = playersCurrentPiece.position_y;
+          childParent.position.z = playersCurrentPiece.position_z;
+        }
+      }
+
+      //HANDLE OUR CLIENTS PIECE
+      let ourNetworkedCurrentPiece = this.networkInfo[this.clientId];//pull out our piece
+      if(this.currentPiece===null){
+        this.currentPiece = Piece(ourNetworkedCurrentPiece.piece_type);
+        this.currentPiece.mesh.name = this.clientId;
+        this.scene.add(this.currentPiece.mesh);
+      }else{
+        this.currentPiece.mesh.position.x = ourNetworkedCurrentPiece.position_x;
+        this.currentPiece.mesh.position.y = ourNetworkedCurrentPiece.position_y;
+        this.currentPiece.mesh.position.z = ourNetworkedCurrentPiece.position_z;
+      }
+
+
+      //remove all the pieces that are 
+
+      
+
+
+
+    })
+
+
+    //SETUP GAME
 
     let frame = BOARD.frame();
     frame.position.add(new Vector3(-5,0,0))
@@ -75,7 +155,10 @@ class Tetris extends Component {
 
   update(){
 
-    this.currentPiece.update();
+    if(this.currentPiece!==null){
+      this.currentPiece.update();
+    }
+
 
   }
 
@@ -86,7 +169,8 @@ class Tetris extends Component {
   render() {
     return (
       <div>
-        <h5>Controls: w,a,s,d,q,e,j,h</h5>
+        <h5>Controls: w,a,s,d,q,e</h5>
+        <h5>No Collision</h5>
         <div ref={ref => (this.mount = ref)} />
       </div>
     )
