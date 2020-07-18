@@ -1,4 +1,9 @@
 import express from 'express';
+
+//LocalImports
+import MyTime from './utilities/time';
+
+
 const app = express();
 const io = require('socket.io')(80);
 const http = require('http');
@@ -29,15 +34,14 @@ io.on('connection', (client)=>{
   userCount++;
 
   users[client.id] = clientInfo;
-
-  let time = formatedTime();
-  console.log(time + ' Client '+client.id + ' connected.');
+  
+  console.log(MyTime() + ' Client '+client.id + ' connected.');
 
   client.on('disconnect',()=>{
     userCount--;
     //delete users[client.id];
-    time = formatedTime();
-    console.log(time + ' Client '+client.id + ' disconnected.');
+
+    console.log(MyTime() + ' Client '+client.id + ' disconnected.');
     client.removeAllListeners();
   })
 
@@ -144,16 +148,4 @@ function onListening() {
   var bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port;
-}
-
-
-function formatedTime(){
-  //https://www.toptal.com/software/definitive-guide-to-datetime-manipulation
-  let currentDate = new Date();
-  let hours = currentDate.getHours();
-  let minutes = currentDate.getMinutes();
-  let seconds = currentDate.getSeconds();
-
-  let formattedTime = hours +':'+ minutes+':'+ seconds;
-  return formattedTime
 }
