@@ -1,4 +1,5 @@
 import express from 'express';
+import THREE from 'three';
 
 //LocalImports
 import MyTime from './utilities/time';
@@ -28,10 +29,10 @@ io.on('connection', (client)=>{
   let clientInfo = {};
   clientInfo['position_x'] = 0;
   clientInfo['position_y'] = 18;
-  clientInfo['position_z'] = userCount;
+  clientInfo['position_z'] = -1*userCount++;
   clientInfo['piece_type'] = Math.floor(Math.random()*7);
 
-  userCount++;
+  
 
   users[client.id] = clientInfo;
   
@@ -39,7 +40,7 @@ io.on('connection', (client)=>{
 
   client.on('disconnect',()=>{
     userCount--;
-    //delete users[client.id];
+    delete users[client.id];
 
     console.log(MyTime() + ' Client '+client.id + ' disconnected.');
     client.removeAllListeners();
@@ -86,15 +87,9 @@ setInterval(()=>{
 },100);
 
 
-
-
-
-
-
 /**
  * Normalize a port into a number, string, or false.
  */
-
 function normalizePort(val) {
   var port = parseInt(val, 10);
 
