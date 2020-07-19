@@ -124,103 +124,8 @@ class Piece{
 
     }
 
-    //mutators
-    setPosition(newPos){
-    }
-
-    instantDrop(){
-        while(!this.collision_isBlocked['down']){
-            this.move(new Vector3(0,-1,0));
-            this.initRaycasters();
-            this.checkCollisionDown();
-        }
-    }
-
-    moveUp(){
-        if(!this.collision_isBlocked['up']){
-            this.move(new Vector3(0,1,0));
-        }
-    }
-
-    moveDown(){
-        if(!this.collision_isBlocked['down']){
-            this.move(new Vector3(0,-1,0));
-        }
-    }
-
-    moveLeft(){
-        if(!this.collision_isBlocked['left']){
-            this.move(new Vector3(-1,0,0));
-        }
-    }
-
-    moveRight(){
-        if(!this.collision_isBlocked['right']){
-            this.move(new Vector3(1,0,0));
-        }
-    }
-
-    moveIn(){
-        if(!this.collision_isBlocked['in']){
-            this.move(new Vector3(0,0,-1));
-        }
-    }
-
-    moveOut(){
-        if(!this.collision_isBlocked['out']){
-            this.move(new Vector3(0,0,1));
-        }
-    }
-
-
-    moveOut(){
-        if(!this.collision_isBlocked['out']){
-            this.move(new Vector3(0,0,1));
-        }
-    }
-
-    move(mov){
-        this.mesh.position.add(mov);
-    }
-
-    rotateCCW() {
-        
-        let rotCCW = new THREE.Quaternion(0,0,0,0);
-        rotCCW.setFromAxisAngle(new THREE.Vector3(0,0,1), Math.PI/2);
-
-        let cMesh = this.mesh.clone(true);
-        let scene = this.mesh.parent;
-        let uuid = this.mesh.uuid;
-
-        let decision = this.checkCollisionIntersections(uuid, cMesh, scene,rotCCW);
-
-        if(!decision){
-            this.mesh.applyQuaternion(rotCCW);
-        }
-
-    };
-
-    rotateCW() {
-
-        let rotCW = new THREE.Quaternion(0,0,0,0);
-        rotCW.setFromAxisAngle(new THREE.Vector3(0,0,1), -Math.PI/2);
-
-        let cMesh = this.mesh.clone(true);
-        let scene = this.mesh.parent;
-        let uuid = this.mesh.uuid;
-
-        let decision = this.checkCollisionIntersections(uuid, cMesh, scene,rotCW);
-        
-        if(!decision){
-            this.mesh.applyQuaternion(rotCW);
-        }
-    };
-
     update(){
         this.checkAllCollisions();
-
-        //this.checkCollisionIntersections(rot);
-        //checkAllCollisions();
     }
     
     //collisions
@@ -247,14 +152,8 @@ class Piece{
 
 
         pMesh.children.forEach((child)=>{
-    
-            //let currentBox = new THREE.Box3().setFromObject(child.applyQuaternion(pMesh.quaternion));
 
             let  currentBox= new THREE.Box3().setFromObject(child);
-
-           //console.log(currentBox);
-     
-
 
             currentBox.max.x = parseFloat(currentBox.max.x.toFixed(2));
             currentBox.max.y = parseFloat(currentBox.max.y.toFixed(2));
@@ -274,7 +173,6 @@ class Piece{
             });
         });
 
-        //console.log(intersects);
         return intersects;
     }
 
@@ -287,6 +185,8 @@ class Piece{
         this.checkCollisionRight();
         this.checkCollisionIn();
         this.checkCollisionOut();
+        this.checkCollisionCCW();
+        this.checkCollisionCW();
     }
 
     checkCollisionUp(){
@@ -426,8 +326,45 @@ class Piece{
 
     }
 
-}
+    checkCollisionCCW(){
+        let rotCW = new THREE.Quaternion(0,0,0,0);
+        rotCW.setFromAxisAngle(new THREE.Vector3(0,0,1), -Math.PI/2);
 
+        let cMesh = this.mesh.clone(true);
+        let scene = this.mesh.parent;
+        let uuid = this.mesh.uuid;
+
+        let decision = this.checkCollisionIntersections(uuid, cMesh, scene,rotCW);
+        
+
+        if(decision){
+            this.collision_isBlocked['CCW'] = true;
+        }
+        else{
+            this.collision_isBlocked['CCW'] = false;
+        }
+    }
+
+    checkCollisionCW(){
+        let rotCW = new THREE.Quaternion(0,0,0,0);
+        rotCW.setFromAxisAngle(new THREE.Vector3(0,0,1), -Math.PI/2);
+
+        let cMesh = this.mesh.clone(true);
+        let scene = this.mesh.parent;
+        let uuid = this.mesh.uuid;
+
+        let decision = this.checkCollisionIntersections(uuid, cMesh, scene,rotCW);
+        
+
+        if(decision){
+            this.collision_isBlocked['CW'] = true;
+        }
+        else{
+            this.collision_isBlocked['CW'] = false;
+        }
+    }
+
+}
 
 const createPiece = (pieceType = 0, defaultPosition = new Vector3(0,18,0)) =>{
 

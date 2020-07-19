@@ -30,4 +30,49 @@ const gizmo = () =>{
     return ret;
 }
 
-export default gizmo;
+const getChildByName = (parent, childName) => {
+    parent.children.forEach((child) => {
+        if(child.name===childName){
+            return child;
+        }
+    });
+    return null;
+}
+
+const syncronizeScene = (scene, gameInfo) =>{
+
+
+    let clientUnits = [];
+    scene.children.forEach(child=>{
+      if(child.name!==""){
+        clientUnits.push(child);
+      }
+    })
+  
+    let serverUnits = Object.keys(JSON.parse(gameInfo));
+    for(let i = 0;i< clientUnits.length;i++){
+  
+      let contains = false;
+      for(let j = 0;j< serverUnits.length;j++){
+  
+        if(clientUnits[i].name===serverUnits[j]){
+          contains = true;
+        }
+      }
+      if(contains===false){
+    
+        
+        let child = scene.getObjectByName(clientUnits[i].name);
+        scene.remove(child);
+      }
+    }
+  
+  
+  }
+
+  export{
+    syncronizeScene,
+    getChildByName,
+    gizmo
+  }
+  

@@ -2,34 +2,41 @@ import Mousetrap from 'mousetrap';
 import Piece from './pieces/piece'
 
 const initControls = (props) =>{
-
+    
     Mousetrap.bind('w',()=>{
         //props.currentPiece.instantDrop();
         //props.currentPiece.moveUp();
+
         let info = {};
         info['id'] = props.clientId;
         info['dir'] = 'up';
-        props.socket.emit('move',JSON.stringify(info));
+        if(!props.currentPiece.collision_isBlocked.up){
+          props.socket.emit('move',JSON.stringify(info));
+        }
+        
       })
       Mousetrap.bind('a',()=>{
         //props.currentPiece.moveLeft();
         let info = {};
         info['id'] = props.clientId;
         info['dir'] = 'left';
-        props.socket.emit('move',JSON.stringify(info));
+        if(!props.currentPiece.collision_isBlocked.left)
+          props.socket.emit('move',JSON.stringify(info));
       })
       Mousetrap.bind('s',()=>{
         //props.currentPiece.moveDown();
         let info = {};
         info['id'] = props.clientId;
         info['dir'] = 'down';
-        props.socket.emit('move',JSON.stringify(info));
+        if(!props.currentPiece.collision_isBlocked.down)
+          props.socket.emit('move',JSON.stringify(info));
       })
       Mousetrap.bind('d',()=>{
         let info = {};
         info['id'] = props.clientId;
         info['dir'] = 'right';
-        props.socket.emit('move',JSON.stringify(info));
+        if(!props.currentPiece.collision_isBlocked.right)
+          props.socket.emit('move',JSON.stringify(info));
         //props.currentPiece.moveRight();
       })
   
@@ -42,7 +49,8 @@ const initControls = (props) =>{
         let info = {};
         info['id'] = props.clientId;
         info['dir'] = 'in';
-        props.socket.emit('move',JSON.stringify(info));
+        if(!props.currentPiece.collision_isBlocked.in)
+          props.socket.emit('move',JSON.stringify(info));
       })
 
       Mousetrap.bind('q',()=>{
@@ -50,7 +58,8 @@ const initControls = (props) =>{
         let info = {};
         info['id'] = props.clientId;
         info['dir'] = 'out';
-        props.socket.emit('move',JSON.stringify(info));
+        if(!props.currentPiece.collision_isBlocked.out)
+          props.socket.emit('move',JSON.stringify(info));
       })
   
       Mousetrap.bind('k',()=>{

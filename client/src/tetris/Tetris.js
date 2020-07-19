@@ -7,7 +7,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Piece from './pieces/piece'
 import * as BOARD from './board/board';
 import Controls from "./Controls";
-import { Quaternion } from "three/build/three.module";
+import * as NETWORK from './util'
 
 import io from "socket.io-client";
 
@@ -59,8 +59,8 @@ class Tetris extends Component {
 
   init(){
     //SETUP NETWORK
+    //this.socket = io('http://69.254.195.147:80');
     this.socket = io('http://69.254.195.147:80');
-    
     this.socket.on('onconnected',(data)=>{
       this.clientId = data.id;
     })
@@ -69,12 +69,11 @@ class Tetris extends Component {
 
     this.socket.on('UPDATE',(info)=>{
 
-  
-
+      //removes all units that don't exist anymore.
+      NETWORK.syncronizeScene(this.scene,info);
+      
 
       this.networkInfo = JSON.parse(info);
-
-      //console.log(this.networkInfo);
 
       let ootherInfo = JSON.parse(info);
       delete ootherInfo[this.clientId];//remove our data from the list
@@ -92,12 +91,9 @@ class Tetris extends Component {
         let childParent = null;//this is our big object
 
         this.scene.children.forEach(child=>{
-          //console.log(this.scene);
-          //console.log(child.parent);
           if(child.name===playerId){
             isInTheScene=true;
             childParent = child;
-            //console.log(childParent)
           }
         })
         
@@ -169,8 +165,10 @@ class Tetris extends Component {
   render() {
     return (
       <div>
-        <h5>Controls: w,a,s,d,q,e</h5>
-        <h5>No Collision</h5>
+        
+        <h7>Controls: w,a,s,d,e,q</h7>
+        <h7>  Collisions - Yes</h7>
+        <h7>  Rotations - No</h7>
         <div ref={ref => (this.mount = ref)} />
       </div>
     )
