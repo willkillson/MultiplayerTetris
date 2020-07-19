@@ -59,8 +59,8 @@ class Tetris extends Component {
 
   init(){
     //SETUP NETWORK
+    //this.socket = io('http://69.254.195.147:80');
     this.socket = io('http://69.254.195.147:80');
-    
     this.socket.on('onconnected',(data)=>{
       this.clientId = data.id;
     })
