@@ -14,7 +14,7 @@ RUN npm install -g serve
 
 
 # Add metadata to the image to describe which port the container is listening on at runtime.
-EXPOSE 3000
+EXPOSE 5000
 
 # Run the specified command within the container.
 CMD [ "serve", "-s", "build" ]
