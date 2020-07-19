@@ -1,7 +1,9 @@
 import React, { Component } from "react";
 import * as THREE from "three";
-import { Vector3 } from "three";
+import { Vector3, ArrowHelper } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import io from "socket.io-client";
+import $ from "jquery";
 
 //local imports
 import Piece from './pieces/piece'
@@ -9,12 +11,12 @@ import * as BOARD from './board/board';
 import Controls from "./Controls";
 import * as NETWORK from './util'
 
-import io from "socket.io-client";
+
 
 
 class Tetris extends Component {
 
-  constructor(){
+  constructor(props, ref){
     super();
     //
     this.networkInfo = {};
@@ -23,23 +25,47 @@ class Tetris extends Component {
     this.renderer = new THREE.WebGLRenderer();
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera( 90, window.innerWidth/window.innerHeight, 0.1, 1000 );
-    this.renderer.setSize( window.innerWidth*0.90, window.innerHeight*0.90 );
+
+    this.camera.rotateOnAxis(new Vector3(1,0,0),-Math.PI/8);
+
     this.renderer.gammaFactor = 2.2;
-    
+  
     //camera position
-    this.camera.position.y = 10;
+    this.camera.position.y = 16;
     this.camera.position.x = 0;
-    this.camera.position.z = 15;
+    this.camera.position.z = 10;
 
     //default game values
     this.currentPiece = null;
 
-    Controls(this);
   }
 
+
+
   componentDidMount() {
+    Controls(this);
+
     this.mount.appendChild( this.renderer.domElement ); //must be located in the componentDidMount()
-    this.controls = new OrbitControls (this.camera, this.renderer.domElement);
+    
+    //this.controls = new OrbitControls (this.camera, this.renderer.domElement);
+
+
+
+    //bind all the buttons to this.functions
+    
+
+ 
+    
+    //
+    let width = window['document'].getElementById('root-container-center').clientWidth;
+    let height = window['document'].getElementById('root-container-center').clientHeight;
+    this.renderer.setSize( 
+      width*0.9,
+      height*0.9 
+    );   //OLD
+
+
+
 
     this.init();
 
@@ -61,7 +87,10 @@ class Tetris extends Component {
     //SETUP NETWORK
 
     //this.socket = io('http://69.254.195.147:80');
-    this.socket = io('ec2-52-53-191-238.us-west-1.compute.amazonaws.com:80');
+    this.socket = io('localhost:80');
+    //this.socket = io('ec2-52-53-191-238.us-west-1.compute.amazonaws.com:80');
+
+
     this.socket.on('onconnected',(data)=>{
       this.clientId = data.id;
     })
@@ -166,10 +195,6 @@ class Tetris extends Component {
   render() {
     return (
       <div>
-        
-        <h7>Controls: w,a,s,d,e,q</h7>
-        <h7>  Collisions - Yes</h7>
-        <h7>  Rotations - No</h7>
         <div ref={ref => (this.mount = ref)} />
       </div>
     )
