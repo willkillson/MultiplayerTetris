@@ -14,7 +14,7 @@ RUN npm install
 EXPOSE 80
 
 # Run the specified command within the container.
-CMD [ "npm", "run", "build" ]
+CMD [ "npm", "start" ]
 
 # Copy the rest of your app's source code from your host to your image filesystem.
 COPY . .
