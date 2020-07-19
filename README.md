@@ -1,11 +1,17 @@
-# Project is hosted with AWS EC2
+# Project is hosted with AWS EC2 
 
-[MultiplayerTetris](http://ec2-52-53-191-238.us-west-1.compute.amazonaws.com:5000/).
+[Multiplayer Tetris](http://ec2-52-53-191-238.us-west-1.compute.amazonaws.com:5000/). 
 
+# Start project with docker 
+ 
+Make sure ./client/src/Tetris.js is set to local host for local development. 
 
+EX 
+this.socket = io('localhost:80');   
 
-Client/Server game project. 
+//this.socket = io('ec2-52-53-191-238.us-west-1.compute.amazonaws.com:80');   
 
+docker-compose up --build 
 
 # Start the server 
 
