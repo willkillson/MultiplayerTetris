@@ -1,0 +1,17 @@
+version: '2'
+
+services:
+    server:
+        build:
+            context: ./server
+            dockerfile: Dockerfile
+        container_name: server
+        ports:
+            - "80:80"
+    client:
+        build:
+            context: ./client
+            dockerfile: Dockerfile
+        container_name: client
+        ports:
+            - "3000:5000"
