@@ -2,7 +2,10 @@ import {BoxGeometry, MeshBasicMaterial, Mesh, Raycaster, Ray} from 'three';
 import * as THREE from 'three';
 import {Vector3} from 'three';
 
-
+/**
+ * Main Piece class. Contains methods involved with moveing,
+ * and checking boundaries for collision.
+ */
 class Piece {
   constructor(pBlockPositions, pColor, pPos) {
     // class variables

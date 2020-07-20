@@ -46,7 +46,8 @@ const getChildByName = (parent, childName) => {
  * candidate for refactoring into "handleOtherPlayersPieces"
  *
  * @param {*} props "this" information.
- * @param {*} networkInfo the network information provided on the call to 'UPDATE'
+ * @param {*} networkInfo the network information
+ * provided on the call to'UPDATE'
  */
 const syncronizeScene = (props, networkInfo) =>{
   const scene = props.scene;
@@ -78,7 +79,8 @@ const syncronizeScene = (props, networkInfo) =>{
  * information.
  *
  * @param {*} props "this" information.
- * @param {*} networkInfo the network information provided on the call to 'UPDATE'
+ * @param {*} networkInfo the network information provided on
+ * the call to 'UPDATE'
  */
 const handlePlayersPiece = (props, networkInfo) =>{
   // HANDLE OUR CLIENTS PIECE
