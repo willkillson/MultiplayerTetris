@@ -14,6 +14,8 @@ class Tetris extends Component {
 
   constructor(props, ref){
     super();
+
+    this.IS_DEVELOP = false;//MAKE SURE TO SET THIS TO FALSE WHEN PUSHING TO MASTER FOR A NEW BUILD
     //
     this.networkInfo = {};
     this.clientId = null;
@@ -46,8 +48,8 @@ class Tetris extends Component {
     this.init();
 
     ////////////MainGameLoop
-    let width = window['document'].getElementById("myCanvas").clientWidth;
-    let height = window['document'].getElementById("myCanvas").clientWidth*0.5625
+    let width = window['document'].getElementById("myCanvas").clientWidth*0.5625;
+    let height = window['document'].getElementById("myCanvas").clientWidth;
     console.log(height);
     this.renderer.setSize( 
       width,
@@ -82,10 +84,11 @@ class Tetris extends Component {
   init(){
     //SETUP NETWORK
 
-    //this.socket = io('http://69.254.195.147:80');
-    //this.socket = io('localhost:80');
-    this.socket = io('ec2-52-53-191-238.us-west-1.compute.amazonaws.com:80');
-
+    if(this.IS_DEVELOP){
+      this.socket = io('localhost:80');
+    }else{
+      this.socket = io('ec2-52-53-191-238.us-west-1.compute.amazonaws.com:80');
+    }
 
     this.socket.on('onconnected',(data)=>{
       this.clientId = data.id;

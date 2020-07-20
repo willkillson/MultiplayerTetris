@@ -25,23 +25,14 @@ ReactDOM.render(
       </Container>
     
       <Container fixed>
-        <Col >
 
           <Row>
-            <div style={{width:200}}><Button size="lg" id="button-up" block>Up</Button></div>
-            <div style={{width:200}}><Button size="lg" id="button-in" block>In</Button></div>     
-            <div style={{width:200}}><Button size="lg" id="button-ccw" block>CCW</Button></div>
-            <div style={{width:200}}><Button size="lg" id="button-cw" block>CW</Button></div>
-          </Row>
-          
-          <Row>
-            <div style={{width:200}}><Button size="lg" id="button-down" block>Down</Button></div>
-            <div style={{width:200}}><Button size="lg" id="button-out" block>Out</Button></div>
-            <div style={{width:200}}><Button size="lg"  id="button-left" block>Left</Button></div>
-            <div style={{width:200}}><Button size="lg" id="button-right" block>Right</Button></div>
-          </Row>
-           
-        </Col>
+            <div style={{width:100}}><Button size="lg" id="button-up" block>Up</Button></div>
+            <div style={{width:100}}><Button size="lg" id="button-down" block>Down</Button></div> 
+            <div style={{width:100}}><Button size="lg"  id="button-left" block>Left</Button></div>
+            <div style={{width:100}}><Button size="lg" id="button-right" block>Right</Button></div>
+          </Row>           
+
       </Container>
 
     </div>

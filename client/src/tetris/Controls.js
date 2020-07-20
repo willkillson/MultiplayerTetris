@@ -80,17 +80,17 @@ const initControls = (props) =>{
       Mousetrap.bind('j',()=>{
         console.log("Not implemented.")
       })
-      window['document'].getElementById('button-ccw').onclick = function hello(){
-        console.log("Not implemented.")
-      }
+      // window['document'].getElementById('button-ccw').onclick = function hello(){
+      //   console.log("Not implemented.")
+      // }
 
       //Rotate CW
       Mousetrap.bind('k',()=>{
         console.log("Not implemented.")
       })
-      window['document'].getElementById('button-cw').onclick = function hello(){
-        console.log("Not implemented.")
-      }
+      // window['document'].getElementById('button-cw').onclick = function hello(){
+      //   console.log("Not implemented.")
+      // }
 
       //Move in
       Mousetrap.bind('e',()=>{
@@ -100,13 +100,13 @@ const initControls = (props) =>{
         if(!props.currentPiece.collision_isBlocked.in)
           props.socket.emit('move',JSON.stringify(info));
       })
-      window['document'].getElementById('button-in').onclick = function hello(){
-        let info = {};
-        info['id'] = props.clientId;
-        info['dir'] = 'in';
-        if(!props.currentPiece.collision_isBlocked.in)
-          props.socket.emit('move',JSON.stringify(info));
-      }
+      // window['document'].getElementById('button-in').onclick = function hello(){
+      //   let info = {};
+      //   info['id'] = props.clientId;
+      //   info['dir'] = 'in';
+      //   if(!props.currentPiece.collision_isBlocked.in)
+      //     props.socket.emit('move',JSON.stringify(info));
+      // }
 
 
       //MOVE OUT
@@ -117,13 +117,13 @@ const initControls = (props) =>{
         if(!props.currentPiece.collision_isBlocked.out)
           props.socket.emit('move',JSON.stringify(info));
       })
-      window['document'].getElementById('button-out').onclick = function hello(){
-        let info = {};
-        info['id'] = props.clientId;
-        info['dir'] = 'out';
-        if(!props.currentPiece.collision_isBlocked.out)
-          props.socket.emit('move',JSON.stringify(info));
-      }
+      // window['document'].getElementById('button-out').onclick = function hello(){
+      //   let info = {};
+      //   info['id'] = props.clientId;
+      //   info['dir'] = 'out';
+      //   if(!props.currentPiece.collision_isBlocked.out)
+      //     props.socket.emit('move',JSON.stringify(info));
+      // }
 
   
       Mousetrap.bind('k',()=>{
