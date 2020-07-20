@@ -78,16 +78,27 @@ const initControls = (props) =>{
 
       //Rotate CCW
       Mousetrap.bind('j',()=>{
-        console.log("Not implemented.")
+        let info = {};
+        info['id'] = props.clientId;
+        info['dir'] = 'ccw';
+        if(!props.currentPiece.collision_isBlocked['ccw'])
+          props.socket.emit('move',JSON.stringify(info));
       })
       // window['document'].getElementById('button-ccw').onclick = function hello(){
       //   console.log("Not implemented.")
       // }
 
       //Rotate CW
+
+
       Mousetrap.bind('k',()=>{
-        console.log("Not implemented.")
+        let info = {};
+        info['id'] = props.clientId;
+        info['dir'] = 'cw';
+        if(!props.currentPiece.collision_isBlocked['cw'])
+          props.socket.emit('move',JSON.stringify(info));
       })
+
       // window['document'].getElementById('button-cw').onclick = function hello(){
       //   console.log("Not implemented.")
       // }
@@ -125,10 +136,7 @@ const initControls = (props) =>{
       //     props.socket.emit('move',JSON.stringify(info));
       // }
 
-  
-      Mousetrap.bind('k',()=>{
-        //props.currentPiece.rotateCW();
-      })
+
   
       Mousetrap.bind('h',()=>{
         //props.currentPiece = Piece(Math.floor(Math.random()*7));
