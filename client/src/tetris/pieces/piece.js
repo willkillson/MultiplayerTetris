@@ -1,7 +1,7 @@
-import {BoxGeometry, MeshBasicMaterial, Mesh, Raycaster, Ray, Quaternion} from "three";
+import {BoxGeometry, MeshBasicMaterial, Mesh, Raycaster, Ray} from "three";
 import * as THREE from 'three';
 import{Vector3} from 'three';
-import { Object3D } from "three/build/three.module";
+
 
 class Piece{
     constructor(pBlockPositions, pColor, pPos){

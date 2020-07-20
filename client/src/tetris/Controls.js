@@ -1,5 +1,4 @@
 import Mousetrap from 'mousetrap';
-import Piece from './pieces/piece'
 
 const initControls = (props) =>{
 
