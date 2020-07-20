@@ -2,41 +2,50 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Tetris from './tetris/Tetris'
 import * as serviceWorker from './serviceWorker';
-import { render } from '@testing-library/react';
-import './css/index.css'
 
-function ButtonFrame(){
-  return (
-    <div>
-      <div class="flex-container-vertical">
+import Container from 'react-bootstrap/Container';
+import Button from 'react-bootstrap/Button';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 
-        <div id="root-container-lhs">
-          <button id="button-out" class="button-vertical">Out</button>
-          <button id="button-ccw" class="button-vertical">CCW</button>
-          <button id="button-left" class="button-vertical">Left</button>
-        </div>
 
-        <div id="root-container-center">
-            <Tetris></Tetris>
-            <button id="button-up">Up</button>
-            <button id="button-down">Down</button>
-        </div>
-
-        <div id="root-container-rhs">
-          <button id="button-in" class="button-vertical">in</button>
-          <button id="button-cw" class="button-vertical">cw</button>
-          <button id="button-right" class="button-vertical">right</button>
-        </div>
-
-      </div>
-    </div>
-  );
-}
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 ReactDOM.render(
 
   <React.StrictMode>
-    <ButtonFrame></ButtonFrame>
+    <div> 
+
+      <Container>
+        <Col id="colMyCanvas"> 
+          <Row id="myCanvas">
+            <Tetris ></Tetris>
+          </Row>
+        </Col>
+      </Container>
+    
+      <Container fixed>
+        <Col >
+
+          <Row>
+            <div style={{width:200}}><Button size="lg" id="button-up" block>Up</Button></div>
+            <div style={{width:200}}><Button size="lg" id="button-in" block>In</Button></div>     
+            <div style={{width:200}}><Button size="lg" id="button-ccw" block>CCW</Button></div>
+            <div style={{width:200}}><Button size="lg" id="button-cw" block>CW</Button></div>
+          </Row>
+          
+          <Row>
+            <div style={{width:200}}><Button size="lg" id="button-down" block>Down</Button></div>
+            <div style={{width:200}}><Button size="lg" id="button-out" block>Out</Button></div>
+            <div style={{width:200}}><Button size="lg"  id="button-left" block>Left</Button></div>
+            <div style={{width:200}}><Button size="lg" id="button-right" block>Right</Button></div>
+          </Row>
+           
+        </Col>
+      </Container>
+
+    </div>
+
     
   </React.StrictMode>,
   document.getElementById('root')
