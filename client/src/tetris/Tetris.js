@@ -24,14 +24,14 @@ class Tetris extends Component {
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera( 90, window.innerWidth/window.innerHeight, 0.1, 1000 );
 
-    this.camera.rotateOnAxis(new Vector3(1,0,0),-Math.PI/8);
+    this.camera.rotateOnAxis(new Vector3(1,0,0),0);
 
     this.renderer.gammaFactor = 2.2;
   
     //camera position
-    this.camera.position.y = 16;
+    this.camera.position.y = 10;
     this.camera.position.x = 0;
-    this.camera.position.z = 10;
+    this.camera.position.z = 15;
 
     //default game values
     this.currentPiece = null;
@@ -49,11 +49,11 @@ class Tetris extends Component {
     this.init();
 
     ////////////MainGameLoop
-    let width = window['document'].getElementById("myCanvas").clientWidth*0.5625;
-    let height = window['document'].getElementById("myCanvas").clientWidth;
+    let width = window['document'].getElementById("myCanvas").clientWidth;
+    let height = window['document'].getElementById("myCanvas").clientHeight;
     this.renderer.setSize( 
-      width,
-      height
+      1000,
+      640
     );   
 
     const animate = () => {

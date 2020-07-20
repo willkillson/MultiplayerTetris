@@ -16,12 +16,8 @@ ReactDOM.render(
   <React.StrictMode>
     <div> 
 
-      <Container>
-        <Col id="colMyCanvas"> 
-          <Row id="myCanvas">
-            <Tetris ></Tetris>
-          </Row>
-        </Col>
+      <Container id="myCanvas">
+        <Tetris></Tetris>
       </Container>
     
       <Container fixed>
