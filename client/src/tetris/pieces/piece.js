@@ -166,8 +166,6 @@ class Piece{
             allBlocks.forEach(block=>{
 
                  if(currentBox.containsBox(block)){
-                     console.log(currentBox);
-                     console.log(block);
                     intersects=true;
                 }
             });
