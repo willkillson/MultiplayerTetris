@@ -22,13 +22,31 @@ export const levelFloor = () => {
         map: ground,
     });
     
-    const grassGeometry = new THREE.BoxBufferGeometry(30,0.0001,30);
-    grassGeometry.translate(0,0,0);
+    const grassGeometry1 = new THREE.BoxBufferGeometry(30,0.0001,30);
+    const grassGeometry2 = new THREE.BoxBufferGeometry(30,0.0001,30);
+    const grassGeometry3 = new THREE.BoxBufferGeometry(30,0.0001,30);
+    const grassGeometry4 = new THREE.BoxBufferGeometry(30,0.0001,30);
+    const grassGeometry5 = new THREE.BoxBufferGeometry(30,0.0001,30);
+    const grassGeometry6 = new THREE.BoxBufferGeometry(30,0.0001,30);
+
+    grassGeometry1.translate(0,0,0);
+    grassGeometry2.translate(30,0,0);
+    grassGeometry3.translate(60,0,0);
+    grassGeometry4.translate(90,0,0);
+    grassGeometry5.translate(-30,0,0);
+    grassGeometry6.translate(-60,0,0);
+
     const groundGeometry = new THREE.BoxBufferGeometry(30,0.0001,30);
     groundGeometry.translate(0,-0.01,0);
 
     const group = new THREE.Object3D();
-    group.add(new THREE.Mesh(grassGeometry, grassMaterial));
+    group.add(new THREE.Mesh(grassGeometry1, grassMaterial));
+    group.add(new THREE.Mesh(grassGeometry2, grassMaterial));
+    group.add(new THREE.Mesh(grassGeometry3, grassMaterial));
+    group.add(new THREE.Mesh(grassGeometry4, grassMaterial));
+    group.add(new THREE.Mesh(grassGeometry5, grassMaterial));
+    group.add(new THREE.Mesh(grassGeometry6, grassMaterial));
+
     group.add(new THREE.Mesh(groundGeometry, groundMaterial));
 
     return group;

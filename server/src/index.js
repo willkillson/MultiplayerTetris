@@ -1,5 +1,5 @@
 import express from 'express';
-import THREE from 'three';
+import { Vector3, Quaternion, Euler} from 'three';
 
 //LocalImports
 import MyTime from './utilities/time';
@@ -34,6 +34,11 @@ io.on('connection', (client)=>{
   clientInfo['position_x'] = 0;
   clientInfo['position_y'] = 18;
   clientInfo['position_z'] = -1*userCount++;
+  clientInfo['rotation'] ={
+      'x': 0,
+      'y': 0,
+      'z': 0
+  };
   clientInfo['piece_type'] = Math.floor(Math.random()*7);
 
   
@@ -50,10 +55,6 @@ io.on('connection', (client)=>{
     client.removeAllListeners();
   })
 
-  client.on('join',(msg)=>{
-    console.log(msg);
-  })
-
   client.on('say',(client)=>{
     console.log(client);
   })
@@ -61,6 +62,7 @@ io.on('connection', (client)=>{
   client.on('move', info=>{
     let parsedInfo = JSON.parse(info);
     let currentPiece = users[parsedInfo['id']];
+    let euler = new Euler(0,0,0,"xyz");
     switch(parsedInfo['dir']){
       case 'up':
         currentPiece['position_y']++;
@@ -80,7 +82,23 @@ io.on('connection', (client)=>{
       case 'out':
         currentPiece['position_z']++;
         break;
+      case 'ccw':
+        euler.setFromVector3(new Vector3(0,0,Math.PI/2),"xyz");
+        currentPiece['rotation'].x += euler.x;
+        currentPiece['rotation'].y += euler.y;
+        currentPiece['rotation'].z += euler.z;
+        break;
+      case 'cw':
+        euler.setFromVector3(new Vector3(0,0,-Math.PI/2),"xyz");
+        currentPiece['rotation'].x += euler.x;
+        currentPiece['rotation'].y += euler.y;
+        currentPiece['rotation'].z += euler.z;
+        break;
     }
+
+    //CLAMP
+
+    console.log(info);
   })
 
 })
@@ -88,7 +106,7 @@ io.on('connection', (client)=>{
 setInterval(()=>{
   //console.log("Sending_UPDATE: "+JSON.stringify(users));
   io.sockets.emit('UPDATE', JSON.stringify(users));
-},100);
+},10);
 
 
 /**
@@ -109,42 +127,3 @@ function normalizePort(val) {
 
   return false;
 }
-
-/**
- * Event listener for HTTP server "error" event.
- */
-
-// function onError(error) {
-//   if (error.syscall !== 'listen') {
-//     throw error;
-//   }
-
-//   var bind = typeof port === 'string'
-//     ? 'Pipe ' + port
-//     : 'Port ' + port;
-
-//   // handle specific listen errors with friendly messages
-//   switch (error.code) {
-//     case 'EACCES':
-//       console.error(bind + ' requires elevated privileges');
-//       process.exit(1);
-//       break;
-//     case 'EADDRINUSE':
-//       console.error(bind + ' is already in use');
-//       process.exit(1);
-//       break;
-//     default:
-//       throw error;
-//   }
-// }
-
-/**
- * Event listener for HTTP server "listening" event.
- */
-
-// function onListening() {
-//   var addr = server.address();
-//   var bind = typeof addr === 'string'
-//     ? 'pipe ' + addr
-//     : 'port ' + addr.port;
-// }

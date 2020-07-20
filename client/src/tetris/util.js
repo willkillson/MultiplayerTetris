@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import Piece from './pieces/piece'
 
 const gizmo = () =>{
     // arrow helper
@@ -39,8 +40,16 @@ const getChildByName = (parent, childName) => {
     return null;
 }
 
-const syncronizeScene = (scene, gameInfo) =>{
-
+/**
+ * This method removes players pieces that are
+ * no longer connected. This method is a prime
+ * candidate for refactoring into "handleOtherPlayersPieces"
+ * 
+ * @param {*} props "this" information.
+ * @param {*} networkInfo the network information provided on the call to 'UPDATE'
+ */
+const syncronizeScene = (props, networkInfo) =>{
+    let scene = props.scene;
 
     let clientUnits = [];
     scene.children.forEach(child=>{
@@ -49,7 +58,7 @@ const syncronizeScene = (scene, gameInfo) =>{
       }
     })
   
-    let serverUnits = Object.keys(JSON.parse(gameInfo));
+    let serverUnits = Object.keys(JSON.parse(networkInfo));
     for(let i = 0;i< clientUnits.length;i++){
   
       let contains = false;
@@ -68,11 +77,93 @@ const syncronizeScene = (scene, gameInfo) =>{
     }
   
   
-  }
+}
+
+/**
+ * Updates our players position in the board from the network 
+ * information.
+ * 
+ * @param {*} props "this" information.
+ * @param {*} networkInfo the network information provided on the call to 'UPDATE'
+ */
+const handlePlayersPiece = (props, networkInfo) =>{
+      //HANDLE OUR CLIENTS PIECE
+      let ourNetworkedCurrentPiece = JSON.parse(networkInfo);//pull out our piece
+      ourNetworkedCurrentPiece = ourNetworkedCurrentPiece[props.clientId];
+
+      if(props.currentPiece===null){
+        props.currentPiece = Piece(ourNetworkedCurrentPiece.piece_type);
+        props.currentPiece.mesh.name = props.clientId;
+        props.scene.add(props.currentPiece.mesh);
+        console.log(props.currentPiece);
+      }else{
+        //set the position
+        //console.log(ourNetworkedCurrentPiece);
+        props.currentPiece.mesh.position.x = ourNetworkedCurrentPiece.position_x;
+        props.currentPiece.mesh.position.y = ourNetworkedCurrentPiece.position_y;
+        props.currentPiece.mesh.position.z = ourNetworkedCurrentPiece.position_z;
+
+        //set the rotation
+        //console.log(ourNetworkedCurrentPiece);
+        props.currentPiece.mesh.rotation.x = ourNetworkedCurrentPiece.rotation.x;
+        props.currentPiece.mesh.rotation.y = ourNetworkedCurrentPiece.rotation.y;
+        props.currentPiece.mesh.rotation.z = ourNetworkedCurrentPiece.rotation.z;
+        //console.log(props.currentPiece.mesh.rotation);
+      }
+}
+
+/**
+ * Updates the other players positions in the game from the network information.
+ * 
+ * @param {*} props "this" information.
+ * @param {*} networkInfo  the network information provided on the call to 'UPDATE'
+ */
+const handleOtherPlayersPieces = (props, networkInfo) =>{
+        let otherPlayersNetworkInformation = JSON.parse(networkInfo);
+        delete otherPlayersNetworkInformation[props.clientId];
+        let otherInfo = Object.entries(otherPlayersNetworkInformation);
+
+        //HANDLE OTHER PLAYERS PIECE's
+        for(let i = 0;i< otherInfo.length;i++){
+          let player = otherInfo[i];
+          let playerId = player[0];
+          let playersCurrentPiece = player[1];
+          
+          //check if the piece is already created  in the scene
+          let isInTheScene = false;
+          let childParent = null;//this is our big object
+  
+          props.scene.children.forEach(child=>{
+            if(child.name===playerId){
+              isInTheScene=true;
+              childParent = child;
+            }
+          })
+  
+          //use that condition to create the piece
+          if(!isInTheScene){
+            let otherPiece= Piece( playersCurrentPiece['piece_type']);
+            otherPiece.mesh.name = playerId;
+            otherPiece.mesh.position.x = playersCurrentPiece.position_x;
+            otherPiece.mesh.position.y = playersCurrentPiece.position_y;
+            otherPiece.mesh.position.z = playersCurrentPiece.position_z;
+            props.scene.add(otherPiece.mesh);
+            
+          }else{
+            //we need to find the piece in the scene, so we can update its position
+            childParent.position.x = playersCurrentPiece.position_x;
+            childParent.position.y = playersCurrentPiece.position_y;
+            childParent.position.z = playersCurrentPiece.position_z;
+          }
+        }
+}
+
 
   export{
     syncronizeScene,
     getChildByName,
-    gizmo
+    gizmo,
+    handleOtherPlayersPieces,
+    handlePlayersPiece
   }
   

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import * as THREE from "three";
-import { Vector3} from "three";
+import { Vector3, Quaternion, Matrix4} from "three";
 //import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import io from "socket.io-client";
 
@@ -24,17 +24,18 @@ class Tetris extends Component {
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera( 90, window.innerWidth/window.innerHeight, 0.1, 1000 );
 
-    this.camera.rotateOnAxis(new Vector3(1,0,0),-Math.PI/8);
+    this.camera.rotateOnAxis(new Vector3(1,0,0),0);
 
     this.renderer.gammaFactor = 2.2;
   
     //camera position
-    this.camera.position.y = 16;
+    this.camera.position.y = 10;
     this.camera.position.x = 0;
-    this.camera.position.z = 10;
+    this.camera.position.z = 15;
 
     //default game values
     this.currentPiece = null;
+    
 
   }
 
@@ -48,12 +49,11 @@ class Tetris extends Component {
     this.init();
 
     ////////////MainGameLoop
-    let width = window['document'].getElementById("myCanvas").clientWidth*0.5625;
-    let height = window['document'].getElementById("myCanvas").clientWidth;
-    console.log(height);
+    let width = window['document'].getElementById("myCanvas").clientWidth;
+    let height = window['document'].getElementById("myCanvas").clientHeight;
     this.renderer.setSize( 
-      width,
-      height
+      1000,
+      640
     );   
 
     const animate = () => {
@@ -62,7 +62,7 @@ class Tetris extends Component {
 
         width = window['document'].getElementById("myCanvas").clientWidth;
         height = window['document'].getElementById("myCanvas").clientWidth*0.5625
-        console.log(height);
+
         this.renderer.setSize( 
           width,
           height
@@ -94,71 +94,15 @@ class Tetris extends Component {
       this.clientId = data.id;
     })
 
-    this.socket.emit('join', 'hello world from client');
-
     this.socket.on('UPDATE',(info)=>{
 
       //removes all units that don't exist anymore.
-      NETWORK.syncronizeScene(this.scene,info);
-      
+      NETWORK.syncronizeScene(this,info);
 
-      this.networkInfo = JSON.parse(info);
+      NETWORK.handleOtherPlayersPieces(this,info);
 
-      let ootherInfo = JSON.parse(info);
-      delete ootherInfo[this.clientId];//remove our data from the list
-      let otherInfo = Object.entries(ootherInfo);//convert our json object into an array of arrays without our piece in it.
-
-      //HANDLE OTHER PLAYERS PIECE's
-      for(let i = 0;i< otherInfo.length;i++){
-        let player = otherInfo[i];
-        let playerId = player[0];
-        let playersCurrentPiece = player[1];
-
-       
-        //check if the piece is already created  in the scene
-        let isInTheScene = false;
-        let childParent = null;//this is our big object
-
-        this.scene.children.forEach(child=>{
-          if(child.name===playerId){
-            isInTheScene=true;
-            childParent = child;
-          }
-        })
-        
-
-
-        //use that condition to create the piece
-        if(!isInTheScene){
-          let otherPiece= Piece( playersCurrentPiece['piece_type']);
-          otherPiece.mesh.name = playerId;
-          otherPiece.mesh.position.x = playersCurrentPiece.position_x;
-          otherPiece.mesh.position.y = playersCurrentPiece.position_y;
-          otherPiece.mesh.position.z = playersCurrentPiece.position_z;
-          this.scene.add(otherPiece.mesh);
-          
-        }else{
-          //we need to find the piece in the scene, so we can update its position
-          childParent.position.x = playersCurrentPiece.position_x;
-          childParent.position.y = playersCurrentPiece.position_y;
-          childParent.position.z = playersCurrentPiece.position_z;
-        }
-      }
-
-      //HANDLE OUR CLIENTS PIECE
-      let ourNetworkedCurrentPiece = this.networkInfo[this.clientId];//pull out our piece
-      if(this.currentPiece===null){
-        this.currentPiece = Piece(ourNetworkedCurrentPiece.piece_type);
-        this.currentPiece.mesh.name = this.clientId;
-        this.scene.add(this.currentPiece.mesh);
-      }else{
-        this.currentPiece.mesh.position.x = ourNetworkedCurrentPiece.position_x;
-        this.currentPiece.mesh.position.y = ourNetworkedCurrentPiece.position_y;
-        this.currentPiece.mesh.position.z = ourNetworkedCurrentPiece.position_z;
-      }
-
-
-      //remove all the pieces that are 
+      NETWORK.handlePlayersPiece(this,info)
+   
     })
 
 
@@ -171,14 +115,16 @@ class Tetris extends Component {
     this.scene.add(BOARD.sky()); 
     this.scene.add(frame);          
     this.scene.add(new THREE.DirectionalLight(0xfffffff,3.0));
-  }
 
+  }
   update(){
 
     if(this.currentPiece!==null){
-      this.currentPiece.update();
-    }
 
+      this.currentPiece.update();
+
+    }
+ 
 
   }
 
