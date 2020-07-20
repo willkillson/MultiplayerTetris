@@ -37,7 +37,11 @@
     ]
   },
   "devDependencies": {
+    "eslint": "^7.5.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-plugin-react": "^7.20.3",
     "jquery": "^3.5.1",
-    "react-bootstrap": "^1.2.2"
+    "react-bootstrap": "^1.2.2",
+    "typescript": "^3.9.7"
   }
 }
