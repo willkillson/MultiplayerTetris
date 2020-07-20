@@ -1,18 +1,14 @@
 import React, { Component } from "react";
 import * as THREE from "three";
-import { Vector3, ArrowHelper } from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { Vector3} from "three";
+//import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import io from "socket.io-client";
-import $ from "jquery";
 
 //local imports
 import Piece from './pieces/piece'
 import * as BOARD from './board/board';
 import Controls from "./Controls";
 import * as NETWORK from './util'
-
-
-
 
 class Tetris extends Component {
 
@@ -40,8 +36,6 @@ class Tetris extends Component {
 
   }
 
-
-
   componentDidMount() {
     Controls(this);
 
@@ -49,29 +43,31 @@ class Tetris extends Component {
     
     //this.controls = new OrbitControls (this.camera, this.renderer.domElement);
 
-
-
-    //bind all the buttons to this.functions
-    
-
- 
-    
-    //
-    let width = window['document'].getElementById('root-container-center').clientWidth;
-    let height = window['document'].getElementById('root-container-center').clientHeight;
-    this.renderer.setSize( 
-      width*0.9,
-      height*0.9 
-    );   //OLD
-
-
-
-
     this.init();
 
     ////////////MainGameLoop
+    let width = window['document'].getElementById("myCanvas").clientWidth;
+    let height = window['document'].getElementById("myCanvas").clientWidth*0.5625
+    console.log(height);
+    this.renderer.setSize( 
+      width,
+      height
+    );   
+
     const animate = () => {
 
+      if(width!==window['document'].getElementById("myCanvas").clientWidth){
+
+        width = window['document'].getElementById("myCanvas").clientWidth;
+        height = window['document'].getElementById("myCanvas").clientWidth*0.5625
+        console.log(height);
+        this.renderer.setSize( 
+          width,
+          height
+        );   
+  
+      }
+  
       this.update();
 
       this.draw();
@@ -160,11 +156,6 @@ class Tetris extends Component {
 
 
       //remove all the pieces that are 
-
-      
-
-
-
     })
 
 
