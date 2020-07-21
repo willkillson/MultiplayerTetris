@@ -109,12 +109,17 @@ io.on('connection', (client)=>{
 })
 
 setInterval(()=>{
-  //console.log("Sending_UPDATE: "+JSON.stringify(users));
+
+
+
   let networkInfo = {};
   networkInfo['users'] = users;
   networkInfo['persistentblocks'] = persistentBlocks;
+  if(persistentBlocks.length>50){
+    persistentBlocks =[];
+  }
   io.sockets.emit('UPDATE', JSON.stringify(networkInfo));
-},10);
+},50);
 
 
 /**
