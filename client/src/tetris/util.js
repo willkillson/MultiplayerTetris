@@ -1,5 +1,8 @@
 import * as THREE from 'three';
 import Piece from './pieces/piece';
+import Tetris from './Tetris'
+
+
 
 const gizmo = () =>{
   // arrow helper
@@ -50,6 +53,9 @@ const getChildByName = (parent, childName) => {
  * provided on the call to'UPDATE'
  */
 const syncronizeScene = (props, networkInfo) =>{
+
+  let ni = JSON.parse(networkInfo);
+
   const scene = props.scene;
 
   const clientUnits = [];
@@ -59,7 +65,7 @@ const syncronizeScene = (props, networkInfo) =>{
     }
   });
 
-  const serverUnits = Object.keys(JSON.parse(networkInfo));
+  const serverUnits = Object.keys(ni['users']);
   for (let i = 0; i< clientUnits.length; i++) {
     let contains = false;
     for (let j = 0; j< serverUnits.length; j++) {
@@ -84,8 +90,11 @@ const syncronizeScene = (props, networkInfo) =>{
  */
 const handlePlayersPiece = (props, networkInfo) =>{
   // HANDLE OUR CLIENTS PIECE
-  let ourNetworkedCurrentPiece = JSON.parse(networkInfo);// pull out our piece
-  ourNetworkedCurrentPiece = ourNetworkedCurrentPiece[props.clientId];
+
+  
+  let ni = JSON.parse(networkInfo);
+  let ourNetworkedCurrentPiece = ni['users'];
+  ourNetworkedCurrentPiece = ourNetworkedCurrentPiece[props.clientId];// pull out our piece
 
   if (props.currentPiece===null) {
     props.currentPiece = Piece(ourNetworkedCurrentPiece.piece_type);
@@ -115,7 +124,8 @@ const handlePlayersPiece = (props, networkInfo) =>{
  * @param {*} networkInfo  the network information provided on the call to 'UPDATE'
  */
 const handleOtherPlayersPieces = (props, networkInfo) =>{
-  const otherPlayersNetworkInformation = JSON.parse(networkInfo);
+  let ni = JSON.parse(networkInfo);
+  const otherPlayersNetworkInformation = ni['users'];
   delete otherPlayersNetworkInformation[props.clientId];
   const otherInfo = Object.entries(otherPlayersNetworkInformation);
 
@@ -152,6 +162,8 @@ const handleOtherPlayersPieces = (props, networkInfo) =>{
     }
   }
 };
+
+
 
 
 export {

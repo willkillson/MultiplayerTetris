@@ -1,4 +1,5 @@
 import express from 'express';
+import { v4 as uuidv4 } from 'node-uuid';
 import { Vector3, Quaternion, Euler} from 'three';
 
 //LocalImports
@@ -25,6 +26,8 @@ console.log("Listening on port: "+port);
 let users = {};
 let userCount = 0;
 
+let persistentBlocks = [];
+
 io.on('connection', (client)=>{
 
   //tell the player they connected, giving them their id
@@ -40,6 +43,7 @@ io.on('connection', (client)=>{
       'z': 0
   };
   clientInfo['piece_type'] = Math.floor(Math.random()*7);
+  
 
   
 
@@ -55,8 +59,10 @@ io.on('connection', (client)=>{
     client.removeAllListeners();
   })
 
-  client.on('say',(client)=>{
-    console.log(client);
+  client.on('set_blocks',(client)=>{
+    client.uuid = ' '+ uuidv4();
+
+    persistentBlocks.push(client);
   })
 
   client.on('move', info=>{
@@ -98,14 +104,16 @@ io.on('connection', (client)=>{
 
     //CLAMP
 
-    console.log(info);
   })
 
 })
 
 setInterval(()=>{
   //console.log("Sending_UPDATE: "+JSON.stringify(users));
-  io.sockets.emit('UPDATE', JSON.stringify(users));
+  let networkInfo = {};
+  networkInfo['users'] = users;
+  networkInfo['persistentblocks'] = persistentBlocks;
+  io.sockets.emit('UPDATE', JSON.stringify(networkInfo));
 },10);
 
 

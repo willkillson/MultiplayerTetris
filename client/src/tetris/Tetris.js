@@ -9,12 +9,13 @@ import Piece from './pieces/piece';
 import * as BOARD from './board/board';
 import Controls from './Controls';
 import * as NETWORK from './util';
+import * as NETWORK2 from './util2';
 
 class Tetris extends Component {
   constructor(props, ref) {
     super();
 
-    this.IS_DEVELOP = false;// MAKE SURE TO SET THIS TO FALSE WHEN PUSHING TO MASTER FOR A NEW BUILD
+    this.IS_DEVELOP = true;// MAKE SURE TO SET THIS TO FALSE WHEN PUSHING TO MASTER FOR A NEW BUILD
     //
     this.networkInfo = {};
     this.clientId = null;
@@ -90,11 +91,15 @@ class Tetris extends Component {
 
     this.socket.on('UPDATE', (info)=>{
       // removes all units that don't exist anymore.
+      //console.log(info);
       NETWORK.syncronizeScene(this, info);
 
       NETWORK.handleOtherPlayersPieces(this, info);
 
       NETWORK.handlePlayersPiece(this, info);
+
+      NETWORK2.handleNonPlayerPieces(this,info);
+      
     });
 
 

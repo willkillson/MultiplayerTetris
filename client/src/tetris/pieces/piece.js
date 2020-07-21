@@ -1,6 +1,7 @@
 import {BoxGeometry, MeshBasicMaterial, Mesh, Raycaster, Ray} from 'three';
 import * as THREE from 'three';
 import {Vector3} from 'three';
+import * as MyConstants from '../utilities/constants'
 
 /**
  * Main Piece class. Contains methods involved with moveing,
@@ -344,13 +345,6 @@ class Piece {
 }
 
 const createPiece = (pieceType = 0, defaultPosition = new Vector3(0, 18, 0)) =>{
-  const I_color = 0xffa500;
-  const T_color = 0xadd8e6;
-  const L_color = 0xfed8b1;
-  const J_color = 0x0000ff;
-  const S_color = 0x800080;
-  const Z_color = 0x00ff00;
-  const O_color = 0xffff00;
 
   let retPiece;
 
@@ -362,7 +356,7 @@ const createPiece = (pieceType = 0, defaultPosition = new Vector3(0, 18, 0)) =>{
         new Vector3(-1, 0, 0),
         new Vector3(1, 0, 0),
         new Vector3(0, -1, 0)];
-      retPiece = new Piece(blocks, T_color, defaultPosition);
+      retPiece = new Piece(blocks, MyConstants.T_COLOR, defaultPosition);
       break;
     }
     case 1:// S
@@ -372,7 +366,7 @@ const createPiece = (pieceType = 0, defaultPosition = new Vector3(0, 18, 0)) =>{
         new Vector3(-1, 0, 0),
         new Vector3(0, 1, 0),
         new Vector3(1, 1, 0)];
-      retPiece = new Piece(blocks, S_color, defaultPosition);
+      retPiece = new Piece(blocks, MyConstants.S_COLOR, defaultPosition);
       break;
     }
     case 2:// I
@@ -382,7 +376,7 @@ const createPiece = (pieceType = 0, defaultPosition = new Vector3(0, 18, 0)) =>{
         new Vector3(-1, 0, 0),
         new Vector3(1, 0, 0),
         new Vector3(2, 0, 0)];
-      retPiece = new Piece(blocks, I_color, defaultPosition);
+      retPiece = new Piece(blocks, MyConstants.I_COLOR, defaultPosition);
       break;
     }
     case 3:// L
@@ -392,7 +386,7 @@ const createPiece = (pieceType = 0, defaultPosition = new Vector3(0, 18, 0)) =>{
         new Vector3(1, 0, 0),
         new Vector3(-1, 0, 0),
         new Vector3(-1, -1, 0)];
-      retPiece = new Piece(blocks, L_color, defaultPosition);
+      retPiece = new Piece(blocks, MyConstants.L_COLOR, defaultPosition);
       break;
     }
     case 4:// J
@@ -403,7 +397,7 @@ const createPiece = (pieceType = 0, defaultPosition = new Vector3(0, 18, 0)) =>{
         new Vector3(1, 0, 0),
         new Vector3(1, -1, 0)];
 
-      retPiece = new Piece(blocks, J_color, defaultPosition);
+      retPiece = new Piece(blocks, MyConstants.J_COLOR, defaultPosition);
       break;
     }
     case 5:// Z
@@ -414,7 +408,7 @@ const createPiece = (pieceType = 0, defaultPosition = new Vector3(0, 18, 0)) =>{
         new Vector3(0, -1, 0),
         new Vector3(1, -1, 0)];
 
-      retPiece = new Piece(blocks, Z_color, defaultPosition);
+      retPiece = new Piece(blocks, MyConstants.Z_COLOR, defaultPosition);
       break;
     }
     case 6:// O
@@ -424,7 +418,7 @@ const createPiece = (pieceType = 0, defaultPosition = new Vector3(0, 18, 0)) =>{
         new Vector3(1, 0, 0), // top right
         new Vector3(1, -1, 0), // bot right
         new Vector3(0, -1, 0)];// bot left
-      retPiece = new Piece(blocks, O_color, defaultPosition);
+      retPiece = new Piece(blocks, MyConstants.O_COLOR, defaultPosition);
       break;
     }
     case 7:// RANDOM
@@ -436,7 +430,7 @@ const createPiece = (pieceType = 0, defaultPosition = new Vector3(0, 18, 0)) =>{
       blocks.push(new Vector3(-1, 0, 0));
       //
 
-      retPiece = new Piece(blocks, O_color, defaultPosition);
+      retPiece = new Piece(blocks, MyConstants.O_COLOR, defaultPosition);
       break;
     }
     case 8:// RANDOM
@@ -448,7 +442,7 @@ const createPiece = (pieceType = 0, defaultPosition = new Vector3(0, 18, 0)) =>{
       blocks.push(new Vector3(0, 0, 1));
       //
 
-      retPiece = new Piece(blocks, O_color, defaultPosition);
+      retPiece = new Piece(blocks, MyConstants.O_COLOR, defaultPosition);
       break;
     }
     case 9:// single cube
