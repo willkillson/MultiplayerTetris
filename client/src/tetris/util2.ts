@@ -10,9 +10,6 @@ interface Player{
     piece_type: number
 }
 
-const removeAllListANotInGraphB = ( list:any, graph:any ) => {
-    
-}
 
 interface Vec3{
     x: number,
@@ -22,7 +19,6 @@ interface Vec3{
 
 interface Block{
     player: string,//the player who created this block
-    color: string,
     position: Vec3,
     piece_type: number,
     uuid: string//unique identifier assigned by the server

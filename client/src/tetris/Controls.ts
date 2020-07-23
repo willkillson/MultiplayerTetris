@@ -13,14 +13,6 @@ const initControls = (game:Tetris) =>{
     z: number
   }
 
-  interface Message{
-    player:string,
-    id:string,
-    dir:string,
-    color:string,
-    position: Vec3,
-    piece_type: number
-  }
 
   // Move up
   Mousetrap.bind('w', ()=>{
@@ -168,21 +160,36 @@ const initControls = (game:Tetris) =>{
   // }
 
 
-  Mousetrap.bind('h', ()=>{
-    // props.currentPiece = Piece(Math.floor(Math.random()*7));
-    // props.scene.add(props.currentPiece.mesh);
+  interface Block{
+    position: Vec3,
+    piece_type: number,
+    uuid: string//unique identifier assigned by the server
+  }
 
+
+  interface Message{
+    player:string,
+    id:string,
+    dir:string,
+    color:string,
+    positions: Vec3[],
+    piece_type: number,
+    blocks: Vec3[]
+  }
+
+  Mousetrap.bind('h', ()=>{
     
     const info = <Message>{};
     info['player'] = game.clientId;
     
     info['color'] = '0xff0000';
-    info['position'] = {
-      'x': game.currentPiece.mesh.position.x,
-      'y': game.currentPiece.mesh.position.y,
-      'z': game.currentPiece.mesh.position.z    
-    }
-    info['piece_type'] = MyConstants.PIECE_MAP.get('CUBE');
+
+ 
+    info['blocks'] = [];
+    game.currentPiece.blockPositions.forEach((block:Vec3)=>{
+      info['blocks'].push(block)
+    })
+
     game.socket.emit('set_blocks', info);
   });
 };
