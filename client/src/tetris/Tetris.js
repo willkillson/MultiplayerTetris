@@ -93,13 +93,13 @@ class Tetris extends Component {
       // removes all units that don't exist anymore.
       //console.log(info);
 
-      NETWORK.syncronizeScene(this, info);
+      //NETWORK.syncronizeScene(this, info);
 
-      NETWORK.handleOtherPlayersPieces(this, info);
+      //NETWORK.handleOtherPlayersPieces(this, info);
 
-      NETWORK.handlePlayersPiece(this, info);
+      //NETWORK.handlePlayersPiece(this, info);
 
-      NETWORK2.handleNonPlayerPieces(this,info);
+      //NETWORK2.handleNonPlayerPieces(this,info);
       
     });
 

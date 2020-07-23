@@ -93,6 +93,7 @@ const handlePlayersPiece = (props, networkInfo) =>{
 
   
   let ni = JSON.parse(networkInfo);
+  console.log(ni);
   let ourNetworkedCurrentPiece = ni['users'];
   ourNetworkedCurrentPiece = ourNetworkedCurrentPiece[props.clientId];// pull out our piece
 
@@ -124,7 +125,9 @@ const handlePlayersPiece = (props, networkInfo) =>{
  * @param {*} networkInfo  the network information provided on the call to 'UPDATE'
  */
 const handleOtherPlayersPieces = (props, networkInfo) =>{
+  
   let ni = JSON.parse(networkInfo);
+  console.log(ni);
   const otherPlayersNetworkInformation = ni['users'];
   delete otherPlayersNetworkInformation[props.clientId];
   const otherInfo = Object.entries(otherPlayersNetworkInformation);
