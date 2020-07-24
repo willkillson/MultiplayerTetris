@@ -8,8 +8,10 @@ import io from 'socket.io-client';
 import Piece from './pieces/piece';
 import * as BOARD from './board/board';
 import Controls from './Controls';
-import * as NETWORK from './util';
-import * as NETWORK2 from './util2';
+import * as NETWORK from './Network';
+
+
+
 
 class Tetris extends Component {
   constructor(props, ref) {
@@ -85,23 +87,10 @@ class Tetris extends Component {
       this.socket = io('ec2-52-53-191-238.us-west-1.compute.amazonaws.com:80');
     }
 
-    this.socket.on('onconnected', (data)=>{
-      this.clientId = data.id;
-    });
 
-    this.socket.on('UPDATE', (info)=>{
-      // removes all units that don't exist anymore.
-      //console.log(info);
+    this.socket.on('onconnected', (newClient)=> NETWORK.onConnected(newClient,this));
 
-      //NETWORK.syncronizeScene(this, info);
-
-      //NETWORK.handleOtherPlayersPieces(this, info);
-
-      //NETWORK.handlePlayersPiece(this, info);
-
-      //NETWORK2.handleNonPlayerPieces(this,info);
-      
-    });
+    this.socket.on('UPDATE', (info)=> NETWORK.onUpdate(info,this));
 
 
     // SETUP GAME
@@ -114,6 +103,7 @@ class Tetris extends Component {
     this.scene.add(frame);
     this.scene.add(new THREE.DirectionalLight(0xfffffff, 3.0));
   }
+
   update() {
     if (this.currentPiece!==null) {
       this.currentPiece.update();

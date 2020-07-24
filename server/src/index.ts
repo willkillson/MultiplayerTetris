@@ -1,7 +1,5 @@
 import Server from './Server'
 
-
-
 //TODO start backend service, and pass into the server
 
 let gameServer = new Server();

@@ -43,9 +43,8 @@ class Block{
   }
 }
 
-interface NetworkInfo{//This is the data being passed and forth.
-  users:Client[]
-}
+
+
 
 const normalizePort = (val:string) => {
   var port = parseInt(val, 10);
@@ -69,6 +68,7 @@ export default class Server  {
     private io: any;
     private persistentBlocks:Block[];
     private users:Client[];
+
 
     constructor(){
       //Data storage, local only for now.
@@ -100,31 +100,37 @@ export default class Server  {
     //on connect
     initNewConnection(socket:any){
 
-      let newClient:Client =  new Client();
+      let info:Client =  new Client();
       //assign unique id
-      newClient.id = socket.id;   
+      info.id = socket.id;   
 
       //assign position
-      newClient.position.x = 0;   
-      newClient.position.y = 18;
-      newClient.position.z = -1*this.users.length;
+      info.position.x = 0;   
+      info.position.y = 18;
+      info.position.z = -1*this.users.length;
       
       //assign euler angle
-      newClient.rotation.x = 0;   
-      newClient.rotation.y = 0;
-      newClient.rotation.z = 0;
+      info.rotation.x = 0;   
+      info.rotation.y = 0;
+      info.rotation.z = 0;
   
       /*
         assign piece
         put the client in our data store
         announce to the server console
       */
-      newClient.pieceType = Math.floor(Math.random()*7);              
-      this.users.push(newClient);                                          
-      console.log(MyTime() + ' Client '+ newClient.id + ' connected.');  
+      info.pieceType = Math.floor(Math.random()*7);              
+      this.users.push(info);                                          
+      console.log(MyTime() + ' Client '+ info.id + ' connected.');  
 
       //now give the client all the information
-      socket.emit('onconnected',{id: newClient});   
+      
+      const retObject ={
+        id: info.id,
+        users:this.users
+      }
+
+      socket.emit('onconnected',retObject);   
     }
 
     //on disconnect
@@ -141,7 +147,6 @@ export default class Server  {
       }
 
     }
-
 
     //on move
     move(newSocket:any){
@@ -193,21 +198,18 @@ export default class Server  {
      */
     sendConstantUpdates(){
       setInterval(()=>{
-        console.log("Running...");
-        let networkInfo = ():NetworkInfo =>({
-          users:this.users.filter((user)=>{
-            if(user!==null){
-              return true
-            }else{
-              return false;
-            }
-          })
-        })
-      this.io.sockets.emit('UPDATE', JSON.stringify(networkInfo));
+      //   console.log("Running...");
+      //   let networkInfo = ():NetworkInfo =>({
+      //     users:this.users.filter((user)=>{
+      //       if(user!==null){
+      //         return true
+      //       }else{
+      //         return false;
+      //       }
+      //     })
+      //   })
+      // this.io.sockets.emit('UPDATE', JSON.stringify(networkInfo));
       },1000);
       
     }
-
-
-
 }
