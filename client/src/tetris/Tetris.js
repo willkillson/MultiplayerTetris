@@ -87,10 +87,12 @@ class Tetris extends Component {
       this.socket = io('ec2-52-53-191-238.us-west-1.compute.amazonaws.com:80');
     }
 
-
     this.socket.on('onconnected', (newClient)=> NETWORK.onConnected(newClient,this));
 
+    this.socket.on('onPlayerDisconnect', (info)=> NETWORK.onPlayerDisconnect(info,this));
+
     this.socket.on('UPDATE', (info)=> NETWORK.onUpdate(info,this));
+
 
 
     // SETUP GAME
@@ -101,7 +103,7 @@ class Tetris extends Component {
     this.scene.add(BOARD.levelFloor()); // grpimd
     this.scene.add(BOARD.sky());
     this.scene.add(frame);
-    this.scene.add(new THREE.DirectionalLight(0xfffffff, 3.0));
+    //this.scene.add(new THREE.DirectionalLight(0xfffffff, 3.0));
   }
 
   update() {

@@ -1,4 +1,5 @@
 import Tetris from './Tetris'
+import createPiece from './pieces/piece'
 import Piece from './pieces/piece'
 import { Vector3 } from 'three'
 
@@ -28,6 +29,11 @@ interface ClientInfo{
     users: Client[]
 }
 
+interface UserData{
+    entityType : string,
+    owner : string
+}
+
 interface Client{
     id: string,
     position: Vec3,
@@ -46,6 +52,7 @@ interface Client{
  */
 export const onConnected = (newClient:ClientInfo, game:Tetris) =>{
     let client = newClient.users.find(client=>client.id===newClient.id);
+    console.log(newClient);
     //process error handling for client
     if(client!==undefined){
         if(client.position!==undefined && client.rotation!==undefined && client.pieceType!==null && client.pieceType!==undefined &&client.id){
@@ -68,6 +75,7 @@ export const onConnected = (newClient:ClientInfo, game:Tetris) =>{
 }
 
 const initPlayerPiece = (client:Client, game:Tetris) => {
+    
     //create the users piece
     let id  = client.id;
     let pieceType:any = client.pieceType;
@@ -78,16 +86,38 @@ const initPlayerPiece = (client:Client, game:Tetris) => {
         position.y,
         position.z);
 
-    game.currentPiece = Piece(pieceType,threeVec3);
+    game.currentPiece = createPiece(pieceType,threeVec3);
+    game.currentPiece.userData = {
+        entityType : "active_piece",
+        owner : id
+      }
+
     game.scene.add(game.currentPiece.mesh);
 }
 
 const initOtherPlayersPieces = (clients:(Client|undefined)[], game:Tetris) =>{
-    
+
+    clients.forEach((clientPiece)=>{
+        let position = clientPiece?.position;
+        let clientPieceType = clientPiece?.pieceType;
+        let newVector = new Vector3(position?.x,position?.y,position?.z);
+
+        if(clientPieceType!==null){
+            let piece:any = createPiece(clientPieceType,newVector);
+            game.scene.add(piece.mesh);
+        }
+    });
+
 }
 
 const initNonPlayerPieces = (blocks:Block[], game:Tetris) => {
+
+    console.log(blocks);
     //TODO
+
+}
+
+export const onPlayerDisconnect = (client:any, game:Tetris) => {
 
 }
 
@@ -128,7 +158,7 @@ export const handleNonPlayerPieces = (game:Tetris, networkInfo:string) =>{
                 csb.position.y,
                 csb.position.z);
 
-            let newPiece: any = Piece(csb.piece_type,position);
+            let newPiece: any = createPiece(csb.piece_type,position);
             newPiece.mesh.name = csb.uuid;
             game.scene.add(newPiece.mesh);
         })
