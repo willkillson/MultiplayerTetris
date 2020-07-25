@@ -105,9 +105,9 @@ export default class Server  {
       info.id = socket.id;   
 
       //assign position
-      info.position.x = 0;   
-      info.position.y = 18;
-      info.position.z = -1*this.users.length;
+      info.position.x = Math.floor(Math.random()*-10+Math.random()*10);   
+      info.position.y = Math.floor(Math.random()*15+3);   
+      info.position.z = Math.floor(Math.random()*-10 + Math.random()*5);   
       
       //assign euler angle
       info.rotation.x = 0;   
