@@ -19,9 +19,12 @@ const initControls = (game:Tetris) =>{
     let info = <Message>{};
     info['id'] = game.clientId;
     info['dir'] = 'up';
-    if (!game.currentPiece.collision_isBlocked.up) {
-      game.socket.emit('move', JSON.stringify(info));
-    }
+    console.log(info);
+
+    const collision = !game.currentPiece.collision_isBlocked.up;
+    
+    game.socket.emit('move', JSON.stringify(info));
+    
   });
 
   // @ts-ignore
@@ -29,9 +32,13 @@ const initControls = (game:Tetris) =>{
     const info = <Message>{};
     info['id'] = game.clientId;
     info['dir'] = 'up';
-    if (!game.currentPiece.collision_isBlocked.up) {
+    console.log(info);
+
+    const collision = !game.currentPiece.collision_isBlocked.up;
+
+    //if (collision) 
       game.socket.emit('move', JSON.stringify(info));
-    }
+    
   };
 
   // Move left
@@ -39,9 +46,13 @@ const initControls = (game:Tetris) =>{
     const info = <Message>{};
     info['id'] = game.clientId;
     info['dir'] = 'left';
-    if (!game.currentPiece.collision_isBlocked.left) {
+    console.log(info);
+
+    const collision = !game.currentPiece.collision_isBlocked.left;
+
+    //if (collision) 
       game.socket.emit('move', JSON.stringify(info));
-    }
+    
   });
 
   // @ts-ignore
@@ -60,9 +71,12 @@ const initControls = (game:Tetris) =>{
     const info = <Message>{};
     info['id'] = game.clientId;
     info['dir'] = 'down';
-    if (!game.currentPiece.collision_isBlocked.down) {
+
+    const collision = !game.currentPiece.collision_isBlocked.down;
+
+    //if (collision) 
       game.socket.emit('move', JSON.stringify(info));
-    }
+    
   });
 
   // @ts-ignore
@@ -80,9 +94,12 @@ const initControls = (game:Tetris) =>{
     const info = <Message>{};
     info['id'] = game.clientId;
     info['dir'] = 'right';
-    if (!game.currentPiece.collision_isBlocked.right) {
+
+    const collision = !game.currentPiece.collision_isBlocked.right
+
+  //  if(collision) 
       game.socket.emit('move', JSON.stringify(info));
-    }
+    
   });
 
   // @ts-ignore
@@ -100,9 +117,12 @@ const initControls = (game:Tetris) =>{
     const info = <Message>{};
     info['id'] = game.clientId;
     info['dir'] = 'ccw';
-    if (!game.currentPiece.collision_isBlocked['ccw']) {
+
+    const collision = !game.currentPiece.collision_isBlocked['ccw'];
+
+   // if(collision) 
       game.socket.emit('move', JSON.stringify(info));
-    }
+    
   });
   // window['document'].getElementById('button-ccw').onclick = function hello(){
   //   console.log("Not implemented.")
@@ -115,9 +135,11 @@ const initControls = (game:Tetris) =>{
     const info = <Message>{};
     info['id'] = game.clientId;
     info['dir'] = 'cw';
-    if (!game.currentPiece.collision_isBlocked['cw']) {
+
+    const collision = !game.currentPiece.collision_isBlocked['cw'];
+    if (collision) 
       game.socket.emit('move', JSON.stringify(info));
-    }
+
   });
 
   // window['document'].getElementById('button-cw').onclick = function hello(){
@@ -129,9 +151,11 @@ const initControls = (game:Tetris) =>{
     const info = <Message>{};
     info['id'] = game.clientId;
     info['dir'] = 'in';
-    if (!game.currentPiece.collision_isBlocked.in) {
+
+    const collision = !game.currentPiece.collision_isBlocked.in;
+    //if (collision) 
       game.socket.emit('move', JSON.stringify(info));
-    }
+
   });
   // window['document'].getElementById('button-in').onclick = function hello(){
   //   let info = {};
@@ -147,9 +171,11 @@ const initControls = (game:Tetris) =>{
     const info = <Message>{};
     info['id'] = game.clientId;
     info['dir'] = 'out';
-    if (!game.currentPiece.collision_isBlocked.out) {
+
+    const collision = !game.currentPiece.collision_isBlocked.out;
+    //if (collision) 
       game.socket.emit('move', JSON.stringify(info));
-    }
+    
   });
   // window['document'].getElementById('button-out').onclick = function hello(){
   //   let info = {};
@@ -179,19 +205,28 @@ const initControls = (game:Tetris) =>{
 
   Mousetrap.bind('h', ()=>{
     
+    
+    //console.log(game.currentPiece);
     const info = <Message>{};
     info['player'] = game.clientId;
-    
     info['color'] = '0xff0000';
-
- 
-    info['blocks'] = [];
-    game.currentPiece.blockPositions.forEach((block:Vec3)=>{
-      info['blocks'].push(block)
-    })
-
+    info['blocks'] = getBlocksFromMesh(game.currentPiece.mesh);
+    console.log(info);
     game.socket.emit('set_blocks', info);
   });
 };
+
+const getBlocksFromMesh = (mesh:any)=>{
+
+  let blocks= [];
+  for(let i = 0;i< mesh.children.length;i++){
+    let block = new Vector3(
+      mesh.children[i].position.x,
+      mesh.children[i].position.y,
+      mesh.children[i].position.z);
+    blocks.push(block);
+  }
+  return blocks;
+}
 
 export default initControls;

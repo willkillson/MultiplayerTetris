@@ -39,6 +39,8 @@ class Tetris extends Component {
     this.currentPiece = null;
   }
 
+
+
   componentDidMount() {
     Controls(this);
 
@@ -98,10 +100,8 @@ class Tetris extends Component {
 
 
     // SETUP GAME
-
     const frame = BOARD.frame();
     frame.position.add(new Vector3(-5, 0, 0));
-
     this.scene.add(BOARD.levelFloor()); // grpimd
     this.scene.add(BOARD.sky());
     this.scene.add(frame);
@@ -109,9 +109,11 @@ class Tetris extends Component {
   }
 
   update() {
+
     if (this.currentPiece!==null) {
       this.currentPiece.update();
     }
+
   }
 
   draw() {
@@ -125,6 +127,9 @@ class Tetris extends Component {
       </div>
     );
   }
+
+
+
 }
 
 export default Tetris;

@@ -3,14 +3,6 @@ import createPiece from './pieces/piece'
 import Piece from './pieces/piece'
 import { Vector3 } from 'three'
 
-interface Player{
-    position_x:number,
-    position_y:number,
-    position_z:number,
-    rotation: Vec3,
-    piece_type: number
-}
-
 interface Vec3{
     x: number,
     y: number,
@@ -51,60 +43,28 @@ interface Client{
  * @param game 
  */
 export const onConnected = (newClient:ClientInfo, game:Tetris) =>{
-    let client = newClient.users.find(client=>{
-        if(client!==null){
-            client.id===newClient.id
+    
+    game.clientId = newClient.id;
+    let clientIndex = newClient.users.findIndex((usr)=>{
+        if(usr!==null){
+            return usr.id===game.clientId;
         }
-            
-            
     });
 
-    console.log(newClient);
-    //process error handling for client
-    if(client!==undefined){
-        if(client.position!==undefined && client.rotation!==undefined && client.pieceType!==null && client.pieceType!==undefined &&client.id){
-            //all is good, instantiate player piece
-            initPlayerPiece(client,game);
-            //process error handling for other clients
-            let otherClientInformation = newClient.users.map(usr=>{
-                if(client!==undefined)
-                    if(usr.id!==client.id)
-                        return  usr;
-            });
-            initOtherPlayersPieces(otherClientInformation,game);
-        }
-        else{
-            throw new Error("Client attributes are not assigned.");        
-        }
-    }else{
-       //throw new Error("Client is not registered on the server.");        
-    }
-}
+    const client =  newClient.users.splice(clientIndex,1);
+    game.clientId  = client[0].id;
 
-const initPlayerPiece = (client:Client, game:Tetris) => {
+    //process error handling for other clients
+
+    console.log(newClient.users);
     
-    //create the users piece
-    game.clientId = client.id;
-    let id  = client.id;
-    let pieceType:any = client.pieceType;
-    let position = client.position;
-    let rotation = client.rotation;
 
-    let threeVec3:Vector3 = new Vector3(position.x,
-        position.y,
-        position.z);
-
-
-    game.currentPiece = createPiece(pieceType,threeVec3);
-    game.currentPiece.mesh.userData = {
-        entityType : "active_piece",
-        owner : id
-      }
-
-    game.scene.add(game.currentPiece.mesh);
+    initOtherPlayersPieces(newClient.users,game);
+    
+    
 }
 
-const initOtherPlayersPieces = (clients:(Client|undefined)[], game:Tetris) =>{
+const initOtherPlayersPieces = (clients:(Client[]), game:Tetris) =>{
 
     clients.forEach((clientPiece:Client|undefined)=>{
         if(clientPiece!==undefined){
@@ -165,21 +125,80 @@ export const onPlayerDisconnect = (client:any, game:Tetris) => {
 
 }
 
+interface updateInfo{
+    users:Client[]
+}
+
 export const onUpdate = (info:any, game:Tetris) =>{
 
-    console.log(info);
+    let jsonInfo:updateInfo = JSON.parse(info);
+    //strip out playerInfo
+    const index = jsonInfo.users.findIndex((usr)=>{
+        if(usr!==null)
+            return usr.id===game.clientId;
+    })
 
-        // removes all units that don't exist anymore.
-     
-      //NETWORK.syncronizeScene(this, info);
+    let playerInfo = jsonInfo.users.splice(index,1);
+    let otherPlayersInfo = jsonInfo.users;
 
-      //NETWORK.handleOtherPlayersPieces(this, info);
+    //console.log(playerInfo[0]);
+    updatePlayerPiece(playerInfo[0], game);
+    //console.log(otherPlayersInfo);
+    updateOtherPlayersPieces(otherPlayersInfo, game);
 
-      //NETWORK.handlePlayersPiece(this, info);
-
-      //NETWORK2.handleNonPlayerPieces(this,info);
-      
 }
+
+const updatePlayerPiece = (playerInfo:Client, game:Tetris) =>{
+    // HANDLE OUR CLIENTS PIECE
+
+    if (game.currentPiece===null && playerInfo.pieceType!==null) {
+        let threeVec3 = new Vector3(
+            playerInfo.position.x,
+            playerInfo.position.y,
+            playerInfo.position.z);
+
+        game.currentPiece = Piece(playerInfo.pieceType,threeVec3);
+        game.currentPiece.mesh.name = game.clientId;
+        //set the name of the piece so we can find it in the scene.
+        game.currentPiece.mesh.userData = {
+            entityType : "active_piece",
+            owner : playerInfo.id
+        }
+        console.log(game.currentPiece);
+        game.scene.add(game.currentPiece.mesh);
+
+    } else {
+      // set the position
+      // console.log(ourNetworkedCurrentPiece);
+      if(playerInfo.pieceType!==null){
+        game.currentPiece.mesh.position.x = playerInfo.position.x;
+        game.currentPiece.mesh.position.y = playerInfo.position.y;
+        game.currentPiece.mesh.position.z = playerInfo.position.z;
+    
+        // set the rotation
+        // console.log(ourNetworkedCurrentPiece);
+        game.currentPiece.mesh.rotation.x = playerInfo.rotation.x;
+        game.currentPiece.mesh.rotation.y = playerInfo.rotation.y;
+        game.currentPiece.mesh.rotation.z = playerInfo.rotation.z;
+        // console.log(props.currentPiece.mesh.rotation);
+      }
+    }
+};
+  
+const updateOtherPlayersPieces = (otherPlayersInfo:Client[], game:Tetris) =>{
+    // HANDLE OTHER PLAYERS PIECE's
+    otherPlayersInfo.forEach((player)=>{
+        let index = game.scene.children.findIndex((child)=>child.userData.owner===player.id);
+        if(index!==-1){
+            game.scene.children[index].position.x = player.position.x;
+            game.scene.children[index].position.y = player.position.y;
+            game.scene.children[index].position.z = player.position.z;
+            game.scene.children[index].rotation.x = player.rotation.x;
+            game.scene.children[index].rotation.y = player.rotation.y;
+            game.scene.children[index].rotation.z = player.rotation.z;
+        }
+    })
+};
 
 export const handleNonPlayerPieces = (game:Tetris, networkInfo:string) =>{
 

@@ -43,6 +43,9 @@ class Block{
   }
 }
 
+interface updateInfo{
+  users:Client[]
+}
 
 
 
@@ -67,8 +70,7 @@ export default class Server  {
     private port:string|number|false;
     private io: any;
     private persistentBlocks:Block[];
-    private users:Client[];
-
+    public users:Client[];
 
     constructor(){
       //Data storage, local only for now.
@@ -79,7 +81,7 @@ export default class Server  {
       this.initServer("80");
 
       //makes the server constantly broadcast messages to the clients
-      //this.sendConstantUpdates();
+      this.sendConstantUpdates();
     }
 
     initServer(port:string){
@@ -93,11 +95,11 @@ export default class Server  {
           
           this.initNewConnection(socket)
 
-
-
           socket.on('disconnect', ()=>this.disconnect(socket));
 
-          socket.on('move',()=>this.move(socket));
+          socket.on('move', (info:any)=>this.move(socket,info));
+
+          socket.on('set_blocks',(info:any)=>this.set(socket,info));
 
         }); 
     }
@@ -141,62 +143,69 @@ export default class Server  {
 
     //on disconnect
     disconnect(socket:any){
-      for(let i = 0;i< this.users.length;i++){
-        if(this.users[i]!==undefined){
-          if(this.users[i].id===socket.id){
-            delete this.users[i];
-            console.log(MyTime() + ' Client '+ socket.id + ' disconnected.');
-            socket.removeAllListeners();
-            
-            //Let the other players know to delete the players piece.
-            this.io.sockets.emit('onPlayerDisconnect', socket.id);
-            return;
-          }
+      this.users.splice(this.users.findIndex((usr)=>{
+        if(usr!==null){
+          console.log(MyTime() + ' Client '+ socket.id + ' disconnected.');
+          socket.removeAllListeners();
+          this.io.sockets.emit('onPlayerDisconnect', socket.id);
+          return usr.id===socket.id;
         }
-      }
+      }),1);
+    }
+
+    //on set
+    set(newSocket:any, info:any){
+     console.log(info); 
     }
 
     //on move
-    move(newSocket:any){
-      console.log(newSocket);
-      // let parsedInfo = JSON.parse(info);
+    move(newSocket:any, info:any){     
+      let parsedInfo = JSON.parse(info);
+      let userIndex = this.users.findIndex((usr)=>{
+        if(usr!==null &&usr!==undefined){
+          return usr.id===parsedInfo['id'];
+        }
+      });
+      if(userIndex===-1){
+        return;
+      }
+      let currentPiece:Client = this.users[userIndex];
+      let euler = new Euler(0,0,0,"xyz");
+      switch(parsedInfo['dir']){
+        case 'up':
+          currentPiece.position.y++;
+          break;
+        case 'down':
+          currentPiece.position.y--;
+          break;
+        case 'left':
+          currentPiece.position.x--;
+          break;
+        case 'right':
+          currentPiece.position.x++;
+          break;
+        case 'in':
+          currentPiece.position.z--;
+          break;
+        case 'out':
+          currentPiece.position.z++;
+          break;
+        case 'ccw':
+          euler.setFromVector3(new Vector3(0,0,Math.PI/2),"xyz");
+          currentPiece['rotation'].x += euler.x;
+          currentPiece['rotation'].y += euler.y;
+          currentPiece['rotation'].z += euler.z;
+          break;
+        case 'cw':
+          euler.setFromVector3(new Vector3(0,0,-Math.PI/2),"xyz");
+          currentPiece['rotation'].x += euler.x;
+          currentPiece['rotation'].y += euler.y;
+          currentPiece['rotation'].z += euler.z;
+          break;
+      }
 
-      // let currentPiece:Client = users[parsedInfo['id']];
-      // let euler = new Euler(0,0,0,"xyz");
-      // switch(parsedInfo['dir']){
-      //   case 'up':
-      //     currentPiece.position.y++;
-      //     break;
-      //   case 'down':
-      //     currentPiece.position.y--;
-      //     break;
-      //   case 'left':
-      //     currentPiece.position.x--;
-      //     break;
-      //   case 'right':
-      //     currentPiece.position.x++;
-      //     break;
-      //   case 'in':
-      //     currentPiece.position.z--;
-      //     break;
-      //   case 'out':
-      //     currentPiece.position.z++;
-      //     break;
-      //   case 'ccw':
-      //     euler.setFromVector3(new Vector3(0,0,Math.PI/2),"xyz");
-      //     currentPiece['rotation'].x += euler.x;
-      //     currentPiece['rotation'].y += euler.y;
-      //     currentPiece['rotation'].z += euler.z;
-      //     break;
-      //   case 'cw':
-      //     euler.setFromVector3(new Vector3(0,0,-Math.PI/2),"xyz");
-      //     currentPiece['rotation'].x += euler.x;
-      //     currentPiece['rotation'].y += euler.y;
-      //     currentPiece['rotation'].z += euler.z;
-      //     break;
-      
-  
-      //CLAMP//new change
+      //send everyone else our update.  
+      //newSocket.emit('')
     }
 
     /**
@@ -206,18 +215,12 @@ export default class Server  {
      */
     sendConstantUpdates(){
       setInterval(()=>{
-      //   console.log("Running...");
-      //   let networkInfo = ():NetworkInfo =>({
-      //     users:this.users.filter((user)=>{
-      //       if(user!==null){
-      //         return true
-      //       }else{
-      //         return false;
-      //       }
-      //     })
-      //   })
-      // this.io.sockets.emit('UPDATE', JSON.stringify(networkInfo));
-      },1000);
+        
+      const info = <updateInfo>{};
+      info.users = this.users;
+      this.io.sockets.emit('UPDATE', JSON.stringify(info));
+      },50);
       
     }
+
 }
