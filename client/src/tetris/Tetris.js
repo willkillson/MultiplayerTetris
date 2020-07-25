@@ -91,6 +91,8 @@ class Tetris extends Component {
 
     this.socket.on('onPlayerDisconnect', (info)=> NETWORK.onPlayerDisconnect(info,this));
 
+    this.socket.on('onNewPlayer', (info) => NETWORK.onNewPlayer(info,this));
+
     this.socket.on('UPDATE', (info)=> NETWORK.onUpdate(info,this));
 
 

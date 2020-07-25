@@ -91,8 +91,13 @@ export default class Server  {
 
         this.io.on('connection', (socket:any)=>{
           
-          //console.log(socket);
           this.initNewConnection(socket)
+
+
+
+          socket.on('disconnect', ()=>this.disconnect(socket));
+
+          socket.on('move',()=>this.move(socket));
 
         }); 
     }
@@ -124,28 +129,31 @@ export default class Server  {
       console.log(MyTime() + ' Client '+ info.id + ' connected.');  
 
       //now give the client all the information
-      
       const retObject ={
         id: info.id,
         users:this.users
       }
+      socket.emit('onconnected',retObject);  
 
-      socket.emit('onconnected',retObject);   
+      //Inform the rest of the players we have a new connection.
+      this.io.sockets.emit('onNewPlayer', info);
     }
 
     //on disconnect
-    disconnect(newSocket:any){
+    disconnect(socket:any){
       for(let i = 0;i< this.users.length;i++){
         if(this.users[i]!==undefined){
-          if(this.users[i].id===newSocket.id){
+          if(this.users[i].id===socket.id){
             delete this.users[i];
-            console.log(MyTime() + ' Client '+ newSocket.id + ' disconnected.');
-            newSocket.removeAllListeners();
+            console.log(MyTime() + ' Client '+ socket.id + ' disconnected.');
+            socket.removeAllListeners();
+            
+            //Let the other players know to delete the players piece.
+            this.io.sockets.emit('onPlayerDisconnect', socket.id);
             return;
           }
         }
       }
-
     }
 
     //on move

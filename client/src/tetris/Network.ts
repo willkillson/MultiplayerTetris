@@ -51,7 +51,14 @@ interface Client{
  * @param game 
  */
 export const onConnected = (newClient:ClientInfo, game:Tetris) =>{
-    let client = newClient.users.find(client=>client.id===newClient.id);
+    let client = newClient.users.find(client=>{
+        if(client!==null){
+            client.id===newClient.id
+        }
+            
+            
+    });
+
     console.log(newClient);
     //process error handling for client
     if(client!==undefined){
@@ -70,13 +77,14 @@ export const onConnected = (newClient:ClientInfo, game:Tetris) =>{
             throw new Error("Client attributes are not assigned.");        
         }
     }else{
-        throw new Error("Client is not registered on the server.");        
+       //throw new Error("Client is not registered on the server.");        
     }
 }
 
 const initPlayerPiece = (client:Client, game:Tetris) => {
     
     //create the users piece
+    game.clientId = client.id;
     let id  = client.id;
     let pieceType:any = client.pieceType;
     let position = client.position;
@@ -86,8 +94,9 @@ const initPlayerPiece = (client:Client, game:Tetris) => {
         position.y,
         position.z);
 
+
     game.currentPiece = createPiece(pieceType,threeVec3);
-    game.currentPiece.userData = {
+    game.currentPiece.mesh.userData = {
         entityType : "active_piece",
         owner : id
       }
@@ -97,14 +106,21 @@ const initPlayerPiece = (client:Client, game:Tetris) => {
 
 const initOtherPlayersPieces = (clients:(Client|undefined)[], game:Tetris) =>{
 
-    clients.forEach((clientPiece)=>{
-        let position = clientPiece?.position;
-        let clientPieceType = clientPiece?.pieceType;
-        let newVector = new Vector3(position?.x,position?.y,position?.z);
+    clients.forEach((clientPiece:Client|undefined)=>{
+        if(clientPiece!==undefined){
+            let position = clientPiece?.position;
+            let clientPieceType = clientPiece?.pieceType;
+            let newVector = new Vector3(position?.x,position?.y,position?.z);
 
-        if(clientPieceType!==null){
-            let piece:any = createPiece(clientPieceType,newVector);
-            game.scene.add(piece.mesh);
+            if(clientPieceType!==null){
+                let piece:any = createPiece(clientPieceType,newVector);
+
+                piece.mesh.userData = {
+                    entityType : "active_piece",
+                    owner : clientPiece.id
+                }
+                game.scene.add(piece.mesh);
+            }
         }
     });
 
@@ -117,7 +133,35 @@ const initNonPlayerPieces = (blocks:Block[], game:Tetris) => {
 
 }
 
+export const onNewPlayer = (client:any, game:Tetris) =>{
+    console.log("export const onNewPlayer = (client:any, game:Tetris)");
+
+    if(game.clientId!==client.id){
+        
+        let position = client?.position;
+        let clientPieceType = client?.pieceType;
+        let newVector = new Vector3(position?.x,position?.y,position?.z);
+
+        if(clientPieceType!==null){
+            let piece:any = createPiece(clientPieceType,newVector);
+            piece.mesh.userData = {
+                entityType : "active_piece",
+                owner : client.id
+            }
+            game.scene.add(piece.mesh);
+        }
+    }
+    
+}
+
 export const onPlayerDisconnect = (client:any, game:Tetris) => {
+
+    console.log("export const onPlayerDisconnect = (client:any, game:Tetris) ");
+    let index = game.scene.children.findIndex(child=>child.userData.owner=== client);
+    if(index!==-1){
+        let dcPlayersPiece = game.scene.children[index];
+        game.scene.remove(dcPlayersPiece);
+    }
 
 }
 

@@ -7,7 +7,7 @@ import * as MyConstants from '../utilities/constants'
  * Main Piece class. Contains methods involved with moveing,
  * and checking boundaries for collision.
  */
-class Piece {
+export class Piece {
   constructor(pBlockPositions, pColor, pPos) {
     // class variables
     this.color = pColor;
