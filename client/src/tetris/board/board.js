@@ -46,9 +46,13 @@ export const levelFloor = () => {
   group.add(new THREE.Mesh(grassGeometry4, grassMaterial));
   group.add(new THREE.Mesh(grassGeometry5, grassMaterial));
   group.add(new THREE.Mesh(grassGeometry6, grassMaterial));
-
   group.add(new THREE.Mesh(groundGeometry, groundMaterial));
 
+
+  group.userData = {
+    entityType : "floor",
+    owner : "LEVEL_1"
+  }
   return group;
 };
 
@@ -84,6 +88,10 @@ export const frame = () => {
     group.add(new THREE.Mesh(geo_yr, metalMaterial));
   }
 
+  group.userData = {
+    entityType : "frame",
+    owner : "LEVEL_1"
+  }
 
   return group;
 };
@@ -104,6 +112,10 @@ export const sky = () =>{
   geometry.translate(0, 25, 0);
   group.add(new THREE.Mesh(geometry, material));
 
+  group.userData = {
+    entityType : "skyBox",
+    owner : "LEVEL_1"
+  }
 
   return group;
 };

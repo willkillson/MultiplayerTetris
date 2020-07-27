@@ -14,13 +14,13 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 ReactDOM.render(
 
     <React.StrictMode>
-      <div>
+
 
         <Container id="myCanvas">
           <Tetris></Tetris>
         </Container>
 
-        <Container fixed>
+        <Container fixed='true'>
 
           <Row>
             <div style={{width: 100}}><Button size="lg" id="button-up" block>Up</Button></div>
@@ -31,7 +31,7 @@ ReactDOM.render(
 
         </Container>
 
-      </div>
+
 
 
     </React.StrictMode>,
