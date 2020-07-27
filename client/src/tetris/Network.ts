@@ -35,6 +35,12 @@ interface Client{
     pieceType: number | null
 }
 
+interface PersistentBlock{
+    color: number,
+    position: Vector3,
+    uuid: string
+}
+
 /**
  * runs, 
  *      initPlayerPiece
@@ -59,7 +65,7 @@ export const onConnected = (newClient:ClientInfo, game:Tetris) =>{
     const otherClients = newClient.users;
 
     initOtherPlayersPieces(otherClients ,game);
-    console.log(game);
+
 }
 
 /**
@@ -235,28 +241,23 @@ export const handleNonPlayerPieces = (game:Tetris, networkInfo:string) =>{
 
 }
 
-export const onPlayerSetPiece = (info:any, game:Tetris) => {
+
+export const onPlayerSetPiece = (info:PersistentBlock[], game:Tetris) => {
     //TODO
-
-    let blocks: Vector3[] = info.blocks;
-    let colors: number = info.color;
-    let player:string = info.player;
-
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshBasicMaterial( {color: colors} );
-
-    //const material2 = new THREE.MeshBasicMaterial( {color: 0xff0000} );
-    blocks.forEach((block)=>{
+    console.log("export const onPlayerSetPiece = (info:any, game:Tetris)");
+    console.log(info);
+    
+    info.forEach((block)=>{
+        const geometry = new THREE.BoxGeometry(1, 1, 1);
+        const material = new THREE.MeshBasicMaterial( {color: block.color} );
         let newMesh = new THREE.Mesh(geometry,material);
-        newMesh.position.x = block.x;
-        newMesh.position.y = block.y;
-        newMesh.position.z = block.z;
-
+        newMesh.position.x = block.position.x;
+        newMesh.position.y = block.position.y;
+        newMesh.position.z = block.position.z;
         newMesh.userData = {
             entityType : "inactive_piece",
-            owner : player
+            owner : block.uuid
         }
         game.scene.add(newMesh);
-    });
-
+    })
 }

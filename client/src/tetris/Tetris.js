@@ -162,6 +162,10 @@ class Tetris extends Component {
     if (this.currentPiece!==null) {
       this.currentPiece.update();
     }
+    else{
+      console.log(this.currentPiece);
+    }
+
 
   }
 

@@ -10,12 +10,42 @@ class Client{
   public rotation: Vec3; //Euler angle
   public pieceType: number | null;
 
-  constructor(){
+  constructor(piece: Piece){
     this.id = "";
-    this.position = new Vec3();
-    this.rotation = new Vec3();
-    this.pieceType = null;
+    this.position = piece.position;
+    this.rotation = piece.rotation;
+    this.pieceType = piece.pieceType;
   }
+
+  updatePiece(piece: Piece){
+    this.position = piece.position;
+    this.rotation = piece.rotation;
+    this.pieceType = piece.pieceType;
+  }
+
+  generateNewPiece(){
+    this.updatePiece(new Piece());
+  }
+
+}
+
+class Piece{
+  public position: Vector3;
+  public rotation: Vector3;
+  public pieceType: number;
+
+  constructor(){
+      //assign position
+      this.position = new Vector3(0,0,0);
+      
+      //assign euler angle
+      this.rotation = new Vector3(0,0,0);
+
+      this.pieceType = Math.floor(Math.random()*7);            
+  }
+
+
+
 }
 
 class Vec3{
@@ -107,30 +137,14 @@ export default class Server  {
     //on connect
     initNewConnection(socket:any){
 
-      let info:Client =  new Client();
+      let info:Client =  new Client(new Piece());
       //assign unique id
       info.id = socket.id;   
-
-      //assign position
-      // info.position.x = Math.floor(Math.random()*-10+Math.random()*10);   
-      // info.position.y = Math.floor(Math.random()*15+3);   
-      // info.position.z = Math.floor(Math.random()*-10 + Math.random()*5);   
-      info.position.x = 0;   
-      info.position.y = 5;   
-      info.position.z = 0;   
-      
-      //assign euler angle
-      info.rotation.x = 0;   
-      info.rotation.y = 0;
-      info.rotation.z = 0;
-  
       /*
         assign piece
         put the client in our data store
         announce to the server console
-      */
-      info.pieceType = Math.floor(0);    
-      //info.pieceType = Math.floor(Math.random()*7);              
+      */       
       this.users.push(info);                                          
       console.log(MyTime() + ' Client '+ info.id + ' connected.');  
 
@@ -161,17 +175,31 @@ export default class Server  {
 
     //on set
     set(newSocket:any, info:any){
+      console.log("set(newSocket:any, info:any)");
+      console.log(info);
      //console.log(info); 
-     let blocks:Block[] = info.blocks;
+     let blocks:Vector3[] = info.blocks;
      let color:number = info.color;
 
-     blocks.forEach((block:Block) =>{
-        let newBlock = new Block(block.position,color);
+     blocks.forEach((block:Vector3) =>{
+       
+        let newBlock = new Block(block,color);
         this.persistentBlocks.push(newBlock);
      })
-
+     console.log(this.persistentBlocks)
      //let all the players know this block has been set in.
+
+
+     let index = this.users.findIndex((usr)=>{
+       return usr.id ===info.player;
+     })
+     
+     this.users[index].generateNewPiece();
+
+
      this.io.sockets.emit('onPlayerSetPiece', this.persistentBlocks);
+
+
     }
 
     

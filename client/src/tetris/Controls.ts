@@ -15,7 +15,7 @@ const initControls = (game:Tetris) =>{
     info['dir'] = 'up';
     console.log(info);
 
-    const collision = !game.currentPiece.collision_isBlocked.up;
+    //const collision = !game.currentPiece.collision_isBlocked.up;
     
     game.socket.emit('move', JSON.stringify(info));
     
@@ -28,7 +28,7 @@ const initControls = (game:Tetris) =>{
     info['dir'] = 'up';
     console.log(info);
 
-    const collision = !game.currentPiece.collision_isBlocked.up;
+    //const collision = !game.currentPiece.collision_isBlocked.up;
 
     //if (collision) 
       game.socket.emit('move', JSON.stringify(info));
@@ -42,7 +42,7 @@ const initControls = (game:Tetris) =>{
     info['dir'] = 'left';
     console.log(info);
 
-    const collision = !game.currentPiece.collision_isBlocked.left;
+    //const collision = !game.currentPiece.collision_isBlocked.left;
 
     //if (collision) 
       game.socket.emit('move', JSON.stringify(info));
@@ -66,7 +66,7 @@ const initControls = (game:Tetris) =>{
     info['id'] = game.clientId;
     info['dir'] = 'down';
 
-    const collision = !game.currentPiece.collision_isBlocked.down;
+    //const collision = !game.currentPiece.collision_isBlocked.down;
 
     //if (collision) 
       game.socket.emit('move', JSON.stringify(info));
@@ -89,7 +89,7 @@ const initControls = (game:Tetris) =>{
     info['id'] = game.clientId;
     info['dir'] = 'right';
 
-    const collision = !game.currentPiece.collision_isBlocked.right
+    //const collision = !game.currentPiece.collision_isBlocked.right
 
   //  if(collision) 
       game.socket.emit('move', JSON.stringify(info));
@@ -101,9 +101,9 @@ const initControls = (game:Tetris) =>{
     const info = <Message>{};
     info['id'] = game.clientId;
     info['dir'] = 'right';
-    if (!game.currentPiece.collision_isBlocked.right) {
+   //if (!game.currentPiece.collision_isBlocked.right) {
       game.socket.emit('move', JSON.stringify(info));
-    }
+   // }
   };
 
   // Rotate CCW
@@ -112,7 +112,7 @@ const initControls = (game:Tetris) =>{
     info['id'] = game.clientId;
     info['dir'] = 'ccw';
 
-    const collision = !game.currentPiece.collision_isBlocked['ccw'];
+    //const collision = !game.currentPiece.collision_isBlocked['ccw'];
 
    // if(collision) 
       game.socket.emit('move', JSON.stringify(info));
@@ -130,8 +130,8 @@ const initControls = (game:Tetris) =>{
     info['id'] = game.clientId;
     info['dir'] = 'cw';
 
-    const collision = !game.currentPiece.collision_isBlocked['cw'];
-    if (collision) 
+    //const collision = !game.currentPiece.collision_isBlocked['cw'];
+    //if (collision) 
       game.socket.emit('move', JSON.stringify(info));
 
   });
@@ -146,7 +146,7 @@ const initControls = (game:Tetris) =>{
     info['id'] = game.clientId;
     info['dir'] = 'in';
 
-    const collision = !game.currentPiece.collision_isBlocked.in;
+    //const collision = !game.currentPiece.collision_isBlocked.in;
     //if (collision) 
       game.socket.emit('move', JSON.stringify(info));
 
@@ -166,7 +166,7 @@ const initControls = (game:Tetris) =>{
     info['id'] = game.clientId;
     info['dir'] = 'out';
 
-    const collision = !game.currentPiece.collision_isBlocked.out;
+   // const collision = !game.currentPiece.collision_isBlocked.out;
     //if (collision) 
       game.socket.emit('move', JSON.stringify(info));
     
@@ -202,20 +202,22 @@ const initControls = (game:Tetris) =>{
     //console.log(game.currentPiece);
     const info = <Message>{};
     console.log(game);
-    info['player'] = game.clientId;
-    info['color'] = game.currentPiece.color;
-    info['blocks'] = getRotatedBlocksFromMesh(game.currentPiece.mesh);
-   
-    info['blocks'] = bakeInOrigin(info['blocks'], game.currentPiece.mesh.position);
-    console.log("info");
-    console.log(info);
-    game.socket.emit('set_blocks', info);
-
-    //set the current player to null
-    game.currentPiece=null;
-
-    //remove the current players piece from the game, and let the server generate another one
-
+    if(game.currentPiece!=null){
+      info['player'] = game.clientId;
+      info['color'] = game.currentPiece.color;
+      info['blocks'] = getRotatedBlocksFromMesh(game.currentPiece.mesh);
+     
+      info['blocks'] = bakeInOrigin(info['blocks'], game.currentPiece.mesh.position);
+      console.log("info");
+      console.log(info);
+  
+      game.socket.emit('set_blocks', info);
+  
+      //set the current player to null
+      game.currentPiece=null;
+  
+      //remove the current players piece from the game, and let the server generate another one
+    }
   });
 
   Mousetrap.bind('i', ()=>{    
