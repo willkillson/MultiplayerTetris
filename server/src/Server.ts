@@ -36,7 +36,7 @@ class Piece{
 
   constructor(){
       //assign position
-      this.position = new Vector3(0,0,0);
+      this.position = new Vector3(0,18,0);
       
       //assign euler angle
       this.rotation = new Vector3(0,0,0);

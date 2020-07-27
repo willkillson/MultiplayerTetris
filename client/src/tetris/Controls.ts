@@ -15,9 +15,11 @@ const initControls = (game:Tetris) =>{
     info['dir'] = 'up';
     console.log(info);
 
-    //const collision = !game.currentPiece.collision_isBlocked.up;
-    
-    game.socket.emit('move', JSON.stringify(info));
+    const collision = !game.currentPiece.collision_isBlocked.up;
+    if(collision){
+      game.socket.emit('move', JSON.stringify(info));
+    }
+ 
     
   });
 
@@ -42,9 +44,9 @@ const initControls = (game:Tetris) =>{
     info['dir'] = 'left';
     console.log(info);
 
-    //const collision = !game.currentPiece.collision_isBlocked.left;
+    const collision = !game.currentPiece.collision_isBlocked.left;
 
-    //if (collision) 
+    if (collision) 
       game.socket.emit('move', JSON.stringify(info));
     
   });
@@ -66,9 +68,9 @@ const initControls = (game:Tetris) =>{
     info['id'] = game.clientId;
     info['dir'] = 'down';
 
-    //const collision = !game.currentPiece.collision_isBlocked.down;
+    const collision = !game.currentPiece.collision_isBlocked.down;
 
-    //if (collision) 
+    if (collision) 
       game.socket.emit('move', JSON.stringify(info));
     
   });
@@ -89,9 +91,9 @@ const initControls = (game:Tetris) =>{
     info['id'] = game.clientId;
     info['dir'] = 'right';
 
-    //const collision = !game.currentPiece.collision_isBlocked.right
+    const collision = !game.currentPiece.collision_isBlocked.right
 
-  //  if(collision) 
+    if(collision) 
       game.socket.emit('move', JSON.stringify(info));
     
   });
@@ -112,9 +114,9 @@ const initControls = (game:Tetris) =>{
     info['id'] = game.clientId;
     info['dir'] = 'ccw';
 
-    //const collision = !game.currentPiece.collision_isBlocked['ccw'];
+    const collision = !game.currentPiece.collision_isBlocked['ccw'];
 
-   // if(collision) 
+    if(collision) 
       game.socket.emit('move', JSON.stringify(info));
     
   });
@@ -130,8 +132,8 @@ const initControls = (game:Tetris) =>{
     info['id'] = game.clientId;
     info['dir'] = 'cw';
 
-    //const collision = !game.currentPiece.collision_isBlocked['cw'];
-    //if (collision) 
+    const collision = !game.currentPiece.collision_isBlocked['cw'];
+    if (collision) 
       game.socket.emit('move', JSON.stringify(info));
 
   });
@@ -146,8 +148,8 @@ const initControls = (game:Tetris) =>{
     info['id'] = game.clientId;
     info['dir'] = 'in';
 
-    //const collision = !game.currentPiece.collision_isBlocked.in;
-    //if (collision) 
+    const collision = !game.currentPiece.collision_isBlocked.in;
+    if (collision) 
       game.socket.emit('move', JSON.stringify(info));
 
   });
@@ -166,8 +168,8 @@ const initControls = (game:Tetris) =>{
     info['id'] = game.clientId;
     info['dir'] = 'out';
 
-   // const collision = !game.currentPiece.collision_isBlocked.out;
-    //if (collision) 
+    const collision = !game.currentPiece.collision_isBlocked.out;
+    if (collision) 
       game.socket.emit('move', JSON.stringify(info));
     
   });
@@ -215,6 +217,8 @@ const initControls = (game:Tetris) =>{
   
       //set the current player to null
       game.currentPiece=null;
+
+      
   
       //remove the current players piece from the game, and let the server generate another one
     }

@@ -96,19 +96,6 @@ const initOtherPlayersPieces = (clients:(Client[]), game:Tetris) =>{
 
 }
 
-/**
- * Initializes all the blocks that have been set into the board by players.
- * 
- * @param blocks all the blocks.
- * @param game 
- */
-const initNonPlayerPieces = (blocks:Block[], game:Tetris) => {
-
-    console.log(blocks);
-    //TODO
-
-}
-
 export const onNewPlayer = (client:any, game:Tetris) =>{
     console.log("export const onNewPlayer = (client:any, game:Tetris)");
 
@@ -146,6 +133,7 @@ interface updateInfo{
 }
 
 export const onUpdate = (info:any, game:Tetris) =>{
+    
 
     let jsonInfo:updateInfo = JSON.parse(info);
     //strip out playerInfo
@@ -241,12 +229,10 @@ export const handleNonPlayerPieces = (game:Tetris, networkInfo:string) =>{
 
 }
 
-
 export const onPlayerSetPiece = (info:PersistentBlock[], game:Tetris) => {
     //TODO
     console.log("export const onPlayerSetPiece = (info:any, game:Tetris)");
     console.log(info);
-    
     info.forEach((block)=>{
         const geometry = new THREE.BoxGeometry(1, 1, 1);
         const material = new THREE.MeshBasicMaterial( {color: block.color} );
