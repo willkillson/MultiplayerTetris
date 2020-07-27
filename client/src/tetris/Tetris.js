@@ -48,7 +48,7 @@ class Tetris extends Component {
     if (this.IS_DEVELOP) {
       this.socket = io('localhost:80');
     } else {
-      this.socket = io('ec2-52-53-191-238.us-west-1.compute.amazonaws.com:80');
+      this.socket = io('ec2-3-101-18-142.us-west-1.compute.amazonaws.com/:80');
     }
 
     this.socket.on('onconnected', (newClient)=> NETWORK.onConnected(newClient,this));
