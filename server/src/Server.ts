@@ -33,12 +33,12 @@ class Vec3{
 class Block{
 
   public uuid: string;
-  public pUserPosition: string;
-  public position: Vec3;
-  public color: string;
+  public position: Vector3;
+  public color: number;
 
-  constructor(pUserPosition:string){
-    this.pUserPosition = pUserPosition;
+  constructor(pPosition:Vector3, pColor:number){
+    this.position = pPosition;
+    this.color = pColor;
     this.uuid = uuidv4();
   }
 }
@@ -112,9 +112,12 @@ export default class Server  {
       info.id = socket.id;   
 
       //assign position
-      info.position.x = Math.floor(Math.random()*-10+Math.random()*10);   
-      info.position.y = Math.floor(Math.random()*15+3);   
-      info.position.z = Math.floor(Math.random()*-10 + Math.random()*5);   
+      // info.position.x = Math.floor(Math.random()*-10+Math.random()*10);   
+      // info.position.y = Math.floor(Math.random()*15+3);   
+      // info.position.z = Math.floor(Math.random()*-10 + Math.random()*5);   
+      info.position.x = 0;   
+      info.position.y = 5;   
+      info.position.z = 0;   
       
       //assign euler angle
       info.rotation.x = 0;   
@@ -126,7 +129,8 @@ export default class Server  {
         put the client in our data store
         announce to the server console
       */
-      info.pieceType = Math.floor(Math.random()*7);              
+      info.pieceType = Math.floor(0);    
+      //info.pieceType = Math.floor(Math.random()*7);              
       this.users.push(info);                                          
       console.log(MyTime() + ' Client '+ info.id + ' connected.');  
 
@@ -136,6 +140,8 @@ export default class Server  {
         users:this.users
       }
       socket.emit('onconnected',retObject);  
+
+      console.log(info);
 
       //Inform the rest of the players we have a new connection.
       this.io.sockets.emit('onNewPlayer', info);
@@ -155,8 +161,20 @@ export default class Server  {
 
     //on set
     set(newSocket:any, info:any){
-     console.log(info); 
+     //console.log(info); 
+     let blocks:Block[] = info.blocks;
+     let color:number = info.color;
+
+     blocks.forEach((block:Block) =>{
+        let newBlock = new Block(block.position,color);
+        this.persistentBlocks.push(newBlock);
+     })
+
+     //let all the players know this block has been set in.
+     this.io.sockets.emit('onPlayerSetPiece', this.persistentBlocks);
     }
+
+    
 
     //on move
     move(newSocket:any, info:any){     

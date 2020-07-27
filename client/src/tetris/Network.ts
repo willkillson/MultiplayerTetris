@@ -3,6 +3,8 @@ import createPiece from './pieces/piece'
 import Piece from './pieces/piece'
 import { Vector3 } from 'three'
 
+import * as THREE from 'three'
+
 interface Vec3{
     x: number,
     y: number,
@@ -43,27 +45,29 @@ interface Client{
  * @param game 
  */
 export const onConnected = (newClient:ClientInfo, game:Tetris) =>{
-    
+    console.log("export const onConnected = (newClient:ClientInfo, game:Tetris)");
+
     game.clientId = newClient.id;
+
+    //get all the players who are not the local player
     let clientIndex = newClient.users.findIndex((usr)=>{
         if(usr!==null){
             return usr.id===game.clientId;
         }
     });
-
     const client =  newClient.users.splice(clientIndex,1);
-    game.clientId  = client[0].id;
+    const otherClients = newClient.users;
 
-    //process error handling for other clients
-
-    console.log(newClient.users);
-    
-
-    initOtherPlayersPieces(newClient.users,game);
-    
-    
+    initOtherPlayersPieces(otherClients ,game);
+    console.log(game);
 }
 
+/**
+ * Initializes other players pieces. 
+ * 
+ * @param clients contains all the other players pieces from the server.
+ * @param game the game.
+ */
 const initOtherPlayersPieces = (clients:(Client[]), game:Tetris) =>{
 
     clients.forEach((clientPiece:Client|undefined)=>{
@@ -86,6 +90,12 @@ const initOtherPlayersPieces = (clients:(Client[]), game:Tetris) =>{
 
 }
 
+/**
+ * Initializes all the blocks that have been set into the board by players.
+ * 
+ * @param blocks all the blocks.
+ * @param game 
+ */
 const initNonPlayerPieces = (blocks:Block[], game:Tetris) => {
 
     console.log(blocks);
@@ -164,23 +174,19 @@ const updatePlayerPiece = (playerInfo:Client, game:Tetris) =>{
             entityType : "active_piece",
             owner : playerInfo.id
         }
-        console.log(game.currentPiece);
         game.scene.add(game.currentPiece.mesh);
 
     } else {
       // set the position
-      // console.log(ourNetworkedCurrentPiece);
       if(playerInfo.pieceType!==null){
         game.currentPiece.mesh.position.x = playerInfo.position.x;
         game.currentPiece.mesh.position.y = playerInfo.position.y;
         game.currentPiece.mesh.position.z = playerInfo.position.z;
     
         // set the rotation
-        // console.log(ourNetworkedCurrentPiece);
         game.currentPiece.mesh.rotation.x = playerInfo.rotation.x;
         game.currentPiece.mesh.rotation.y = playerInfo.rotation.y;
         game.currentPiece.mesh.rotation.z = playerInfo.rotation.z;
-        // console.log(props.currentPiece.mesh.rotation);
       }
     }
 };
@@ -226,5 +232,31 @@ export const handleNonPlayerPieces = (game:Tetris, networkInfo:string) =>{
             game.scene.add(newPiece.mesh);
         })
     }
+
+}
+
+export const onPlayerSetPiece = (info:any, game:Tetris) => {
+    //TODO
+
+    let blocks: Vector3[] = info.blocks;
+    let colors: number = info.color;
+    let player:string = info.player;
+
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const material = new THREE.MeshBasicMaterial( {color: colors} );
+
+    //const material2 = new THREE.MeshBasicMaterial( {color: 0xff0000} );
+    blocks.forEach((block)=>{
+        let newMesh = new THREE.Mesh(geometry,material);
+        newMesh.position.x = block.x;
+        newMesh.position.y = block.y;
+        newMesh.position.z = block.z;
+
+        newMesh.userData = {
+            entityType : "inactive_piece",
+            owner : player
+        }
+        game.scene.add(newMesh);
+    });
 
 }

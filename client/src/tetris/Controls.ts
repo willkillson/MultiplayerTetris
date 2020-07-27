@@ -1,18 +1,12 @@
 import Mousetrap from 'mousetrap';
 import Tetris from './Tetris'
 import * as MyConstants from './utilities/constants'
-import { Vector3 } from 'three';
+import { Vector3, Object3D } from 'three';
+import * as THREE from 'three';
 
 const initControls = (game:Tetris) =>{
+
   // assign page buttons
-
-
-  interface Vec3{
-    x: number,
-    y: number,
-    z: number
-  }
-
 
   // Move up
   Mousetrap.bind('w', ()=>{
@@ -187,45 +181,103 @@ const initControls = (game:Tetris) =>{
 
 
   interface Block{
-    position: Vec3,
+    position: Vector3,
     piece_type: number,
     uuid: string//unique identifier assigned by the server
   }
 
 
   interface Message{
+    origin: Vector3,
     player:string,
     id:string,
     dir:string,
     color:string,
-    positions: Vec3[],
+    positions: Vector3[],
     piece_type: number,
-    blocks: Vec3[]
+    blocks: Vector3[]
   }
 
-  Mousetrap.bind('h', ()=>{
-    
-    
+  Mousetrap.bind('h', ()=>{    
     //console.log(game.currentPiece);
     const info = <Message>{};
+    console.log(game);
     info['player'] = game.clientId;
-    info['color'] = '0xff0000';
-    info['blocks'] = getBlocksFromMesh(game.currentPiece.mesh);
+    info['color'] = game.currentPiece.color;
+    info['blocks'] = getRotatedBlocksFromMesh(game.currentPiece.mesh);
+   
+    info['blocks'] = bakeInOrigin(info['blocks'], game.currentPiece.mesh.position);
+    console.log("info");
     console.log(info);
     game.socket.emit('set_blocks', info);
+
+    //set the current player to null
+    game.currentPiece=null;
+
+    //remove the current players piece from the game, and let the server generate another one
+
   });
+
+  Mousetrap.bind('i', ()=>{    
+    console.log(game.currentPiece);
+
+    for(let i = 0;i< game.currentPiece.mesh.children.length;i++){
+      console.log(game.currentPiece.mesh.children[i].position);
+    }
+
+    console.log(game.currentPiece.mesh.rotation);
+
+
+    
+  });
+
+
+  
 };
 
-const getBlocksFromMesh = (mesh:any)=>{
+const bakeInOrigin = (blocks:Vector3[], origin:Vector3) =>{
+  blocks.forEach((block) =>{
+    block.x += origin.x;
+    block.y += origin.y;
+    block.z += origin.z;
+  });
+  return blocks;
+}
+
+const calRotMatZaxis = (radians:number):THREE.Matrix4 => {
+  let m = new THREE.Matrix4();
+  m.set(Math.cos(radians),-Math.sin(radians),0,0,
+  Math.sin(radians),Math.cos(radians),0,0,
+            0,0,1,0,
+            0,0,0,1);
+  return m;
+}
+
+const getRotatedBlocksFromMesh = (mesh:Object3D)=>{
+
+  //we rotate around the z
+  let m = calRotMatZaxis(mesh.rotation.z);
 
   let blocks= [];
   for(let i = 0;i< mesh.children.length;i++){
-    let block = new Vector3(
+    let newVec = new Vector3(
       mesh.children[i].position.x,
       mesh.children[i].position.y,
       mesh.children[i].position.z);
+
+    newVec = newVec.applyMatrix4(m);
+    
+
+    newVec.x = Math.round(newVec.x*1000)/1000;
+    newVec.y = Math.round(newVec.y*1000)/1000;
+    newVec.z = Math.round(newVec.z*1000)/1000;
+    
+
+    let block = new Vector3(newVec.x,newVec.y,newVec.z);
+
     blocks.push(block);
   }
+ // console.log(blocks);
   return blocks;
 }
 

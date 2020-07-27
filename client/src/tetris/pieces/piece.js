@@ -8,6 +8,7 @@ import * as MyConstants from '../utilities/constants'
  * and checking boundaries for collision.
  */
 export class Piece {
+  
   constructor(pBlockPositions, pColor, pPos) {
     // class variables
     this.color = pColor;

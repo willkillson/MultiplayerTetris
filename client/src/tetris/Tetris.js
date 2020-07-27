@@ -97,7 +97,7 @@ class Tetris extends Component {
 
     this.socket.on('UPDATE', (info)=> NETWORK.onUpdate(info,this));
 
-
+    this.socket.on('onPlayerSetPiece', (info)=> NETWORK.onPlayerSetPiece(info,this));
 
     // SETUP GAME
     const frame = BOARD.frame();
@@ -106,9 +106,58 @@ class Tetris extends Component {
     this.scene.add(BOARD.sky());
     this.scene.add(frame);
     //this.scene.add(new THREE.DirectionalLight(0xfffffff, 3.0));
+
+
+    // // TEST
+    // const geometry1 = new THREE.BoxGeometry(1, 1, 1);
+    // const material1 = new THREE.MeshBasicMaterial( {color: 0xff0000} );
+    // const geometry2 = new THREE.BoxGeometry(1, 1, 1);
+    // const material2 = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+    // //const material2 = new THREE.MeshBasicMaterial( {color: 0xff0000} );
+    // this.mesh = new THREE.Object3D();
+
+    // this.mesh.add(new THREE.Mesh(geometry1,material1));
+    // this.mesh.add(new THREE.Mesh(geometry2,material2));
+
+
+    //mesh.add(new THREE.Mesh(geometry,material2));
+    //mesh.position.y+=1;
+
+    //mat4 rotation around the y
+    
+    // this.m = new THREE.Matrix4();
+    // this.m.set(0,-1,0,0,
+    //       1,0,0,0,
+    //       0,0,1,0,
+    //       0,0,0,1);
+
+
+
+    // this.mesh.children[1].position.y += 1;
+    // this.mesh.position.y+=5;
+
+    //console.log(mesh.position);
+    // //console.log(mesh.children);
+    // this.scene.add(this. mesh);
+
+
+
+    // for(let i = 0;i<this.mesh.children.length; i++){
+    //   //console.log(mesh.children[i].position);
+    //   //mesh.children[i].position = m*position;
+    // }
+
+    //mesh.rotation.z += Math.PI/2;
+
+
+
   }
 
   update() {
+    // for(let i = 0;i<this.mesh.children.length; i++){
+    //   console.log(this.mesh.children[i].position.applyMatrix4(this.m));
+    //   //mesh.children[i].position = m*position;
+    // }
 
     if (this.currentPiece!==null) {
       this.currentPiece.update();
