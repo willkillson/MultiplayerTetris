@@ -9,11 +9,14 @@ import * as MyConstants from '../utilities/constants'
  */
 export class Piece {
   
-  constructor(pBlockPositions, pColor, pPos) {
+  constructor(pBlockPositions, pColor, pPos, userData= {
+    entityType : "active_piece",
+    owner : 'NA'}) {
     // class variables
     this.color = pColor;
     this.blockPositions = pBlockPositions;
     this.startingPosition = pPos;
+    this.userData = userData;
 
     this.initClassVariables();
     this.initCollisionVariables();
@@ -29,7 +32,9 @@ export class Piece {
     for (let i = 0; i< this.blockPositions.length; i++) {
       const geometry = new BoxGeometry(1, 1, 1);
       const material = new MeshBasicMaterial( {color: this.color} );
-      this.mesh.add(new Mesh(geometry, material));
+      let newMesh = new Mesh(geometry, material);
+      newMesh.userData = this.userData;
+      this.mesh.add(newMesh);
     }
 
     // put the blocks where it needs to go

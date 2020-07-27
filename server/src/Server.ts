@@ -159,6 +159,8 @@ export default class Server  {
 
       //Inform the rest of the players we have a new connection.
       this.io.sockets.emit('onNewPlayer', info);
+
+      socket.emit('onPlayerSetPiece', this.persistentBlocks);
     }
 
     //on disconnect
