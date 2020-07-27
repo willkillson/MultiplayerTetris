@@ -17,7 +17,7 @@ class Tetris extends Component {
   constructor(props, ref) {
     super();
 
-    this.IS_DEVELOP = true;// MAKE SURE TO SET THIS TO FALSE WHEN PUSHING TO MASTER FOR A NEW BUILD
+    this.IS_DEVELOP = false;// MAKE SURE TO SET THIS TO FALSE WHEN PUSHING TO MASTER FOR A NEW BUILD
     //
     this.networkInfo = {};
     this.clientId = null;
@@ -48,7 +48,7 @@ class Tetris extends Component {
     if (this.IS_DEVELOP) {
       this.socket = io('localhost:80');
     } else {
-      this.socket = io('ec2-3-101-18-142.us-west-1.compute.amazonaws.com:80');
+      this.socket = io('ec2-13-56-213-252.us-west-1.compute.amazonaws.com:80');
     }
 
     this.socket.on('onconnected', (newClient)=> NETWORK.onConnected(newClient,this));
