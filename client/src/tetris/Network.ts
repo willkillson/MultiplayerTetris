@@ -20,7 +20,8 @@ interface Block{
 
 interface ClientInfo{
     id: string,
-    users: Client[]
+    users: Client[],
+    serverTime:number
 }
 
 interface UserData{
@@ -54,6 +55,7 @@ export const onConnected = (newClient:ClientInfo, game:Tetris) =>{
     console.log("export const onConnected = (newClient:ClientInfo, game:Tetris)");
 
     game.clientId = newClient.id;
+    game.syncTime = newClient.serverTime;
 
     //get all the players who are not the local player
     let clientIndex = newClient.users.findIndex((usr)=>{
@@ -129,13 +131,17 @@ export const onPlayerDisconnect = (client:any, game:Tetris) => {
 }
 
 interface updateInfo{
-    users:Client[]
-}
+    users:Client[],
+    serverTime:number
+  }
 
 export const onUpdate = (info:any, game:Tetris) =>{
-    
-
     let jsonInfo:updateInfo = JSON.parse(info);
+    console.log(jsonInfo.serverTime);
+
+
+
+
     //strip out playerInfo
     const index = jsonInfo.users.findIndex((usr)=>{
         if(usr!==null)

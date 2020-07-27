@@ -74,7 +74,8 @@ class Block{
 }
 
 interface updateInfo{
-  users:Client[]
+  users:Client[],
+  serverTime:number
 }
 
 
@@ -102,6 +103,10 @@ export default class Server  {
     private persistentBlocks:Block[];
     public users:Client[];
 
+    //serverTime
+    public currentSecond:number;
+
+
     constructor(){
       //Data storage, local only for now.
       this.persistentBlocks = [];
@@ -112,6 +117,7 @@ export default class Server  {
 
       //makes the server constantly broadcast messages to the clients
       this.sendConstantUpdates();
+
     }
 
     initServer(port:string){
@@ -151,7 +157,8 @@ export default class Server  {
       //now give the client all the information
       const retObject ={
         id: info.id,
-        users:this.users
+        users:this.users,
+        serverTime:this.currentSecond
       }
       socket.emit('onconnected',retObject);  
 
@@ -262,13 +269,28 @@ export default class Server  {
      * important information to keep the games in sync.
      */
     sendConstantUpdates(){
-      setInterval(()=>{
+   // https://stackoverflow.com/questions/29971898/how-to-create-an-accurate-timer-in-javascript
+      let start = Date.now();
         
-      const info = <updateInfo>{};
-      info.users = this.users;
-      this.io.sockets.emit('UPDATE', JSON.stringify(info));
+      setInterval(()=>{
+        let delta = Date.now()-start;//milliseconds elapsed since start
+        
+        let newSecond = Math.floor(delta/1000);
+
+        //send with time,
+        console.log(newSecond);
+        this.currentSecond= newSecond;
+
+        const info = <updateInfo>{};
+        info.users = this.users;
+        info.serverTime = this.currentSecond;
+        this.io.sockets.emit('UPDATE', JSON.stringify(info));
+              
       },50);
       
     }
+
+ 
+
 
 }

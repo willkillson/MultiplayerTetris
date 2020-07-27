@@ -16,8 +16,7 @@ import * as NETWORK from './Network';
 class Tetris extends Component {
   constructor(props, ref) {
     super();
-
-    this.IS_DEVELOP = false;// MAKE SURE TO SET THIS TO FALSE WHEN PUSHING TO MASTER FOR A NEW BUILD
+    this.IS_DEVELOP = true;// MAKE SURE TO SET THIS TO FALSE WHEN PUSHING TO MASTER FOR A NEW BUILD
     //
     this.networkInfo = {};
     this.clientId = null;
@@ -29,7 +28,7 @@ class Tetris extends Component {
     this.camera.rotateOnAxis(new Vector3(1, 0, 0), 0);
 
     this.renderer.gammaFactor = 2.2;
-
+ 
     // camera position
     this.camera.position.y = 10;
     this.camera.position.x = 0;
@@ -37,6 +36,12 @@ class Tetris extends Component {
 
     // default game values
     this.currentPiece = null;
+ 
+    //gameTime
+    this.gameSettings={
+      secondsPerTick: 3
+    }
+    this.syncTime = 0;
   }
 
   /**
@@ -61,6 +66,8 @@ class Tetris extends Component {
 
     this.socket.on('onPlayerSetPiece', (info)=> NETWORK.onPlayerSetPiece(info,this));
 
+
+
     // SETUP GAME
     const frame = BOARD.frame();
     frame.position.add(new Vector3(-5, 0, 0));
@@ -75,10 +82,11 @@ class Tetris extends Component {
       //update our current piece so we get all the collision
       this.currentPiece.update();
     }
-    this.gameStep();//checks the time
+    //this.gameStep(totalTime);//checks the time
   }
 
-  gameStep(){
+  gameStep(totalTime){
+    console.log(totalTime);
 
   }
 
@@ -110,7 +118,7 @@ class Tetris extends Component {
             height,
         );
       }
-      console.log
+
       this.update(totalTime);
 
       this.renderer.render( this.scene, this.camera );
