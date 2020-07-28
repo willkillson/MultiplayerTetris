@@ -248,9 +248,7 @@ class Tetris extends React.Component {
       <div ref={(ref) => (this.mount = ref)} />
     );
   }
-
 }
-
 
 const bakeInOrigin = (blocks:Vector3[], origin:Vector3) =>{
   blocks.forEach((block) =>{
@@ -284,12 +282,10 @@ export const getRotatedBlocksFromMesh = (mesh:THREE.Object3D)=>{
 
     newVec = newVec.applyMatrix4(m);
     
-
     newVec.x = Math.round(newVec.x*1000)/1000;
     newVec.y = Math.round(newVec.y*1000)/1000;
     newVec.z = Math.round(newVec.z*1000)/1000;
     
-
     let block = new Vector3(newVec.x,newVec.y,newVec.z);
 
     blocks.push(block);
