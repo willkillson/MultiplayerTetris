@@ -200,14 +200,8 @@ interface Message{
 }
 
 export const sendCommand = (command:string, game:Tetris) =>{
-    if(game.currentPiece!==null){
-
-        const info = <Message>{};
-        info['id'] = game.clientId;
-        info['dir'] = command;
-    
-        const collision = !game.currentPiece.collision_isBlocked[command];
-        if (collision) 
-          game.socket.emit('move', JSON.stringify(info));
-    }
+    const info = <Message>{};
+    info['id'] = game.clientId;
+    info['dir'] = command;
+    game.socket.emit('move', JSON.stringify(info));
 }
