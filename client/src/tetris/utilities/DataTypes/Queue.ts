@@ -1,24 +1,32 @@
 
 
-export class Queue{
+export class Queue<T> {
 
-    collection:Array<any>;
+    collection:Array<T>;
     
     constructor(){
         this.collection = new Array();
     }
 
-    // enqueue() – Adds an element to the queue
-    enqueue(element:any){
+    /**
+     * Adds an element to the queue
+     * 
+     * @param element 
+     */
+    enqueue(element:T){
         this.collection.push(element);
     }
 
-    // dequeue() – Removes an element from the queue
-    dequeue():any{
+    /**
+     *  Removes an element from the queue
+     */
+    dequeue():T{
         return this.collection.shift();
     }
 
-    // front() – returns the front element of the queue
+    /**
+     *  Returns the front element of the queue
+     */
     front(){
         if(this.isEmpty()===false){
             return this.collection[0];
@@ -28,7 +36,9 @@ export class Queue{
         }
     }
 
-    // isEmpty() – Returns true if the queue is empty
+    /**
+     * Returns true if the queue is empty
+     */
     isEmpty():boolean{
         return this.collection.length>0;
     }
