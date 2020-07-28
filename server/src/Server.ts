@@ -4,6 +4,9 @@ import { Vector3, Quaternion, Euler} from 'three';
 
 //LocalImports
 import MyTime from './utilities/time';
+import * as BLOCK from './Entities/Block'
+
+
 class Client{
   public id: string;
   public position: Vec3;
@@ -60,22 +63,10 @@ class Vec3{
   }
 }
 
-class Block{
-
-  public uuid: string;
-  public position: Vector3;
-  public color: number;
-
-  constructor(pPosition:Vector3, pColor:number){
-    this.position = pPosition;
-    this.color = pColor;
-    this.uuid = uuidv4();
-  }
-}
 
 interface updateInfo{
   users:Client[],
-  persistentBlocks:Block[],
+  persistentBlocks: BLOCK.Block[],
   serverTime:number
 }
 
@@ -101,7 +92,7 @@ export default class Server  {
 
     private port:string|number|false;
     private io: any;
-    private persistentBlocks:Block[];
+    private persistentBlocks: BLOCK.Block[];
     public users:Client[];
 
     //serverTime
@@ -192,7 +183,7 @@ export default class Server  {
 
         blocks.forEach((block:Vector3) =>{
           
-          let newBlock = new Block(block,color);
+          let newBlock = new BLOCK.Block(block,color);
           this.persistentBlocks.push(newBlock);
         })
         //console.log(this.persistentBlocks)
