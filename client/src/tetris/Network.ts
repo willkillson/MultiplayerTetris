@@ -11,16 +11,10 @@ interface Vec3{
     z: number
 }
 
-interface Block{
-    player: string,//the player who created this block
-    position: Vec3,
-    piece_type: number,
-    uuid: string//unique identifier assigned by the server
-}
-
 interface ClientInfo{
     id: string,
-    users: Client[]
+    users: Client[],
+    serverTime:number
 }
 
 interface UserData{
@@ -35,9 +29,9 @@ interface Client{
     pieceType: number | null
 }
 
-interface PersistentBlock{
-    color: number,
+interface Block{
     position: Vector3,
+    color: number,
     uuid: string
 }
 
@@ -51,53 +45,72 @@ interface PersistentBlock{
  * @param game 
  */
 export const onConnected = (newClient:ClientInfo, game:Tetris) =>{
-    console.log("export const onConnected = (newClient:ClientInfo, game:Tetris)");
+
 
     game.clientId = newClient.id;
-
-    //get all the players who are not the local player
-    let clientIndex = newClient.users.findIndex((usr)=>{
-        if(usr!==null){
-            return usr.id===game.clientId;
-        }
-    });
-    const client =  newClient.users.splice(clientIndex,1);
-    const otherClients = newClient.users;
-
-    initOtherPlayersPieces(otherClients ,game);
+    game.syncTime = newClient.serverTime;
+    game.previousTime = newClient.serverTime;
 
 }
 
-/**
- * Initializes other players pieces. 
- * 
- * @param clients contains all the other players pieces from the server.
- * @param game the game.
- */
-const initOtherPlayersPieces = (clients:(Client[]), game:Tetris) =>{
+export const updateAllPlayers = (clients:Client[], game:Tetris) => {
 
-    clients.forEach((clientPiece:Client|undefined)=>{
-        if(clientPiece!==undefined){
-            let position = clientPiece?.position;
-            let clientPieceType = clientPiece?.pieceType;
-            let newVector = new Vector3(position?.x,position?.y,position?.z);
-
-            if(clientPieceType!==null){
-                let piece:any = createPiece(clientPieceType,newVector);
-
-                piece.mesh.userData = {
-                    entityType : "active_piece",
-                    owner : clientPiece.id
-                }
-                game.scene.add(piece.mesh);
-            }
-        }
+//Gater all the active pieces from the scene.
+    let activePieces = game.scene.children.filter((child)=>{
+        return child.userData.entityType==='active_piece';
     });
 
+//Remove all active pieces from the scene.
+    activePieces.forEach(piece=>{
+        game.scene.remove(piece);
+    })
+
+//Recreate them.
+    clients.forEach((clientPiece:Client)=>{
+
+        let position = clientPiece?.position;
+        let clientPieceType = clientPiece?.pieceType;
+        let newVector = new Vector3(position?.x,position?.y,position?.z);
+
+        if(clientPieceType!==null){
+            
+            let piece:any =createPiece(clientPieceType, newVector);
+
+            if(game.clientId===clientPiece.id){
+                game.currentPiece = piece;
+            }
+        
+            piece.mesh.userData = {
+                entityType : "active_piece",
+                owner : clientPiece.id
+            }
+    
+            piece.mesh.rotation.x = clientPiece.rotation.x;
+            piece.mesh.rotation.y = clientPiece.rotation.y;
+            piece.mesh.rotation.z = clientPiece.rotation.z;
+        
+            game.scene.add(piece.mesh);
+
+            //if the position is 0,18,0, and the piece is imediatly blcoked down, then the game has ended.
+            //console.log(clientPiece.position);
+            if(clientPiece.position.x===0 && clientPiece.position.y===18 && clientPiece.position.z===0){
+                piece.update();
+                
+                if(piece.collision_isBlocked.down===true){
+                    // console.log(piece.collision_isBlocked);
+                    // //the game has ended
+                    // console.log("clearBoard");
+                    game.socket.emit('clearBoard');
+                    return;
+                }
+            }
+            
+        }
+        
+    });
 }
 
 export const onNewPlayer = (client:any, game:Tetris) =>{
-    console.log("export const onNewPlayer = (client:any, game:Tetris)");
 
     if(game.clientId!==client.id){
         
@@ -118,8 +131,6 @@ export const onNewPlayer = (client:any, game:Tetris) =>{
 }
 
 export const onPlayerDisconnect = (client:any, game:Tetris) => {
-
-    console.log("export const onPlayerDisconnect = (client:any, game:Tetris) ");
     let index = game.scene.children.findIndex(child=>child.userData.owner=== client);
     if(index!==-1){
         let dcPlayersPiece = game.scene.children[index];
@@ -128,62 +139,25 @@ export const onPlayerDisconnect = (client:any, game:Tetris) => {
 
 }
 
-interface updateInfo{
-    users:Client[]
+interface UpdateInfo{
+    users:Client[],
+    persistentBlocks:Block[],
+    serverTime:number
 }
 
 export const onUpdate = (info:any, game:Tetris) =>{
-    
+    let updateInfo:UpdateInfo = JSON.parse(info);
+    game.syncTime = updateInfo.serverTime;
 
-    let jsonInfo:updateInfo = JSON.parse(info);
-    //strip out playerInfo
-    const index = jsonInfo.users.findIndex((usr)=>{
-        if(usr!==null)
-            return usr.id===game.clientId;
-    })
+   // updateOtherPlayersPieces(updateInfo.users,game);
 
-    let playerInfo = jsonInfo.users.splice(index,1);
-    let otherPlayersInfo = jsonInfo.users;
-
-    //console.log(playerInfo[0]);
-    updatePlayerPiece(playerInfo[0], game);
-    //console.log(otherPlayersInfo);
-    updateOtherPlayersPieces(otherPlayersInfo, game);
+   if(updateInfo.persistentBlocks!==undefined){
+       //clear the game
+       game.resetGame();
+   }
+   updateAllPlayers(updateInfo.users,game);
 
 }
-
-const updatePlayerPiece = (playerInfo:Client, game:Tetris) =>{
-    // HANDLE OUR CLIENTS PIECE
-
-    if (game.currentPiece===null && playerInfo.pieceType!==null) {
-        let threeVec3 = new Vector3(
-            playerInfo.position.x,
-            playerInfo.position.y,
-            playerInfo.position.z);
-
-        game.currentPiece = Piece(playerInfo.pieceType,threeVec3);
-        game.currentPiece.mesh.name = game.clientId;
-        //set the name of the piece so we can find it in the scene.
-        game.currentPiece.mesh.userData = {
-            entityType : "active_piece",
-            owner : playerInfo.id
-        }
-        game.scene.add(game.currentPiece.mesh);
-
-    } else {
-      // set the position
-      if(playerInfo.pieceType!==null){
-        game.currentPiece.mesh.position.x = playerInfo.position.x;
-        game.currentPiece.mesh.position.y = playerInfo.position.y;
-        game.currentPiece.mesh.position.z = playerInfo.position.z;
-    
-        // set the rotation
-        game.currentPiece.mesh.rotation.x = playerInfo.rotation.x;
-        game.currentPiece.mesh.rotation.y = playerInfo.rotation.y;
-        game.currentPiece.mesh.rotation.z = playerInfo.rotation.z;
-      }
-    }
-};
   
 const updateOtherPlayersPieces = (otherPlayersInfo:Client[], game:Tetris) =>{
     // HANDLE OTHER PLAYERS PIECE's
@@ -200,39 +174,7 @@ const updateOtherPlayersPieces = (otherPlayersInfo:Client[], game:Tetris) =>{
     })
 };
 
-export const handleNonPlayerPieces = (game:Tetris, networkInfo:string) =>{
-
-    
- 
-    let ni = JSON.parse(networkInfo);
-    let persistentBlocks:Block[] = ni['persistentblocks'];
-
-    //grab all the blocks not in the game scene that are in the server
-    let clientSide = persistentBlocks.filter((block:Block)=>{game.scene.getObjectByName(block.uuid)===undefined});
-
-    let serverSize = persistentBlocks.length;
-    let clientSize = clientSide.length
-
-    if(clientSize<serverSize){
-        //add all the pieces not in the game
-        persistentBlocks.forEach((csb:Block)=>{
-            let position: any = new Vector3(
-                csb.position.x,
-                csb.position.y,
-                csb.position.z);
-
-            let newPiece: any = createPiece(csb.piece_type,position);
-            newPiece.mesh.name = csb.uuid;
-            game.scene.add(newPiece.mesh);
-        })
-    }
-
-}
-
-export const onPlayerSetPiece = (info:PersistentBlock[], game:Tetris) => {
-    //TODO
-    console.log("export const onPlayerSetPiece = (info:any, game:Tetris)");
-    console.log(info);
+export const onPlayerSetPiece = (info:Block[], game:Tetris) => {
     info.forEach((block)=>{
         const geometry = new THREE.BoxGeometry(1, 1, 1);
         const material = new THREE.MeshBasicMaterial( {color: block.color} );

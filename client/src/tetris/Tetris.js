@@ -9,6 +9,7 @@ import Piece from './pieces/piece';
 import * as BOARD from './board/board';
 import Controls from './Controls';
 import * as NETWORK from './Network';
+import * as CONTROL from './Controls.ts';
 
 
 
@@ -16,7 +17,6 @@ import * as NETWORK from './Network';
 class Tetris extends Component {
   constructor(props, ref) {
     super();
-
     this.IS_DEVELOP = false;// MAKE SURE TO SET THIS TO FALSE WHEN PUSHING TO MASTER FOR A NEW BUILD
     //
     this.networkInfo = {};
@@ -29,7 +29,7 @@ class Tetris extends Component {
     this.camera.rotateOnAxis(new Vector3(1, 0, 0), 0);
 
     this.renderer.gammaFactor = 2.2;
-
+ 
     // camera position
     this.camera.position.y = 10;
     this.camera.position.x = 0;
@@ -37,6 +37,21 @@ class Tetris extends Component {
 
     // default game values
     this.currentPiece = null;
+ 
+    this.gameState ={
+      movPlayerDown:false//when true, the game will force the player to move down
+    }
+
+    //gameTime
+    this.gameSettings={
+      secondsPerTick: 1
+    }
+
+    this.syncTime = 0;// the time we get from the server, and is updated every call to UPDATE
+    this.previousTime = 0; //the time we use to determine whether we have passed a secondsPerTick threshhold value
+    this.secondsSinceLastUpdate = 0;
+
+
   }
 
   /**
@@ -61,13 +76,21 @@ class Tetris extends Component {
 
     this.socket.on('onPlayerSetPiece', (info)=> NETWORK.onPlayerSetPiece(info,this));
 
+    this.socket.on('updateAllPlayers', (info)=> NETWORK.updateAllPlayers(info,this));
+
+    //setup the game
+    this.setupGame();
+
+  }
+
+  setupGame(){
+
     // SETUP GAME
     const frame = BOARD.frame();
     frame.position.add(new Vector3(-5, 0, 0));
     this.scene.add(BOARD.levelFloor()); // grpimd
     this.scene.add(BOARD.sky());
     this.scene.add(frame);
-
   }
 
   update(totalTime) {
@@ -75,11 +98,74 @@ class Tetris extends Component {
       //update our current piece so we get all the collision
       this.currentPiece.update();
     }
-    this.gameStep();//checks the time
+    
+    //changes the game state based on the number of ticks.
+    if(this.syncTime%this.gameSettings.secondsPerTick===0){
+  
+      this.secondsSinceLastUpdate = this.syncTime - this.previousTime;
+
+      if(this.secondsSinceLastUpdate!==0){
+        this.previousTime = this.syncTime;//update the previous time we did this
+
+        this.gameState.movPlayerDown=true;
+        
+      }
+  
+    }
+
+    if(this.gameState.movPlayerDown ===true){
+     this.forceDown()
+     this.gameState.movPlayerDown=false;
+    }
+
+
+    //this.gameStep(totalTime);//checks the time
   }
 
-  gameStep(){
+  forceDown(){
 
+
+    if(this.currentPiece!==null){
+      const info = {};
+      if(this.currentPiece.collision_isBlocked.down===true){
+
+        //set the piece
+        info['player'] = this.clientId;
+        info['color'] = this.currentPiece.color;
+        info['blocks'] = CONTROL.getRotatedBlocksFromMesh(this.currentPiece.mesh);
+        info['blocks'] = CONTROL.bakeInOrigin(info['blocks'], this.currentPiece.mesh.position);
+        this.socket.emit('set_blocks', info);
+        this.currentPiece = null;
+      }else{
+
+        info.id = this.clientId;
+        info.dir = 'down';
+        this.socket.emit('move', JSON.stringify(info));
+        //move the piece
+      }
+
+    }
+
+  }
+
+  resetGame(){
+
+    //remove all the inactive pieces
+    // console.log(" this.scene.childre");
+    // console.log( this.scene.children);
+    let inActivePieces = this.scene.children.filter((child)=>{
+      return child.userData.entityType==='inactive_piece';
+    });
+
+    // console.log("inActivePieces");
+    // console.log(inActivePieces);
+
+    inActivePieces.forEach((piece)=>{
+      this.scene.remove(piece);
+    })
+  
+    // this.scene = new THREE.Scene();
+    // this.setupGame();
   }
 
   componentDidMount() {
@@ -110,7 +196,7 @@ class Tetris extends Component {
             height,
         );
       }
-      console.log
+
       this.update(totalTime);
 
       this.renderer.render( this.scene, this.camera );
@@ -120,7 +206,6 @@ class Tetris extends Component {
     animate();
   }
 
-
   render() {
     return (
       <div>
@@ -128,8 +213,6 @@ class Tetris extends Component {
       </div>
     );
   }
-
-
 
 }
 

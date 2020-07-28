@@ -9,46 +9,46 @@ const initControls = (game:Tetris) =>{
   // assign page buttons
 
   // Move up
-  Mousetrap.bind('w', ()=>{
-    let info = <Message>{};
-    info['id'] = game.clientId;
-    info['dir'] = 'up';
-    console.log(info);
+  // Mousetrap.bind('w', ()=>{
+  //   if(game.currentPiece!==null){
+  //     let info = <Message>{};
+  //     info['id'] = game.clientId;
+  //     info['dir'] = 'up';
 
-    const collision = !game.currentPiece.collision_isBlocked.up;
-    if(collision){
-      game.socket.emit('move', JSON.stringify(info));
-    }
- 
-    
-  });
+  //     const collision = !game.currentPiece.collision_isBlocked.up;
+  //     if(collision){
+  //       game.socket.emit('move', JSON.stringify(info));
+  //     }
+  //   }    
+  // });
 
   // @ts-ignore
-  window['document'].getElementById('button-up').onclick = function hello() {
-    const info = <Message>{};
-    info['id'] = game.clientId;
-    info['dir'] = 'up';
-    console.log(info);
+  // window['document'].getElementById('button-up').onclick = function hello() {
+  //   const info = <Message>{};
+  //   info['id'] = game.clientId;
+  //   info['dir'] = 'up';
 
-    //const collision = !game.currentPiece.collision_isBlocked.up;
 
-    //if (collision) 
-      game.socket.emit('move', JSON.stringify(info));
+  //   //const collision = !game.currentPiece.collision_isBlocked.up;
+
+  //   //if (collision) 
+  //     game.socket.emit('move', JSON.stringify(info));
     
-  };
+  // };
 
   // Move left
   Mousetrap.bind('a', ()=>{
-    const info = <Message>{};
-    info['id'] = game.clientId;
-    info['dir'] = 'left';
-    console.log(info);
+    if(game.currentPiece!==null){
+      const info = <Message>{};
+      info['id'] = game.clientId;
+      info['dir'] = 'left';
 
-    const collision = !game.currentPiece.collision_isBlocked.left;
-
-    if (collision) 
-      game.socket.emit('move', JSON.stringify(info));
-    
+  
+      const collision = !game.currentPiece.collision_isBlocked.left;
+  
+      if (collision) 
+        game.socket.emit('move', JSON.stringify(info));
+    }
   });
 
   // @ts-ignore
@@ -64,15 +64,21 @@ const initControls = (game:Tetris) =>{
 
   // Move down
   Mousetrap.bind('s', ()=>{
-    const info = <Message>{};
-    info['id'] = game.clientId;
-    info['dir'] = 'down';
+    console.log(game.clientId);
+    console.log(game.scene.children);
 
-    const collision = !game.currentPiece.collision_isBlocked.down;
-
-    if (collision) 
-      game.socket.emit('move', JSON.stringify(info));
     
+    if(game.currentPiece!==null){
+      console.log(game.currentPiece);
+      const info = <Message>{};
+      info['id'] = game.clientId;
+      info['dir'] = 'down';
+  
+      const collision = !game.currentPiece.collision_isBlocked.down;
+  
+      if (collision) 
+        game.socket.emit('move', JSON.stringify(info));
+    }
   });
 
   // @ts-ignore
@@ -87,15 +93,16 @@ const initControls = (game:Tetris) =>{
 
   // right
   Mousetrap.bind('d', ()=>{
-    const info = <Message>{};
-    info['id'] = game.clientId;
-    info['dir'] = 'right';
-
-    const collision = !game.currentPiece.collision_isBlocked.right
-
-    if(collision) 
-      game.socket.emit('move', JSON.stringify(info));
-    
+    if(game.currentPiece!==null){
+      const info = <Message>{};
+      info['id'] = game.clientId;
+      info['dir'] = 'right';
+  
+      const collision = !game.currentPiece.collision_isBlocked.right
+  
+      if(collision) 
+        game.socket.emit('move', JSON.stringify(info));
+    }
   });
 
   // @ts-ignore
@@ -110,49 +117,54 @@ const initControls = (game:Tetris) =>{
 
   // Rotate CCW
   Mousetrap.bind('j', ()=>{
-    const info = <Message>{};
-    info['id'] = game.clientId;
-    info['dir'] = 'ccw';
-
-    const collision = !game.currentPiece.collision_isBlocked['ccw'];
-
-    if(collision) 
-      game.socket.emit('move', JSON.stringify(info));
-    
+    if(game.currentPiece!==null){
+      const info = <Message>{};
+      info['id'] = game.clientId;
+      info['dir'] = 'ccw';
+  
+      const collision = !game.currentPiece.collision_isBlocked['ccw'];
+  
+      if(collision) 
+        game.socket.emit('move', JSON.stringify(info));
+    }
   });
   // window['document'].getElementById('button-ccw').onclick = function hello(){
-  //   console.log("Not implemented.")
+
   // }
 
   // Rotate CW
 
 
   Mousetrap.bind('k', ()=>{
-    const info = <Message>{};
-    info['id'] = game.clientId;
-    info['dir'] = 'cw';
-
-    const collision = !game.currentPiece.collision_isBlocked['cw'];
-    if (collision) 
-      game.socket.emit('move', JSON.stringify(info));
-
+    if(game.currentPiece!==null){
+      const info = <Message>{};
+      info['id'] = game.clientId;
+      info['dir'] = 'cw';
+  
+      const collision = !game.currentPiece.collision_isBlocked['cw'];
+      if (collision) 
+        game.socket.emit('move', JSON.stringify(info));
+    }
   });
 
   // window['document'].getElementById('button-cw').onclick = function hello(){
-  //   console.log("Not implemented.")
+
   // }
 
   // Move in
-  Mousetrap.bind('e', ()=>{
-    const info = <Message>{};
-    info['id'] = game.clientId;
-    info['dir'] = 'in';
+  // Mousetrap.bind('e', ()=>{
+  //   if(game.currentPiece!==null){
+  //     const info = <Message>{};
+  //     info['id'] = game.clientId;
+  //     info['dir'] = 'in';
+  
+  //     const collision = !game.currentPiece.collision_isBlocked.in;
+  //     if (collision) 
+  //       game.socket.emit('move', JSON.stringify(info));
+  //   }
 
-    const collision = !game.currentPiece.collision_isBlocked.in;
-    if (collision) 
-      game.socket.emit('move', JSON.stringify(info));
 
-  });
+  // });
   // window['document'].getElementById('button-in').onclick = function hello(){
   //   let info = {};
   //   info['id'] = props.clientId;
@@ -163,16 +175,17 @@ const initControls = (game:Tetris) =>{
 
 
   // MOVE OUT
-  Mousetrap.bind('q', ()=>{
-    const info = <Message>{};
-    info['id'] = game.clientId;
-    info['dir'] = 'out';
-
-    const collision = !game.currentPiece.collision_isBlocked.out;
-    if (collision) 
-      game.socket.emit('move', JSON.stringify(info));
-    
-  });
+  // Mousetrap.bind('q', ()=>{
+  //   if(game.currentPiece!==null){
+  //     const info = <Message>{};
+  //     info['id'] = game.clientId;
+  //     info['dir'] = 'out';
+  
+  //     const collision = !game.currentPiece.collision_isBlocked.out;
+  //     if (collision) 
+  //       game.socket.emit('move', JSON.stringify(info));
+  //   }
+  // });
   // window['document'].getElementById('button-out').onclick = function hello(){
   //   let info = {};
   //   info['id'] = props.clientId;
@@ -200,32 +213,29 @@ const initControls = (game:Tetris) =>{
     blocks: Vector3[]
   }
 
-  Mousetrap.bind('h', ()=>{    
-    //console.log(game.currentPiece);
-    const info = <Message>{};
-    console.log(game);
-    if(game.currentPiece!=null){
-      info['player'] = game.clientId;
-      info['color'] = game.currentPiece.color;
-      info['blocks'] = getRotatedBlocksFromMesh(game.currentPiece.mesh);
-     
-      info['blocks'] = bakeInOrigin(info['blocks'], game.currentPiece.mesh.position);
-      console.log("info");
-      console.log(info);
-  
-      game.socket.emit('set_blocks', info);
-  
-      //set the current player to null
-      game.currentPiece=null;
+  // Mousetrap.bind('h', ()=>{    
 
+  //   const info = <Message>{};
+
+  //   if(game.currentPiece!=null){
+  //     info['player'] = game.clientId;
+  //     info['color'] = game.currentPiece.color;
+  //     info['blocks'] = getRotatedBlocksFromMesh(game.currentPiece.mesh);
+  //     info['blocks'] = bakeInOrigin(info['blocks'], game.currentPiece.mesh.position);
+
+
+  //     //remove the current peice from the scenegraph
+  //     game.scene.remove(game.currentPiece.mesh);  
       
-  
-      //remove the current players piece from the game, and let the server generate another one
-    }
-  });
+  //     //set the current player to null
+  //     game.currentPiece=null;
+      
+  //     game.socket.emit('set_blocks', info);
+  //   }
+  // });
 
   Mousetrap.bind('i', ()=>{    
-    console.log(game.currentPiece);
+
 
     for(let i = 0;i< game.currentPiece.mesh.children.length;i++){
       console.log(game.currentPiece.mesh.children[i].position);
@@ -241,7 +251,7 @@ const initControls = (game:Tetris) =>{
   
 };
 
-const bakeInOrigin = (blocks:Vector3[], origin:Vector3) =>{
+export const bakeInOrigin = (blocks:Vector3[], origin:Vector3) =>{
   blocks.forEach((block) =>{
     block.x += origin.x;
     block.y += origin.y;
@@ -250,7 +260,7 @@ const bakeInOrigin = (blocks:Vector3[], origin:Vector3) =>{
   return blocks;
 }
 
-const calRotMatZaxis = (radians:number):THREE.Matrix4 => {
+export const calRotMatZaxis = (radians:number):THREE.Matrix4 => {
   let m = new THREE.Matrix4();
   m.set(Math.cos(radians),-Math.sin(radians),0,0,
   Math.sin(radians),Math.cos(radians),0,0,
@@ -259,7 +269,7 @@ const calRotMatZaxis = (radians:number):THREE.Matrix4 => {
   return m;
 }
 
-const getRotatedBlocksFromMesh = (mesh:Object3D)=>{
+export const getRotatedBlocksFromMesh = (mesh:Object3D)=>{
 
   //we rotate around the z
   let m = calRotMatZaxis(mesh.rotation.z);
@@ -283,7 +293,6 @@ const getRotatedBlocksFromMesh = (mesh:Object3D)=>{
 
     blocks.push(block);
   }
- // console.log(blocks);
   return blocks;
 }
 

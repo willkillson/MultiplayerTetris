@@ -40,13 +40,50 @@ export const levelFloor = () => {
   groundGeometry.translate(0, -0.01, 0);
 
   const group = new THREE.Object3D();
-  group.add(new THREE.Mesh(grassGeometry1, grassMaterial));
-  group.add(new THREE.Mesh(grassGeometry2, grassMaterial));
-  group.add(new THREE.Mesh(grassGeometry3, grassMaterial));
-  group.add(new THREE.Mesh(grassGeometry4, grassMaterial));
-  group.add(new THREE.Mesh(grassGeometry5, grassMaterial));
-  group.add(new THREE.Mesh(grassGeometry6, grassMaterial));
-  group.add(new THREE.Mesh(groundGeometry, groundMaterial));
+
+
+  const m1 = new THREE.Mesh(grassGeometry2, grassMaterial);
+  const m2 = new THREE.Mesh(grassGeometry3, grassMaterial);
+  const m3 = new THREE.Mesh(grassGeometry4, grassMaterial);
+  const m4 = new THREE.Mesh(grassGeometry5, grassMaterial);
+  const m5 = new THREE.Mesh(grassGeometry6, grassMaterial);
+  const m6 = new THREE.Mesh(groundGeometry, grassMaterial);
+
+  m1.userData = {
+    entityType : "floor",
+    owner : "LEVEL_1"
+  }
+  m2.userData = {
+    entityType : "floor",
+    owner : "LEVEL_1"
+  }
+
+  m3.userData = {
+    entityType : "floor",
+    owner : "LEVEL_1"
+  }
+
+  m4.userData = {
+    entityType : "floor",
+    owner : "LEVEL_1"
+  }
+
+  m5.userData = {
+    entityType : "floor",
+    owner : "LEVEL_1"
+  }
+
+  m6.userData = {
+    entityType : "floor",
+    owner : "LEVEL_1"
+  }
+
+  group.add(m1);
+  group.add(m2);  
+  group.add(m3);  
+  group.add(m4);  
+  group.add(m5);  
+  group.add(m6);
 
 
   group.userData = {
@@ -73,8 +110,23 @@ export const frame = () => {
     geo_xt.name = 'wall';
     geo_xb.translate(i, 0, 0);
     geo_xt.translate(i, 20, 0);
-    group.add(new THREE.Mesh(geo_xb, metalMaterial));
-    group.add(new THREE.Mesh(geo_xt, metalMaterial));
+
+    const m1 = new THREE.Mesh(geo_xb, metalMaterial);
+    const m2 = new THREE.Mesh(geo_xt, metalMaterial);
+
+    m1.userData = {
+      entityType : "frame",
+      owner : "LEVEL_1"
+    }
+
+    m2.userData = {
+      entityType : "frame",
+      owner : "LEVEL_1"
+    }
+
+    group.add(m1);
+    group.add(m2);
+
   }
 
   for (let i = 0; i< 20; i++) {
@@ -84,8 +136,22 @@ export const frame = () => {
     geo_yr.name = 'wall';
     geo_yl.translate(0, i, 0);
     geo_yr.translate(11, i, 0);
-    group.add(new THREE.Mesh(geo_yl, metalMaterial));
-    group.add(new THREE.Mesh(geo_yr, metalMaterial));
+
+    const m1 = new THREE.Mesh(geo_yl, metalMaterial);
+    const m2 = new THREE.Mesh(geo_yr, metalMaterial);
+
+    m1.userData = {
+      entityType : "frame",
+      owner : "LEVEL_1"
+    }
+
+    m2.userData = {
+      entityType : "frame",
+      owner : "LEVEL_1"
+    }
+
+    group.add(m1);
+    group.add(m2);
   }
 
   group.userData = {
