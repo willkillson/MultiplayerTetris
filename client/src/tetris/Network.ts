@@ -48,8 +48,8 @@ export const onConnected = (newClient:ClientInfo, game:Tetris) =>{
 
 
     game.clientId = newClient.id;
-    game.syncTime = newClient.serverTime;
-    game.previousTime = newClient.serverTime;
+    game.gameTimeVariables.syncTime = newClient.serverTime;
+    game.gameTimeVariables.previousTime = newClient.serverTime;
 
 }
 
@@ -147,7 +147,7 @@ interface UpdateInfo{
 
 export const onUpdate = (info:any, game:Tetris) =>{
     let updateInfo:UpdateInfo = JSON.parse(info);
-    game.syncTime = updateInfo.serverTime;
+    game.gameTimeVariables.syncTime = updateInfo.serverTime;
 
    // updateOtherPlayersPieces(updateInfo.users,game);
 
@@ -188,4 +188,25 @@ export const onPlayerSetPiece = (info:Block[], game:Tetris) => {
         }
         game.scene.add(newMesh);
     })
+}
+
+
+
+//OUTGOING
+interface Message{
+    id:string,
+    dir:string,
+}
+
+export const sendCommand = (command:string, game:Tetris) =>{
+    if(game.currentPiece!==null){
+
+        const info = <Message>{};
+        info['id'] = game.clientId;
+        info['dir'] = command;
+    
+        const collision = !game.currentPiece.collision_isBlocked[command];
+        if (collision) 
+          game.socket.emit('move', JSON.stringify(info));
+    }
 }

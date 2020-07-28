@@ -1,25 +1,57 @@
 import React, {Component} from 'react';
+import * as ReactDOM from "react-dom";
+
 import * as THREE from 'three';
 import {Vector3, Quaternion, Matrix4} from 'three';
 // import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import io from 'socket.io-client';
 
 // local imports
-import Piece from './pieces/piece';
+import * as PIECE from './pieces/piece';
 import * as BOARD from './board/board';
-import Controls from './Controls';
 import * as NETWORK from './Network';
-import * as CONTROL from './Controls.ts';
+import * as CONTROL from './Controls';
 
 
 
+interface GameState{
+  movPlayerDown
+}
+
+interface GameTimeVariables{
+  secondsPerTick:number,
+  syncTime: number, // the time we get from the server, and is updated every call to UPDATE
+  previousTime: number, //the time we use to determine whether we have passed a secondsPerTick threshhold value
+  secondsSinceLastUpdate:number
+}
 
 class Tetris extends Component {
-  constructor(props, ref) {
-    super();
-    this.IS_DEVELOP = false;// MAKE SURE TO SET THIS TO FALSE WHEN PUSHING TO MASTER FOR A NEW BUILD
-    //
-    this.networkInfo = {};
+  
+  //Tetris
+  currentPiece: PIECE.Piece;
+  gameState: GameState;
+  gameTimeVariables: GameTimeVariables;
+
+  //Engine
+  IS_DEVELOP: boolean;
+
+
+  ////Networking
+  clientId: string|null;
+  socket: any;
+
+  ////Graphics
+  renderer: THREE.WebGLRenderer;
+  scene: THREE.Scene;
+  camera: THREE.PerspectiveCamera;
+
+
+  
+  constructor(props) {
+    super(props);
+
+    this.IS_DEVELOP = true;// MAKE SURE TO SET THIS TO FALSE WHEN PUSHING TO MASTER FOR A NEW BUILD
+
     this.clientId = null;
     this.socket = null;
     this.renderer = new THREE.WebGLRenderer();
@@ -43,14 +75,12 @@ class Tetris extends Component {
     }
 
     //gameTime
-    this.gameSettings={
-      secondsPerTick: 1
+    this.gameTimeVariables={
+      secondsPerTick: 1,
+      syncTime: 0,
+      previousTime: 0,
+      secondsSinceLastUpdate: 0
     }
-
-    this.syncTime = 0;// the time we get from the server, and is updated every call to UPDATE
-    this.previousTime = 0; //the time we use to determine whether we have passed a secondsPerTick threshhold value
-    this.secondsSinceLastUpdate = 0;
-
 
   }
 
@@ -100,12 +130,12 @@ class Tetris extends Component {
     }
     
     //changes the game state based on the number of ticks.
-    if(this.syncTime%this.gameSettings.secondsPerTick===0){
-  
-      this.secondsSinceLastUpdate = this.syncTime - this.previousTime;
+    if(this.gameTimeVariables.syncTime%this.gameTimeVariables.secondsPerTick===0){
+      
+      this.gameTimeVariables.secondsSinceLastUpdate = this.gameTimeVariables.syncTime - this.gameTimeVariables.previousTime;
 
-      if(this.secondsSinceLastUpdate!==0){
-        this.previousTime = this.syncTime;//update the previous time we did this
+      if(this.gameTimeVariables.secondsSinceLastUpdate!==0){
+        this.gameTimeVariables.previousTime = this.gameTimeVariables.syncTime;//update the previous time we did this
 
         this.gameState.movPlayerDown=true;
         
@@ -122,6 +152,7 @@ class Tetris extends Component {
     //this.gameStep(totalTime);//checks the time
   }
 
+  //Tetris
   forceDown(){
 
 
@@ -132,14 +163,19 @@ class Tetris extends Component {
         //set the piece
         info['player'] = this.clientId;
         info['color'] = this.currentPiece.color;
-        info['blocks'] = CONTROL.getRotatedBlocksFromMesh(this.currentPiece.mesh);
-        info['blocks'] = CONTROL.bakeInOrigin(info['blocks'], this.currentPiece.mesh.position);
+        info['blocks'] = getRotatedBlocksFromMesh(this.currentPiece.mesh);
+        info['blocks'] = bakeInOrigin(info['blocks'], this.currentPiece.mesh.position);
         this.socket.emit('set_blocks', info);
         this.currentPiece = null;
       }else{
+        
 
+        // @ts-ignore
         info.id = this.clientId;
+
+        // @ts-ignore
         info.dir = 'down';
+
         this.socket.emit('move', JSON.stringify(info));
         //move the piece
       }
@@ -148,6 +184,7 @@ class Tetris extends Component {
 
   }
 
+  //Tetris
   resetGame(){
 
     //remove all the inactive pieces
@@ -168,8 +205,12 @@ class Tetris extends Component {
     // this.setupGame();
   }
 
+  //Engine
   componentDidMount() {
-    Controls(this);
+    CONTROL.default(this);
+
+    // @ts-ignore
+    
     this.mount.appendChild( this.renderer.domElement ); // must be located in the componentDidMount()
     // this.controls = new OrbitControls (this.camera, this.renderer.domElement);
     this.init();
@@ -203,17 +244,74 @@ class Tetris extends Component {
       requestAnimationFrame( animate );
     };
 
+    // @ts-ignore
     animate();
   }
 
+
+
   render() {
+
+
+    
     return (
       <div>
-        <div ref={(ref) => (this.mount = ref)} />
+        <h1>Hello, Welcome to the first page</h1>
       </div>
+      
+      // <div>
+      //   <div ref={(ref) => (this.mount = ref)} />
+      // </div>
+
     );
   }
 
+}
+
+
+const bakeInOrigin = (blocks:Vector3[], origin:Vector3) =>{
+  blocks.forEach((block) =>{
+    block.x += origin.x;
+    block.y += origin.y;
+    block.z += origin.z;
+  });
+  return blocks;
+}
+
+const calRotMatZaxis = (radians:number):THREE.Matrix4 => {
+  let m = new THREE.Matrix4();
+  m.set(Math.cos(radians),-Math.sin(radians),0,0,
+  Math.sin(radians),Math.cos(radians),0,0,
+            0,0,1,0,
+            0,0,0,1);
+  return m;
+}
+
+export const getRotatedBlocksFromMesh = (mesh:THREE.Object3D)=>{
+
+  //we rotate around the z
+  let m = calRotMatZaxis(mesh.rotation.z);
+
+  let blocks= [];
+  for(let i = 0;i< mesh.children.length;i++){
+    let newVec = new Vector3(
+      mesh.children[i].position.x,
+      mesh.children[i].position.y,
+      mesh.children[i].position.z);
+
+    newVec = newVec.applyMatrix4(m);
+    
+
+    newVec.x = Math.round(newVec.x*1000)/1000;
+    newVec.y = Math.round(newVec.y*1000)/1000;
+    newVec.z = Math.round(newVec.z*1000)/1000;
+    
+
+    let block = new Vector3(newVec.x,newVec.y,newVec.z);
+
+    blocks.push(block);
+  }
+  return blocks;
 }
 
 export default Tetris;
