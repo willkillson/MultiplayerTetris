@@ -34,8 +34,7 @@ class Tetris extends React.Component {
 
   //Engine
   IS_DEVELOP: boolean;
-
-
+  
   ////Networking
   clientId: string|null;
   socket: any;
@@ -45,8 +44,6 @@ class Tetris extends React.Component {
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
 
-
-  
   constructor(props) {
     super(props);
 
@@ -237,7 +234,6 @@ class Tetris extends React.Component {
       this.renderer.render( this.scene, this.camera );
       requestAnimationFrame( animate );
     };
-
     // @ts-ignore
     animate();
   }
@@ -250,8 +246,8 @@ class Tetris extends React.Component {
   }
 }
 
-const bakeInOrigin = (blocks:Vector3[], origin:Vector3) =>{
-  blocks.forEach((block) =>{
+const bakeInOrigin = (blocks:Vector3[], origin:Vector3) => {
+  blocks.forEach((block) => {
     block.x += origin.x;
     block.y += origin.y;
     block.z += origin.z;
