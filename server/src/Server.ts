@@ -75,6 +75,7 @@ class Block{
 
 interface updateInfo{
   users:Client[],
+  persistentBlocks:Block[],
   serverTime:number
 }
 
@@ -137,6 +138,8 @@ export default class Server  {
 
           socket.on('set_blocks',(info:any)=>this.set(socket,info));
 
+          socket.on('clearBoard', ()=>this.clearBoard());
+
         }); 
     }
 
@@ -157,17 +160,16 @@ export default class Server  {
       //now give the client all the information
       const retObject ={
         id: info.id,
-        users:this.users,
         serverTime:this.currentSecond
       }
       socket.emit('onconnected',retObject);  
 
-      console.log(info);
+      //console.log(info);
 
       //Inform the rest of the players we have a new connection.
-      this.io.sockets.emit('onNewPlayer', info);
+      this.io.sockets.emit('updateAllPlayers', this.users);
 
-      socket.emit('onPlayerSetPiece', this.persistentBlocks);
+      // socket.emit('onPlayerSetPiece', this.persistentBlocks);
     }
 
     //on disconnect
@@ -184,29 +186,52 @@ export default class Server  {
 
     //on set
     set(newSocket:any, info:any){
-      console.log("set(newSocket:any, info:any)");
-      console.log(info);
-     //console.log(info); 
-     let blocks:Vector3[] = info.blocks;
-     let color:number = info.color;
 
-     blocks.forEach((block:Vector3) =>{
-       
-        let newBlock = new Block(block,color);
-        this.persistentBlocks.push(newBlock);
-     })
-     console.log(this.persistentBlocks)
-     //let all the players know this block has been set in.
+        let blocks:Vector3[] = info.blocks;
+        let color:number = info.color;
+
+        blocks.forEach((block:Vector3) =>{
+          
+          let newBlock = new Block(block,color);
+          this.persistentBlocks.push(newBlock);
+        })
+        //console.log(this.persistentBlocks)
+        //let all the players know this block has been set in.
 
 
-     let index = this.users.findIndex((usr)=>{
-       return usr.id ===info.player;
-     })
-     
-     this.users[index].generateNewPiece();
+        let index = this.users.findIndex((usr)=>{
+          return usr.id ===info.player;
+        })
+
+        this.users[index].generateNewPiece();
 
 
-     this.io.sockets.emit('onPlayerSetPiece', this.persistentBlocks);
+        this.io.sockets.emit('onPlayerSetPiece', this.persistentBlocks);
+
+        //emit to all clients, the updated client
+        console.log(this.users);
+        this.io.sockets.emit('updateAllOtherPlayers', this.users);
+
+
+
+    }
+
+    //on clear board
+    clearBoard(){
+
+
+      this.persistentBlocks = [];
+
+      this.users.forEach(usr=>{
+        usr.generateNewPiece();
+      })
+
+      const info = <updateInfo>{};
+      info.users = this.users;
+      info.serverTime = this.currentSecond;
+      info.persistentBlocks = this.persistentBlocks;
+      
+      this.io.sockets.emit('UPDATE', JSON.stringify(info));
 
 
     }
@@ -215,6 +240,7 @@ export default class Server  {
 
     //on move
     move(newSocket:any, info:any){     
+
       let parsedInfo = JSON.parse(info);
       let userIndex = this.users.findIndex((usr)=>{
         if(usr!==null &&usr!==undefined){
@@ -259,6 +285,7 @@ export default class Server  {
           break;
       }
 
+
       //send everyone else our update.  
       //newSocket.emit('')
     }
@@ -276,15 +303,16 @@ export default class Server  {
         let delta = Date.now()-start;//milliseconds elapsed since start
         
         let newSecond = Math.floor(delta/1000);
+        //let newSecond = delta;
 
         //send with time,
-        console.log(newSecond);
         this.currentSecond= newSecond;
 
         const info = <updateInfo>{};
         info.users = this.users;
         info.serverTime = this.currentSecond;
         this.io.sockets.emit('UPDATE', JSON.stringify(info));
+   
               
       },50);
       

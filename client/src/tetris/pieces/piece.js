@@ -58,6 +58,9 @@ export class Piece {
   }
 
   initCollisionVariables() {
+    this.collisionExclusion = [];
+    this.collisionExclusion.push("active_piece");
+
     this.collision_isBlocked = {};
     this.collision_isBlocked['up'] = false;
     this.collision_isBlocked['down'] = false;
@@ -202,6 +205,9 @@ export class Piece {
         intersects.push(intersection);
       }
     });
+
+    //console.log(intersects);
+
     if (intersects.length===0) {
       this.collision_isBlocked['up'] = false;
     } else {
