@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import * as React from 'react';
 import * as ReactDOM from "react-dom";
 
 import * as THREE from 'three';
@@ -25,7 +25,7 @@ interface GameTimeVariables{
   secondsSinceLastUpdate:number
 }
 
-class Tetris extends Component {
+class Tetris extends React.Component {
   
   //Tetris
   currentPiece: PIECE.Piece;
@@ -131,16 +131,11 @@ class Tetris extends Component {
     
     //changes the game state based on the number of ticks.
     if(this.gameTimeVariables.syncTime%this.gameTimeVariables.secondsPerTick===0){
-      
       this.gameTimeVariables.secondsSinceLastUpdate = this.gameTimeVariables.syncTime - this.gameTimeVariables.previousTime;
-
       if(this.gameTimeVariables.secondsSinceLastUpdate!==0){
         this.gameTimeVariables.previousTime = this.gameTimeVariables.syncTime;//update the previous time we did this
-
         this.gameState.movPlayerDown=true;
-        
       }
-  
     }
 
     if(this.gameState.movPlayerDown ===true){
@@ -239,7 +234,6 @@ class Tetris extends Component {
       }
 
       this.update(totalTime);
-
       this.renderer.render( this.scene, this.camera );
       requestAnimationFrame( animate );
     };
@@ -248,21 +242,10 @@ class Tetris extends Component {
     animate();
   }
 
-
-
   render() {
-
-
-    
     return (
-      <div>
-        <h1>Hello, Welcome to the first page</h1>
-      </div>
-      
-      // <div>
-      //   <div ref={(ref) => (this.mount = ref)} />
-      // </div>
-
+      // @ts-ignore
+      <div ref={(ref) => (this.mount = ref)} />
     );
   }
 
