@@ -1,68 +1,49 @@
 import Mousetrap from 'mousetrap';
-import Tetris from '../Tetris'
-import * as MyConstants from '../utilities/constants'
-import { Vector3, Object3D } from 'three';
-import * as THREE from 'three';
-import * as NETWORK from '../Network'
+import * as CM from './ControlManager';
 
-const initControls = (game:Tetris) =>{
+export class Controls {
+  private MouseTrap: any;
+  private controlManager: CM.ControlManager;
 
-  ////////////KEYBOARD
-  // Move left
-  Mousetrap.bind('a', ()=>{
-    NETWORK.sendCommand('left', game);
-  });
-  // Move down
-  Mousetrap.bind('s', ()=>{
-    NETWORK.sendCommand('down',game);
-  });
-  // right
-  Mousetrap.bind('d', ()=>{
-    NETWORK.sendCommand('right',game);
-  });
-  // Rotate CW
-  Mousetrap.bind('k', ()=>{
-    NETWORK.sendCommand('cw',game);
-  });
-  // Rotate CCW
-  Mousetrap.bind('j', ()=>{
-    NETWORK.sendCommand('ccw',game);
-  });
-  // DEBUG
-  Mousetrap.bind('i', ()=>{    
-    for(let i = 0;i< game.currentPiece.mesh.children.length;i++){
-      console.log(game.currentPiece.mesh.children[i].position);
-    }
-    console.log(game.currentPiece.mesh.rotation);
-  });
+  constructor(controlManager:CM.ControlManager){
 
-  ////////////OnScreen
-  // @ts-ignore
-  window['document'].getElementById('button-left').onclick = () => {
-    NETWORK.sendCommand('left', game);
-  };
-  // @ts-ignore
-  window['document'].getElementById('button-down').onclick = () => {
-    NETWORK.sendCommand('down',game);
-  };
-  // @ts-ignore
-  window['document'].getElementById('button-right').onclick = () => {
-    NETWORK.sendCommand('right',game);
-  };
+    this.controlManager = controlManager;
+    this.MouseTrap = Mousetrap;
 
-  interface Message{
-    origin: Vector3,
-    player:string,
-    id:string,
-    dir:string,
-    color:string,
-    positions: Vector3[],
-    piece_type: number,
-    blocks: Vector3[]
+    // Move left
+    this.MouseTrap.bind('a', ()=>{
+      this.controlManager.addCommand('left');
+    });
+    // Move down
+    this.MouseTrap.bind('s', ()=>{
+      this.controlManager.addCommand('down');
+    });
+    // right
+    this.MouseTrap.bind('d', ()=>{
+      this.controlManager.addCommand('right');
+    });
+    // Rotate CW
+    this.MouseTrap.bind('k', ()=>{
+      this.controlManager.addCommand('cw');
+    });
+    // Rotate CCW
+    this.MouseTrap.bind('j', ()=>{
+      this.controlManager.addCommand('ccw');
+    });
+
+    ////////////OnScreen
+    // @ts-ignore
+    window['document'].getElementById('button-left').onclick = () => {
+      controlManager.addCommand('left');
+    };
+    // @ts-ignore
+    window['document'].getElementById('button-down').onclick = () => {
+      controlManager.addCommand('down');
+    };
+    // @ts-ignore
+    window['document'].getElementById('button-right').onclick = () => {
+      controlManager.addCommand('right');
+    };
   }
-
-
   
-};
-
-export default initControls;
+}
