@@ -1,13 +1,14 @@
+import * as QUEUE from '../utilities/DataTypes/Queue'
 
 
-export class ControlManager {
+export class ControlManager extends QUEUE.Queue{
 
-    controlQue:Array<string>
+    //controlQue:Array<string>
     isProcessingCommand: boolean;
 
     constructor(){
-
-        this.controlQue= new Array<string>();
+        super();
+        
         this.isProcessingCommand = false;
 
     }
@@ -17,6 +18,10 @@ export class ControlManager {
     }
 
     processCommand(){
+        
+        if(this.isProcessingCommand===false){
+            
+        }
 
     }
 
