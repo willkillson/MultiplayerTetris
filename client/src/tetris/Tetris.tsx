@@ -10,7 +10,10 @@ import io from 'socket.io-client';
 import * as PIECE from './Entities/piece';
 import * as BOARD from './Entities/board';
 import * as NETWORK from './Network';
-import * as CONTROL from './Controls/Controls'
+
+import * as CONTROLMANAGER from './Controls/ControlManager';
+import * as CONTROLS from './Controls/Controls';
+
 
 
 
@@ -34,6 +37,8 @@ class Tetris extends React.Component {
 
   //Engine
   IS_DEVELOP: boolean;
+  controls: CONTROLS.Controls;
+  controlManager: CONTROLMANAGER.ControlManager;
   
   ////Networking
   clientId: string|null;
@@ -105,6 +110,11 @@ class Tetris extends React.Component {
 
     this.socket.on('updateAllPlayers', (info)=> NETWORK.updateAllPlayers(info,this));
 
+    this.socket.on('aknowledgeMove', ()=> {
+      console.log("yay!!!")
+      this.controlManager.freeUpControls()
+    });// allows the player to move again.
+
     //setup the game
     this.setupGame();
 
@@ -121,6 +131,9 @@ class Tetris extends React.Component {
   }
 
   update(totalTime) {
+
+    this.controlManager.processCommand();
+
     if (this.currentPiece!==null) {
       //update our current piece so we get all the collision
       this.currentPiece.update();
@@ -199,10 +212,12 @@ class Tetris extends React.Component {
 
   //Engine
   componentDidMount() {
-    CONTROL.default(this);
+    //CONTROL.default(this);
+    this.controlManager = new CONTROLMANAGER.ControlManager(this);
+    this.controls = new CONTROLS.Controls(this.controlManager);
+
 
     // @ts-ignore
-    
     this.mount.appendChild( this.renderer.domElement ); // must be located in the componentDidMount()
     // this.controls = new OrbitControls (this.camera, this.renderer.domElement);
     this.init();

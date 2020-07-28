@@ -284,7 +284,7 @@ export default class Server  {
           break;
       }
 
-
+      newSocket.emit('aknowledgeMove');
       //send everyone else our update.  
       //newSocket.emit('')
     }
