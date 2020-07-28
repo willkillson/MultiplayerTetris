@@ -5,72 +5,14 @@ import { Vector3, Quaternion, Euler} from 'three';
 //LocalImports
 import MyTime from './utilities/time';
 import * as BLOCK from './Entities/Block'
-
-
-class Client{
-  public id: string;
-  public position: Vec3;
-  public rotation: Vec3; //Euler angle
-  public pieceType: number | null;
-
-  constructor(piece: Piece){
-    this.id = "";
-    this.position = piece.position;
-    this.rotation = piece.rotation;
-    this.pieceType = piece.pieceType;
-  }
-
-  updatePiece(piece: Piece){
-    this.position = piece.position;
-    this.rotation = piece.rotation;
-    this.pieceType = piece.pieceType;
-  }
-
-  generateNewPiece(){
-    this.updatePiece(new Piece());
-  }
-
-}
-
-class Piece{
-  public position: Vector3;
-  public rotation: Vector3;
-  public pieceType: number;
-
-  constructor(){
-      //assign position
-      this.position = new Vector3(0,18,0);
-      
-      //assign euler angle
-      this.rotation = new Vector3(0,0,0);
-
-      this.pieceType = Math.floor(Math.random()*7);            
-  }
-
-
-
-}
-
-class Vec3{
-  public x: number;
-  public y: number;
-  public z: number;
-
-  constructor(){
-    this.x = 0;
-    this.y = 0;
-    this.z = 0;
-  }
-}
-
+import * as CLIENT from './Entities/Client'
+import * as PIECE from './Entities/Piece'
 
 interface updateInfo{
-  users:Client[],
+  users:CLIENT.Client[],
   persistentBlocks: BLOCK.Block[],
   serverTime:number
 }
-
-
 
 const normalizePort = (val:string) => {
   var port = parseInt(val, 10);
@@ -93,7 +35,7 @@ export default class Server  {
     private port:string|number|false;
     private io: any;
     private persistentBlocks: BLOCK.Block[];
-    public users:Client[];
+    public users: CLIENT.Client[];
 
     //serverTime
     public currentSecond:number;
@@ -137,7 +79,7 @@ export default class Server  {
     //on connect
     initNewConnection(socket:any){
 
-      let info:Client =  new Client(new Piece());
+      let info: CLIENT.Client =  new CLIENT.Client(new PIECE.Piece());
       //assign unique id
       info.id = socket.id;   
       /*
@@ -240,7 +182,7 @@ export default class Server  {
       if(userIndex===-1){
         return;
       }
-      let currentPiece:Client = this.users[userIndex];
+      let currentPiece: CLIENT.Client = this.users[userIndex];
       let euler = new Euler(0,0,0,"xyz");
       switch(parsedInfo['dir']){
         case 'up':
