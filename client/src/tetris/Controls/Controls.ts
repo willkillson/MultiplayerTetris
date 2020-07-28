@@ -1,9 +1,9 @@
 import Mousetrap from 'mousetrap';
-import Tetris from './Tetris'
-import * as MyConstants from './utilities/constants'
+import Tetris from '../Tetris'
+import * as MyConstants from '../utilities/constants'
 import { Vector3, Object3D } from 'three';
 import * as THREE from 'three';
-import * as NETWORK from './Network'
+import * as NETWORK from '../Network'
 
 const initControls = (game:Tetris) =>{
 

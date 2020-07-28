@@ -1,6 +1,5 @@
-import Tetris from './Tetris'
-import createPiece from './pieces/piece'
-import Piece from './pieces/piece'
+import Tetris from './Tetris';
+import * as PIECE from './Entities/piece';
 import { Vector3 } from 'three'
 
 import * as THREE from 'three'
@@ -74,7 +73,8 @@ export const updateAllPlayers = (clients:Client[], game:Tetris) => {
 
         if(clientPieceType!==null){
             
-            let piece:any =createPiece(clientPieceType, newVector);
+            // @ts-ignore
+            let piece:any = PIECE.createPiece(clientPieceType, newVector);
 
             if(game.clientId===clientPiece.id){
                 game.currentPiece = piece;
@@ -119,7 +119,8 @@ export const onNewPlayer = (client:any, game:Tetris) =>{
         let newVector = new Vector3(position?.x,position?.y,position?.z);
 
         if(clientPieceType!==null){
-            let piece:any = createPiece(clientPieceType,newVector);
+            // @ts-ignore
+            let piece:any = PIECE.createPiece(clientPieceType,newVector);
             piece.mesh.userData = {
                 entityType : "active_piece",
                 owner : client.id

@@ -356,7 +356,7 @@ export class Piece {
   }
 }
 
-const createPiece = (pieceType = 0, defaultPosition = new Vector3(0, 18, 0)) =>{
+export const createPiece = (pieceType = 0, defaultPosition = new Vector3(0, 18, 0)) =>{
 
   let retPiece;
 
@@ -478,4 +478,3 @@ const createPiece = (pieceType = 0, defaultPosition = new Vector3(0, 18, 0)) =>{
   return retPiece;
 };
 
-export default createPiece;

@@ -7,10 +7,10 @@ import {Vector3, Quaternion, Matrix4} from 'three';
 import io from 'socket.io-client';
 
 // local imports
-import * as PIECE from './pieces/piece';
-import * as BOARD from './board/board';
+import * as PIECE from './Entities/piece';
+import * as BOARD from './Entities/board';
 import * as NETWORK from './Network';
-import * as CONTROL from './Controls';
+import * as CONTROL from './Controls/Controls'
 
 
 
