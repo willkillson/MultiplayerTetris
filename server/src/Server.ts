@@ -209,7 +209,6 @@ export default class Server  {
         this.io.sockets.emit('onPlayerSetPiece', this.persistentBlocks);
 
         //emit to all clients, the updated client
-        console.log(this.users);
         this.io.sockets.emit('updateAllOtherPlayers', this.users);
 
 
