@@ -34,15 +34,10 @@ export class GameLogic {
         this.leftBounds = -4;
         this.rightBounds = 5;
 
-        this.lengthHorizontal = 1;
-        //calculate horizontal length
-        {
-            let p = this.leftBounds;
-            while(p<this.rightBounds){
-                this.lengthHorizontal++;
-                
-            }
-        }
+
+        //TODO Calculate this number based on this.leftBounds and this.rightBounds
+        this.lengthHorizontal = 10; 
+
 
 
         // this.horizontalMapper = new Map<string,number>();
@@ -82,7 +77,9 @@ export class GameLogic {
        //determine which rows are full
        const determinedRows = this.determineWhichRowsAreFull(rowCount);
     //    //remove those rows that are full
-    //    this.removeRowsThatAreFull(blocks,determinedRows);
+
+       this.removeRowsThatAreFull(blocks,determinedRows);
+
     //    //shift all blocks above these removed lines down by the amount of removed lines
 
        this.print(rowCount, determinedRows);
@@ -112,18 +109,20 @@ export class GameLogic {
         return determinedRows;
     }
 
-    // private removeRowsThatAreFull(blocks:BLOCK.Block[],  determinedRows:boolean[]){
-    //     for(let i = 0;i< determinedRows.length;i++){
-    //         if(determinedRows[i]===true){
-    //             let parsedInt = parseInt(this.mapNumberToString.get(i));
-    //             console.log("deleting " + parsedInt.toString());
-    //             blocks = blocks.filter((block)=>{
-    //                 return block.position.y!==parsedInt;
-    //             });
-    //         }
-    //     }
-    //     //TODO
-    // }
+
+    private removeRowsThatAreFull(blocks:BLOCK.Block[],  determinedRows:boolean[]){
+        for(let i = 0;i< determinedRows.length;i++){
+            if(determinedRows[i]===true){
+                let parsedInt = parseInt(this.mapNumberToString.get(i));
+                console.log("deleting " + parsedInt.toString());
+                blocks = blocks.filter((block)=>{
+                    return block.position.y!==parsedInt;
+                });
+            }
+        }
+        //TODO
+    }
+
 
     private shiftAllRowsAboveTheseRemovedRows(){
         //TODO
