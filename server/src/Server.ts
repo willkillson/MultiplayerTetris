@@ -4,82 +4,16 @@ import { Vector3, Quaternion, Euler} from 'three';
 
 //LocalImports
 import MyTime from './utilities/time';
-class Client{
-  public id: string;
-  public position: Vec3;
-  public rotation: Vec3; //Euler angle
-  public pieceType: number | null;
-
-  constructor(piece: Piece){
-    this.id = "";
-    this.position = piece.position;
-    this.rotation = piece.rotation;
-    this.pieceType = piece.pieceType;
-  }
-
-  updatePiece(piece: Piece){
-    this.position = piece.position;
-    this.rotation = piece.rotation;
-    this.pieceType = piece.pieceType;
-  }
-
-  generateNewPiece(){
-    this.updatePiece(new Piece());
-  }
-
-}
-
-class Piece{
-  public position: Vector3;
-  public rotation: Vector3;
-  public pieceType: number;
-
-  constructor(){
-      //assign position
-      this.position = new Vector3(0,18,0);
-      
-      //assign euler angle
-      this.rotation = new Vector3(0,0,0);
-
-      this.pieceType = Math.floor(Math.random()*7);            
-  }
-
-
-
-}
-
-class Vec3{
-  public x: number;
-  public y: number;
-  public z: number;
-
-  constructor(){
-    this.x = 0;
-    this.y = 0;
-    this.z = 0;
-  }
-}
-
-class Block{
-
-  public uuid: string;
-  public position: Vector3;
-  public color: number;
-
-  constructor(pPosition:Vector3, pColor:number){
-    this.position = pPosition;
-    this.color = pColor;
-    this.uuid = uuidv4();
-  }
-}
+import * as BLOCK from './Entities/Block'
+import * as CLIENT from './Entities/Client'
+import * as PIECE from './Entities/Piece'
+import * as GL from './GameLogic';
 
 interface updateInfo{
-  users:Client[],
-  persistentBlocks:Block[],
+  users:CLIENT.Client[],
+  persistentBlocks: BLOCK.Block[],
   serverTime:number
 }
-
-
 
 const normalizePort = (val:string) => {
   var port = parseInt(val, 10);
@@ -101,17 +35,22 @@ export default class Server  {
 
     private port:string|number|false;
     private io: any;
-    private persistentBlocks:Block[];
-    public users:Client[];
+    private persistentBlocks: BLOCK.Block[];
+    public users: CLIENT.Client[];
+
+    private gameLogic: GL.GameLogic;
+
 
     //serverTime
     public currentSecond:number;
-
 
     constructor(){
       //Data storage, local only for now.
       this.persistentBlocks = [];
       this.users = [];
+
+      //init the game logic
+      this.gameLogic = new GL.GameLogic();
 
       //start the server
       this.initServer("80");
@@ -146,7 +85,7 @@ export default class Server  {
     //on connect
     initNewConnection(socket:any){
 
-      let info:Client =  new Client(new Piece());
+      let info: CLIENT.Client =  new CLIENT.Client(new PIECE.Piece());
       //assign unique id
       info.id = socket.id;   
       /*
@@ -192,7 +131,7 @@ export default class Server  {
 
         blocks.forEach((block:Vector3) =>{
           
-          let newBlock = new Block(block,color);
+          let newBlock = new BLOCK.Block(block,color);
           this.persistentBlocks.push(newBlock);
         })
         //console.log(this.persistentBlocks)
@@ -209,7 +148,6 @@ export default class Server  {
         this.io.sockets.emit('onPlayerSetPiece', this.persistentBlocks);
 
         //emit to all clients, the updated client
-        console.log(this.users);
         this.io.sockets.emit('updateAllOtherPlayers', this.users);
 
 
@@ -236,8 +174,6 @@ export default class Server  {
 
     }
 
-    
-
     //on move
     move(newSocket:any, info:any){     
 
@@ -250,7 +186,7 @@ export default class Server  {
       if(userIndex===-1){
         return;
       }
-      let currentPiece:Client = this.users[userIndex];
+      let currentPiece: CLIENT.Client = this.users[userIndex];
       let euler = new Euler(0,0,0,"xyz");
       switch(parsedInfo['dir']){
         case 'up':
@@ -285,7 +221,7 @@ export default class Server  {
           break;
       }
 
-
+      newSocket.emit('aknowledgeMove');
       //send everyone else our update.  
       //newSocket.emit('')
     }
@@ -311,14 +247,22 @@ export default class Server  {
         const info = <updateInfo>{};
         info.users = this.users;
         info.serverTime = this.currentSecond;
-        this.io.sockets.emit('UPDATE', JSON.stringify(info));
+        
+        this.gameLogic.lineClear(this.persistentBlocks);
+
+        if(this.gameLogic.snycClients===true){//will be set true when linClear detects we need to clear lines
+          info.persistentBlocks = this.persistentBlocks;
+          console.log(info.persistentBlocks);
+          this.io.sockets.emit('UPDATE', JSON.stringify(info));
+          this.gameLogic.snycClients = false;
+        }
+        else{
+          this.io.sockets.emit('UPDATE', JSON.stringify(info));//normal update
+        }
    
               
       },50);
       
     }
-
- 
-
 
 }
