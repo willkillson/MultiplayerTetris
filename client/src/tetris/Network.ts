@@ -44,12 +44,9 @@ interface Block{
  * @param game 
  */
 export const onConnected = (newClient:ClientInfo, game:Tetris) =>{
-
-
     game.clientId = newClient.id;
     game.gameTimeVariables.syncTime = newClient.serverTime;
     game.gameTimeVariables.previousTime = newClient.serverTime;
-
 }
 
 export const updateAllPlayers = (clients:Client[], game:Tetris) => {
@@ -110,6 +107,8 @@ export const updateAllPlayers = (clients:Client[], game:Tetris) => {
     });
 }
 
+
+
 export const onNewPlayer = (client:any, game:Tetris) =>{
 
     if(game.clientId!==client.id){
@@ -150,28 +149,34 @@ export const onUpdate = (info:any, game:Tetris) =>{
     let updateInfo:UpdateInfo = JSON.parse(info);
     game.gameTimeVariables.syncTime = updateInfo.serverTime;
 
-   // updateOtherPlayersPieces(updateInfo.users,game);
-
-   if(updateInfo.persistentBlocks!==undefined){
-       //clear the game
-       game.resetGame();
+    if(updateInfo.persistentBlocks!==undefined){
+//clear the game
+       if(updateInfo.persistentBlocks.length===0){
+//all persistent blocks are removed, reset game
+            game.resetGame();
+       }else{
+//we have a line clear or something.
+            game.resetGame();
+            updateBlocks(updateInfo.persistentBlocks,game);
+       }
    }
    updateAllPlayers(updateInfo.users,game);
 
 }
   
-const updateOtherPlayersPieces = (otherPlayersInfo:Client[], game:Tetris) =>{
-    // HANDLE OTHER PLAYERS PIECE's
-    otherPlayersInfo.forEach((player)=>{
-        let index = game.scene.children.findIndex((child)=>child.userData.owner===player.id);
-        if(index!==-1){
-            game.scene.children[index].position.x = player.position.x;
-            game.scene.children[index].position.y = player.position.y;
-            game.scene.children[index].position.z = player.position.z;
-            game.scene.children[index].rotation.x = player.rotation.x;
-            game.scene.children[index].rotation.y = player.rotation.y;
-            game.scene.children[index].rotation.z = player.rotation.z;
+const updateBlocks = (blocks:Block[], game:Tetris) =>{
+    blocks.forEach((block)=>{
+        const geometry = new THREE.BoxGeometry(1, 1, 1);
+        const material = new THREE.MeshBasicMaterial( {color: block.color} );
+        let newMesh = new THREE.Mesh(geometry,material);
+        newMesh.position.x = block.position.x;
+        newMesh.position.y = block.position.y;
+        newMesh.position.z = block.position.z;
+        newMesh.userData = {
+            entityType : "inactive_piece",
+            owner : block.uuid
         }
+        game.scene.add(newMesh);
     })
 };
 
@@ -192,13 +197,11 @@ export const onPlayerSetPiece = (info:Block[], game:Tetris) => {
 }
 
 
-
 //OUTGOING
 interface Message{
     id:string,
     dir:string,
 }
-
 export const sendCommand = (command:string, game:Tetris) =>{
     const info = <Message>{};
     info['id'] = game.clientId;

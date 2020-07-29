@@ -52,7 +52,7 @@ class Tetris extends React.Component {
   constructor(props) {
     super(props);
 
-    this.IS_DEVELOP = true;// MAKE SURE TO SET THIS TO FALSE WHEN PUSHING TO MASTER FOR A NEW BUILD
+    this.IS_DEVELOP = false;// MAKE SURE TO SET THIS TO FALSE WHEN PUSHING TO MASTER FOR A NEW BUILD
 
     this.clientId = null;
     this.socket = null;
@@ -111,7 +111,7 @@ class Tetris extends React.Component {
     this.socket.on('updateAllPlayers', (info)=> NETWORK.updateAllPlayers(info,this));
 
     this.socket.on('aknowledgeMove', ()=> {
-      console.log("yay!!!")
+     // console.log("yay!!!")
       this.controlManager.freeUpControls()
     });// allows the player to move again.
 
@@ -191,23 +191,15 @@ class Tetris extends React.Component {
 
   //Tetris
   resetGame(){
-
-    //remove all the inactive pieces
-    // console.log(" this.scene.childre");
-    // console.log( this.scene.children);
     let inActivePieces = this.scene.children.filter((child)=>{
       return child.userData.entityType==='inactive_piece';
     });
-
-    // console.log("inActivePieces");
-    // console.log(inActivePieces);
+    //console.log(inActivePieces);
 
     inActivePieces.forEach((piece)=>{
       this.scene.remove(piece);
     })
   
-    // this.scene = new THREE.Scene();
-    // this.setupGame();
   }
 
   //Engine

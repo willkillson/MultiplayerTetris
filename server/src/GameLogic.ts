@@ -5,6 +5,8 @@ import formatedTime from './utilities/time';
 
 export class GameLogic {
 
+    snycClients:boolean;
+
     leftBounds:number;
     rightBounds: number;
     topBounds: number;
@@ -38,6 +40,8 @@ export class GameLogic {
         //TODO Calculate this number based on this.leftBounds and this.rightBounds
         this.lengthHorizontal = 10; 
 
+        this.snycClients = false;
+
 
 
         // this.horizontalMapper = new Map<string,number>();
@@ -66,23 +70,18 @@ export class GameLogic {
     }
 
     /**
-     * 
-     * 
      * @param blocks These blocks are the blocks that are placed into the board.
      */
     public lineClear(blocks:BLOCK.Block[]){
 
-       //Add all the blocks
-       const rowCount = this.calculateTotalBlocksInEachRow(blocks);
-       //determine which rows are full
-       const determinedRows = this.determineWhichRowsAreFull(rowCount);
-    //    //remove those rows that are full
+        //Add all the blocks
+        const rowCount = this.calculateTotalBlocksInEachRow(blocks);
+        //determine which rows are full
+        const determinedRows = this.determineWhichRowsAreFull(rowCount);
+        //remove those rows that are full
+        this.removeRowsThatAreFull(blocks,determinedRows);
 
-       this.removeRowsThatAreFull(blocks,determinedRows);
-
-    //    //shift all blocks above these removed lines down by the amount of removed lines
-
-       this.print(rowCount, determinedRows);
+       //this.print(rowCount, determinedRows);
 
     }
 
@@ -109,23 +108,36 @@ export class GameLogic {
         return determinedRows;
     }
 
-
-    private removeRowsThatAreFull(blocks:BLOCK.Block[],  determinedRows:boolean[]){
+    private removeRowsThatAreFull(blocks:BLOCK.Block[],  determinedRows:boolean[]): number{
+        let shiftAmount = 0;
         for(let i = 0;i< determinedRows.length;i++){
             if(determinedRows[i]===true){
                 let parsedInt = parseInt(this.mapNumberToString.get(i));
                 console.log("deleting " + parsedInt.toString());
-                blocks = blocks.filter((block)=>{
-                    return block.position.y!==parsedInt;
-                });
+                this.snycClients = true;
+                shiftAmount++;
+                for(let k = 0;k< blocks.length;k++){
+                    if(blocks[k].position.y === parsedInt){
+                        blocks.splice(k,1);
+                        k = -1;
+                    }
+                }
+                this.shiftEverythingAbove(parsedInt,blocks);
             }
         }
-        //TODO
+        return shiftAmount;
     }
 
-
-    private shiftAllRowsAboveTheseRemovedRows(){
-        //TODO
+    private shiftEverythingAbove(num:number,blocks:BLOCK.Block[],){
+        let myNum = num;
+        while(myNum<=this.topBounds){
+            for(let k = 0;k< blocks.length;k++){
+                if(blocks[k].position.y === myNum){
+                    blocks[k].position.y--; 
+                }
+            }
+            myNum++;
+        }
     }
 
     private print(rowCount:BLOCK.Block[][], determineWhichRowsAreFull:boolean[]){

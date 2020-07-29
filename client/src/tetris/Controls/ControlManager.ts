@@ -27,7 +27,7 @@ export class ControlManager extends QUEUE.Queue<string>{
      */
     public processCommand(){
         //TODO decouple this section from the ControlManager
-        console.log(this);
+       // console.log(this);
         if(this.socket!==null){
             if(this.isProcessingCommand===false){
                 if(this.isEmpty()!==false){

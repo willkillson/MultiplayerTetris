@@ -247,12 +247,21 @@ export default class Server  {
         const info = <updateInfo>{};
         info.users = this.users;
         info.serverTime = this.currentSecond;
-        this.io.sockets.emit('UPDATE', JSON.stringify(info));
-
+        
         this.gameLogic.lineClear(this.persistentBlocks);
+
+        if(this.gameLogic.snycClients===true){//will be set true when linClear detects we need to clear lines
+          info.persistentBlocks = this.persistentBlocks;
+          console.log(info.persistentBlocks);
+          this.io.sockets.emit('UPDATE', JSON.stringify(info));
+          this.gameLogic.snycClients = false;
+        }
+        else{
+          this.io.sockets.emit('UPDATE', JSON.stringify(info));//normal update
+        }
    
               
-      },500);
+      },50);
       
     }
 
