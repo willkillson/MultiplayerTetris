@@ -7,6 +7,7 @@ import MyTime from './utilities/time';
 import * as BLOCK from './Entities/Block'
 import * as CLIENT from './Entities/Client'
 import * as PIECE from './Entities/Piece'
+import * as GL from './GameLogic';
 
 interface updateInfo{
   users:CLIENT.Client[],
@@ -37,14 +38,19 @@ export default class Server  {
     private persistentBlocks: BLOCK.Block[];
     public users: CLIENT.Client[];
 
+    private gameLogic: GL.GameLogic;
+
+
     //serverTime
     public currentSecond:number;
-
 
     constructor(){
       //Data storage, local only for now.
       this.persistentBlocks = [];
       this.users = [];
+
+      //init the game logic
+      this.gameLogic = new GL.GameLogic();
 
       //start the server
       this.initServer("80");
@@ -168,8 +174,6 @@ export default class Server  {
 
     }
 
-    
-
     //on move
     move(newSocket:any, info:any){     
 
@@ -244,13 +248,12 @@ export default class Server  {
         info.users = this.users;
         info.serverTime = this.currentSecond;
         this.io.sockets.emit('UPDATE', JSON.stringify(info));
+
+        this.gameLogic.lineClear(this.persistentBlocks);
    
               
-      },50);
+      },500);
       
     }
-
- 
-
 
 }
