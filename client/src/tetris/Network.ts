@@ -107,8 +107,6 @@ export const updateAllPlayers = (clients:Client[], game:Tetris) => {
     });
 }
 
-
-
 export const onNewPlayer = (client:any, game:Tetris) =>{
 
     if(game.clientId!==client.id){
@@ -138,7 +136,6 @@ export const onPlayerDisconnect = (client:any, game:Tetris) => {
     }
 
 }
-
 interface UpdateInfo{
     users:Client[],
     persistentBlocks:Block[],
@@ -202,6 +199,7 @@ interface Message{
     id:string,
     dir:string,
 }
+
 export const sendCommand = (command:string, game:Tetris) =>{
     const info = <Message>{};
     info['id'] = game.clientId;

@@ -78,7 +78,7 @@ class Tetris extends React.Component {
 
     //gameTime
     this.gameTimeVariables={
-      secondsPerTick: 1,
+      secondsPerTick: 10,
       syncTime: 0,
       previousTime: 0,
       secondsSinceLastUpdate: 0
@@ -110,10 +110,11 @@ class Tetris extends React.Component {
 
     this.socket.on('updateAllPlayers', (info)=> NETWORK.updateAllPlayers(info,this));
 
+    // allows the player to move again.
     this.socket.on('aknowledgeMove', ()=> {
-     // console.log("yay!!!")
       this.controlManager.freeUpControls()
-    });// allows the player to move again.
+      console.log("free up");
+    });
 
     //setup the game
     this.setupGame();
@@ -131,6 +132,7 @@ class Tetris extends React.Component {
   }
 
   update(totalTime) {
+
 
     this.controlManager.processCommand();
 
@@ -181,7 +183,7 @@ class Tetris extends React.Component {
         // @ts-ignore
         info.dir = 'down';
 
-        this.socket.emit('move', JSON.stringify(info));
+        this.socket.emit('forceDown', JSON.stringify(info));
         //move the piece
       }
 
