@@ -18,6 +18,9 @@ export class Piece {
     this.startingPosition = pPos;
     this.userData = userData;
 
+    this.ignoreCollision = 'active_piece';
+
+
     this.initClassVariables();
     this.initCollisionVariables();
     this.initRaycasters();
@@ -202,7 +205,9 @@ export class Piece {
     const intersects = [];
     allIntersections.forEach((intersection)=>{
       if (intersection.object.parent.uuid!==this.mesh.uuid) {
-        intersects.push(intersection);
+        if(intersection.object.userData.entityType!==this.ignoreCollision){
+          intersects.push(intersection);
+        }
       }
     });
 
@@ -225,7 +230,9 @@ export class Piece {
     const intersects = [];
     allIntersections.forEach((intersection)=>{
       if (intersection.object.parent.uuid!==this.mesh.uuid) {
-        intersects.push(intersection);
+        if(intersection.object.userData.entityType!==this.ignoreCollision){
+          intersects.push(intersection);
+        }
       }
     });
     if (intersects.length===0) {
@@ -245,7 +252,9 @@ export class Piece {
     const intersects = [];
     allIntersections.forEach((intersection)=>{
       if (intersection.object.parent.uuid!==this.mesh.uuid) {
-        intersects.push(intersection);
+        if(intersection.object.userData.entityType!==this.ignoreCollision){
+          intersects.push(intersection);
+        }
       }
     });
 
@@ -266,9 +275,14 @@ export class Piece {
     const intersects = [];
     allIntersections.forEach((intersection)=>{
       if (intersection.object.parent.uuid!==this.mesh.uuid) {
-        intersects.push(intersection);
+        if(intersection.object.userData.entityType!==this.ignoreCollision){
+          intersects.push(intersection);
+        }
       }
     });
+
+    
+    console.log(intersects);
 
     if (intersects.length===0) {
       this.collision_isBlocked['right'] = false;
@@ -287,7 +301,9 @@ export class Piece {
     const intersects = [];
     allIntersections.forEach((intersection)=>{
       if (intersection.object.parent.uuid!==this.mesh.uuid) {
-        intersects.push(intersection);
+        if(intersection.object.userData.entityType!==this.ignoreCollision){
+          intersects.push(intersection);
+        }
       }
     });
 
@@ -308,7 +324,9 @@ export class Piece {
     const intersects = [];
     allIntersections.forEach((intersection)=>{
       if (intersection.object.parent.uuid!==this.mesh.uuid) {
-        intersects.push(intersection);
+        if(intersection.object.userData.entityType!==this.ignoreCollision){
+          intersects.push(intersection);
+        }
       }
     });
 

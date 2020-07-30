@@ -132,8 +132,6 @@ class Tetris extends React.Component {
   }
 
   update(totalTime) {
-
-   
     if (this.currentPiece!==null) {
       this.currentPiece.update(); //update our current piece so we get all the collision
       if(this.gameState.movPlayerDown ===true){
@@ -143,7 +141,6 @@ class Tetris extends React.Component {
         this.controlManager.processCommand();
       }
     }
-    
     //changes the game state based on the number of ticks.
     if(this.gameTimeVariables.syncTime%this.gameTimeVariables.secondsPerTick===0){
       this.gameTimeVariables.secondsSinceLastUpdate = this.gameTimeVariables.syncTime - this.gameTimeVariables.previousTime;
