@@ -52,7 +52,7 @@ class Tetris extends React.Component {
   constructor(props) {
     super(props);
 
-    this.IS_DEVELOP = true;// MAKE SURE TO SET THIS TO FALSE WHEN PUSHING TO MASTER FOR A NEW BUILD
+    this.IS_DEVELOP = false;// MAKE SURE TO SET THIS TO FALSE WHEN PUSHING TO MASTER FOR A NEW BUILD
 
     this.clientId = null;
     this.socket = null;
@@ -110,10 +110,11 @@ class Tetris extends React.Component {
 
     this.socket.on('updateAllPlayers', (info)=> NETWORK.updateAllPlayers(info,this));
 
+    // allows the player to move again.
     this.socket.on('aknowledgeMove', ()=> {
-     // console.log("yay!!!")
       this.controlManager.freeUpControls()
-    });// allows the player to move again.
+
+    });
 
     //setup the game
     this.setupGame();
@@ -131,14 +132,15 @@ class Tetris extends React.Component {
   }
 
   update(totalTime) {
-
-    this.controlManager.processCommand();
-
     if (this.currentPiece!==null) {
-      //update our current piece so we get all the collision
-      this.currentPiece.update();
+      this.currentPiece.update(); //update our current piece so we get all the collision
+      if(this.gameState.movPlayerDown ===true){
+        this.forceDown()
+        this.gameState.movPlayerDown=false;
+      }else{
+        this.controlManager.processCommand();
+      }
     }
-    
     //changes the game state based on the number of ticks.
     if(this.gameTimeVariables.syncTime%this.gameTimeVariables.secondsPerTick===0){
       this.gameTimeVariables.secondsSinceLastUpdate = this.gameTimeVariables.syncTime - this.gameTimeVariables.previousTime;
@@ -148,10 +150,7 @@ class Tetris extends React.Component {
       }
     }
 
-    if(this.gameState.movPlayerDown ===true){
-     this.forceDown()
-     this.gameState.movPlayerDown=false;
-    }
+
 
 
     //this.gameStep(totalTime);//checks the time
@@ -181,7 +180,7 @@ class Tetris extends React.Component {
         // @ts-ignore
         info.dir = 'down';
 
-        this.socket.emit('move', JSON.stringify(info));
+        this.socket.emit('forceDown', JSON.stringify(info));
         //move the piece
       }
 

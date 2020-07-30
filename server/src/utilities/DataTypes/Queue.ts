@@ -28,11 +28,11 @@ export class Queue<T> {
      *  Returns the front element of the queue
      */
     front(){
-        if(this.isEmpty()){
-            return null;
+        if(this.isEmpty()===false){
+            return this.collection[0];
         }
         else{
-            return this.collection[0];
+            return null;
         }
     }
 
@@ -40,7 +40,7 @@ export class Queue<T> {
      * Returns true if the queue is empty
      */
     isEmpty():boolean{
-        return this.collection.length===0;
+        return this.collection.length>0;
     }
 
 }

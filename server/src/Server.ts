@@ -8,6 +8,8 @@ import * as BLOCK from './Entities/Block'
 import * as CLIENT from './Entities/Client'
 import * as PIECE from './Entities/Piece'
 import * as GL from './GameLogic';
+import { NetworkControlManager } from "./Controls/NetworkControlManager";
+import * as COMMAND from './Controls/Command';
 
 interface updateInfo{
   users:CLIENT.Client[],
@@ -38,7 +40,8 @@ export default class Server  {
     private persistentBlocks: BLOCK.Block[];
     public users: CLIENT.Client[];
 
-    private gameLogic: GL.GameLogic;
+    private ncm: NetworkControlManager;
+    private gl: GL.GameLogic;
 
 
     //serverTime
@@ -50,7 +53,10 @@ export default class Server  {
       this.users = [];
 
       //init the game logic
-      this.gameLogic = new GL.GameLogic();
+      this.gl = new GL.GameLogic();
+
+      //init the control manager
+      this.ncm = new NetworkControlManager();
 
       //start the server
       this.initServer("80");
@@ -73,18 +79,20 @@ export default class Server  {
 
           socket.on('disconnect', ()=>this.disconnect(socket));
 
-          socket.on('move', (info:any)=>this.move(socket,info));
+          socket.on('move', (info:any)=>this.move(info));
 
           socket.on('set_blocks',(info:any)=>this.set(socket,info));
 
           socket.on('clearBoard', ()=>this.clearBoard());
+
+          socket.on('forceDown', (info:any)=>this.forceDown(socket,info));
 
         }); 
     }
 
     //on connect
     initNewConnection(socket:any){
-
+      
       let info: CLIENT.Client =  new CLIENT.Client(new PIECE.Piece());
       //assign unique id
       info.id = socket.id;   
@@ -103,16 +111,22 @@ export default class Server  {
       }
       socket.emit('onconnected',retObject);  
 
-      //console.log(info);
+       //Add the player to the ControlManager
+       this.ncm.addPlayer(info.id);
 
       //Inform the rest of the players we have a new connection.
       this.io.sockets.emit('updateAllPlayers', this.users);
 
       // socket.emit('onPlayerSetPiece', this.persistentBlocks);
+
     }
 
     //on disconnect
     disconnect(socket:any){
+
+      //Remove the player from the ControlManager
+      this.ncm.removePlayer(socket.id);
+
       this.users.splice(this.users.findIndex((usr)=>{
         if(usr!==null){
           console.log(MyTime() + ' Client '+ socket.id + ' disconnected.');
@@ -174,9 +188,7 @@ export default class Server  {
 
     }
 
-    //on move
-    move(newSocket:any, info:any){     
-
+    forceDown(newSocket:any, info:any){
       let parsedInfo = JSON.parse(info);
       let userIndex = this.users.findIndex((usr)=>{
         if(usr!==null &&usr!==undefined){
@@ -187,43 +199,66 @@ export default class Server  {
         return;
       }
       let currentPiece: CLIENT.Client = this.users[userIndex];
-      let euler = new Euler(0,0,0,"xyz");
+      currentPiece.position.y--;
+    }
+
+    /**
+     * Adds a command to the NetworkControlManager's players queue.
+     * 
+     * @param info 
+     */
+    move(info:any){     
+
+      let parsedInfo = JSON.parse(info);
+      let userIndex = this.users.findIndex((usr)=>{
+        if(usr!==null &&usr!==undefined){
+          return usr.id===parsedInfo['id'];
+        }
+      });
+      if(userIndex===-1){
+        return;
+      }
+
+      //TODO: 
+      // Need to refactor this portion to recieve the value 
+      // from the user instead of hardcoding the value in the server
+      // but will use this for now. The command value should be generic,
+      // but here it will always be of type Vector3.
+      let cmdValue = new Vector3(0,0,0);
+
       switch(parsedInfo['dir']){
         case 'up':
-          currentPiece.position.y++;
+          cmdValue = new Vector3(0,1,0);
           break;
         case 'down':
-          currentPiece.position.y--;
+          cmdValue = new Vector3(0,-1,0);
           break;
         case 'left':
-          currentPiece.position.x--;
+          cmdValue = new Vector3(-1,0,0);
           break;
         case 'right':
-          currentPiece.position.x++;
+          cmdValue = new Vector3(1,0,0);
           break;
         case 'in':
-          currentPiece.position.z--;
+          cmdValue = new Vector3(0,0,-1);
           break;
         case 'out':
-          currentPiece.position.z++;
+          cmdValue = new Vector3(0,0,1);
           break;
         case 'ccw':
-          euler.setFromVector3(new Vector3(0,0,Math.PI/2),"xyz");
-          currentPiece['rotation'].x += euler.x;
-          currentPiece['rotation'].y += euler.y;
-          currentPiece['rotation'].z += euler.z;
+          cmdValue = new Vector3(0,0,Math.PI/2);
           break;
         case 'cw':
-          euler.setFromVector3(new Vector3(0,0,-Math.PI/2),"xyz");
-          currentPiece['rotation'].x += euler.x;
-          currentPiece['rotation'].y += euler.y;
-          currentPiece['rotation'].z += euler.z;
+          cmdValue = new Vector3(0,0,-Math.PI/2);
           break;
       }
 
-      newSocket.emit('aknowledgeMove');
-      //send everyone else our update.  
-      //newSocket.emit('')
+      let newCommand = new COMMAND.Command(
+        parsedInfo.id,
+        parsedInfo.dir,
+        cmdValue);
+  
+      this.ncm.addCommand(newCommand);
     }
 
     /**
@@ -236,6 +271,8 @@ export default class Server  {
       let start = Date.now();
         
       setInterval(()=>{
+       
+        
         let delta = Date.now()-start;//milliseconds elapsed since start
         
         let newSecond = Math.floor(delta/1000);
@@ -247,21 +284,29 @@ export default class Server  {
         const info = <updateInfo>{};
         info.users = this.users;
         info.serverTime = this.currentSecond;
-        
-        this.gameLogic.lineClear(this.persistentBlocks);
 
-        if(this.gameLogic.snycClients===true){//will be set true when linClear detects we need to clear lines
+        //TODO: process the commands from the ControlManager
+        this.ncm.pollAndProcessCommands(this.users);
+
+        
+        
+        this.gl.lineClear(this.persistentBlocks);
+
+        if(this.gl.snycClients===true){//will be set true when linClear detects we need to clear lines
           info.persistentBlocks = this.persistentBlocks;
          // console.log(info.persistentBlocks);
           this.io.sockets.emit('UPDATE', JSON.stringify(info));
-          this.gameLogic.snycClients = false;
+          this.gl.snycClients = false;
         }
         else{
+          this.io.sockets.emit('aknowledgeMove');
           this.io.sockets.emit('UPDATE', JSON.stringify(info));//normal update
         }
+
+
    
               
-      },30);
+      },27);
       
     }
 
