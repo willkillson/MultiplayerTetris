@@ -252,7 +252,7 @@ export default class Server  {
 
         if(this.gameLogic.snycClients===true){//will be set true when linClear detects we need to clear lines
           info.persistentBlocks = this.persistentBlocks;
-          console.log(info.persistentBlocks);
+         // console.log(info.persistentBlocks);
           this.io.sockets.emit('UPDATE', JSON.stringify(info));
           this.gameLogic.snycClients = false;
         }
@@ -261,7 +261,7 @@ export default class Server  {
         }
    
               
-      },50);
+      },30);
       
     }
 

@@ -113,7 +113,7 @@ export class GameLogic {
         for(let i = 0;i< determinedRows.length;i++){
             if(determinedRows[i]===true){
                 let parsedInt = parseInt(this.mapNumberToString.get(i));
-                console.log("deleting " + parsedInt.toString());
+                //console.log("deleting " + parsedInt.toString());
                 this.snycClients = true;
                 shiftAmount++;
                 for(let k = 0;k< blocks.length;k++){
