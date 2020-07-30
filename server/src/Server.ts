@@ -257,10 +257,8 @@ export default class Server  {
         parsedInfo.id,
         parsedInfo.dir,
         cmdValue);
-
-      //Adds the command to the network command manager.
+  
       this.ncm.addCommand(newCommand);
-
     }
 
     /**
@@ -273,6 +271,8 @@ export default class Server  {
       let start = Date.now();
         
       setInterval(()=>{
+       
+        
         let delta = Date.now()-start;//milliseconds elapsed since start
         
         let newSecond = Math.floor(delta/1000);
@@ -286,6 +286,9 @@ export default class Server  {
         info.serverTime = this.currentSecond;
 
         //TODO: process the commands from the ControlManager
+        this.ncm.pollAndProcessCommands(this.users);
+
+        
         
         this.gl.lineClear(this.persistentBlocks);
 
@@ -296,11 +299,14 @@ export default class Server  {
           this.gl.snycClients = false;
         }
         else{
+          this.io.sockets.emit('aknowledgeMove');
           this.io.sockets.emit('UPDATE', JSON.stringify(info));//normal update
         }
+
+
    
               
-      },1000);
+      },27);
       
     }
 

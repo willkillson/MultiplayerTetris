@@ -143,6 +143,7 @@ interface UpdateInfo{
 }
 
 export const onUpdate = (info:any, game:Tetris) =>{
+
     let updateInfo:UpdateInfo = JSON.parse(info);
     game.gameTimeVariables.syncTime = updateInfo.serverTime;
 
