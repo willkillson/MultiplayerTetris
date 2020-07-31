@@ -52,7 +52,7 @@ class Tetris extends React.Component {
   constructor(props) {
     super(props);
 
-    this.IS_DEVELOP = false;// MAKE SURE TO SET THIS TO FALSE WHEN PUSHING TO MASTER FOR A NEW BUILD
+    this.IS_DEVELOP = true;// MAKE SURE TO SET THIS TO FALSE WHEN PUSHING TO MASTER FOR A NEW BUILD
 
     this.clientId = null;
     this.socket = null;
