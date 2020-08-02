@@ -46,6 +46,9 @@ export class NetworkControlManager {
             if(cmd!==undefined){
                 //find the player
                 let index = users.findIndex(usr=>{ return usr.id===player});
+
+                console.log("Before: ");
+                console.log(users[index].position);
                 switch(cmd.cmdType){
                     case 'up':
                       users[index].position.add(cmd.cmdValue);
@@ -72,7 +75,7 @@ export class NetworkControlManager {
                         users[index].rotation.add(cmd.cmdValue);
                       break;
                   }
-                  console.log("After");
+                  console.log("After: ");
                   console.log(users[index].position);
             }
   

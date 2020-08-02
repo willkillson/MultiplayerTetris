@@ -1,7 +1,7 @@
 import Mousetrap from 'mousetrap';
 import * as CM from './ControlManager';
 
-export class Controls {
+export class KeyboardControls {
   private MouseTrap: any;
   private controlManager: CM.ControlManager;
 
@@ -30,20 +30,7 @@ export class Controls {
     this.MouseTrap.bind('j', ()=>{
       this.controlManager.addCommand('ccw');
     });
-
-    ////////////OnScreen
-    // @ts-ignore
-    window['document'].getElementById('button-left').onclick = () => {
-      controlManager.addCommand('left');
-    };
-    // @ts-ignore
-    window['document'].getElementById('button-down').onclick = () => {
-      controlManager.addCommand('down');
-    };
-    // @ts-ignore
-    window['document'].getElementById('button-right').onclick = () => {
-      controlManager.addCommand('right');
-    };
   }
+
   
 }

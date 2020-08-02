@@ -1,5 +1,8 @@
-import * as QUEUE from '../utilities/DataTypes/Queue';
-import * as NETWORK from '../Network';
+
+//LocalImports
+import * as GAME from '../Game/Game'
+import * as QUEUE from '../Util/AbstractDataTypes/Queue'
+import * as NETWORK from '../Network/ClientNetwork'
 import * as SOCKET from 'socket.io';
 
 
@@ -8,12 +11,11 @@ export class ControlManager extends QUEUE.Queue<string>{
     public isProcessingCommand: boolean; //Controls whether we can process another command or not.
     
     private socket: SOCKET.Socket;                 //The clients socket object reference for processing commands.
-    private game:any;
+    private game:GAME.Game;
 
-    constructor(game:any){
+    constructor(game:GAME.Game){
         super();
 
-        console.log(game);
         this.game = game;
         this.isProcessingCommand = false;
     }
@@ -28,10 +30,11 @@ export class ControlManager extends QUEUE.Queue<string>{
     public processCommand(){
         //TODO decouple this section from the ControlManager
        // console.log(this);
-        if(this.socket!==null && this.isProcessingCommand===false && this.isEmpty()===false ){
+        if(this.socket!==null && this.isEmpty()===false ){
             let cmd = this.dequeue();      
             if(!this.game.currentPiece.collision_isBlocked[cmd]){
-                NETWORK.sendCommand(cmd, this.game);
+                console.log(this.game.currentPiece.mesh.position);
+                //NETWORK.sendCommand(cmd, this.game);
                 this.isProcessingCommand=true;  
             }
             else{

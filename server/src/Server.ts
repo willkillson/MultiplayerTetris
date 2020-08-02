@@ -1,6 +1,6 @@
-import { Socket, createConnection } from "net";
+import * as io from 'socket.io';
 import { v4 as uuidv4 } from 'node-uuid';
-import { Vector3, Quaternion, Euler} from 'three';
+import * as THREE from 'three';
 
 //LocalImports
 import MyTime from './utilities/time';
@@ -11,10 +11,17 @@ import * as GL from './GameLogic';
 import { NetworkControlManager } from "./Controls/NetworkControlManager";
 import * as COMMAND from './Controls/Command';
 
-interface updateInfo{
-  users:CLIENT.Client[],
-  persistentBlocks: BLOCK.Block[],
-  serverTime:number
+interface UpdateInfo{
+  users:CLIENT.Client[];
+  persistentBlocks: BLOCK.Block[];
+  serverTime:number;
+}
+
+interface NewConnectionInfo{
+  users:CLIENT.Client[];
+  persistentBlocks: BLOCK.Block[];
+  serverTime:number;
+  clientId:string;
 }
 
 const normalizePort = (val:string) => {
@@ -45,7 +52,7 @@ export default class Server  {
 
 
     //serverTime
-    public currentSecond:number;
+    public serverTime:number;
 
     constructor(){
       //Data storage, local only for now.
@@ -64,16 +71,20 @@ export default class Server  {
       //makes the server constantly broadcast messages to the clients
       this.sendConstantUpdates();
 
+      //TODO: remove, used for testing.
+      this.testAddPiece();
+
+
     }
 
     initServer(port:string){
         this.port = normalizePort(process.env.PORT || port);
-        
         this.io = require('socket.io')(this.port);
         console.log(this.port);
         console.log("Listening on port: "+ this.port);
 
-        this.io.on('connection', (socket:any)=>{
+
+        this.io.on('connection', (socket:SocketIO.Socket)=>{
           
           this.initNewConnection(socket)
 
@@ -91,42 +102,32 @@ export default class Server  {
     }
 
     //on connect
-    initNewConnection(socket:any){
+    initNewConnection( socket:SocketIO.Socket ){
       
       let info: CLIENT.Client =  new CLIENT.Client(new PIECE.Piece());
       //assign unique id
       info.id = socket.id;   
-      /*
-        assign piece
-        put the client in our data store
-        announce to the server console
-      */       
+
       this.users.push(info);                                          
       console.log(MyTime() + ' Client '+ info.id + ' connected.');  
 
-      //now give the client all the information
-      const retObject ={
-        id: info.id,
-        serverTime:this.currentSecond
-      }
-      socket.emit('onconnected',retObject);  
+      const newConnectionInfo = <NewConnectionInfo>{};
+      newConnectionInfo.users = this.users;
+      newConnectionInfo.persistentBlocks = this.persistentBlocks;
+      newConnectionInfo.serverTime = this.serverTime;
+      newConnectionInfo.clientId = socket.id;
 
-       //Add the player to the ControlManager
-       this.ncm.addPlayer(info.id);
+      socket.emit('onConnected',newConnectionInfo);  
 
-      //Inform the rest of the players we have a new connection.
-      this.io.sockets.emit('updateAllPlayers', this.users);
-
-      // socket.emit('onPlayerSetPiece', this.persistentBlocks);
+      //Add the player to the ControlManager
+      this.ncm.addPlayer(info.id);
 
     }
 
     //on disconnect
-    disconnect(socket:any){
-
+    disconnect( socket:SocketIO.Socket ){
       //Remove the player from the ControlManager
       this.ncm.removePlayer(socket.id);
-
       this.users.splice(this.users.findIndex((usr)=>{
         if(usr!==null){
           console.log(MyTime() + ' Client '+ socket.id + ' disconnected.');
@@ -138,12 +139,12 @@ export default class Server  {
     }
 
     //on set
-    set(newSocket:any, info:any){
+    set( socket:SocketIO.Socket, info:any){
 
-        let blocks:Vector3[] = info.blocks;
+        let blocks:THREE.Vector3[] = info.blocks;
         let color:number = info.color;
 
-        blocks.forEach((block:Vector3) =>{
+        blocks.forEach((block:THREE.Vector3) =>{
           
           let newBlock = new BLOCK.Block(block,color);
           this.persistentBlocks.push(newBlock);
@@ -178,9 +179,9 @@ export default class Server  {
         usr.generateNewPiece();
       })
 
-      const info = <updateInfo>{};
+      const info = <UpdateInfo>{};
       info.users = this.users;
-      info.serverTime = this.currentSecond;
+      info.serverTime = this.serverTime;
       info.persistentBlocks = this.persistentBlocks;
       
       this.io.sockets.emit('UPDATE', JSON.stringify(info));
@@ -198,6 +199,8 @@ export default class Server  {
       if(userIndex===-1){
         return;
       }
+      console.log(info);
+
       let currentPiece: CLIENT.Client = this.users[userIndex];
       currentPiece.position.y--;
     }
@@ -224,32 +227,32 @@ export default class Server  {
       // from the user instead of hardcoding the value in the server
       // but will use this for now. The command value should be generic,
       // but here it will always be of type Vector3.
-      let cmdValue = new Vector3(0,0,0);
+      let cmdValue = new THREE.Vector3(0,0,0);
 
       switch(parsedInfo['dir']){
         case 'up':
-          cmdValue = new Vector3(0,1,0);
+          cmdValue = new THREE.Vector3(0,1,0);
           break;
         case 'down':
-          cmdValue = new Vector3(0,-1,0);
+          cmdValue = new THREE.Vector3(0,-1,0);
           break;
         case 'left':
-          cmdValue = new Vector3(-1,0,0);
+          cmdValue = new THREE.Vector3(-1,0,0);
           break;
         case 'right':
-          cmdValue = new Vector3(1,0,0);
+          cmdValue = new THREE.Vector3(1,0,0);
           break;
         case 'in':
-          cmdValue = new Vector3(0,0,-1);
+          cmdValue = new THREE.Vector3(0,0,-1);
           break;
         case 'out':
-          cmdValue = new Vector3(0,0,1);
+          cmdValue = new THREE.Vector3(0,0,1);
           break;
         case 'ccw':
-          cmdValue = new Vector3(0,0,Math.PI/2);
+          cmdValue = new THREE.Vector3(0,0,Math.PI/2);
           break;
         case 'cw':
-          cmdValue = new Vector3(0,0,-Math.PI/2);
+          cmdValue = new THREE.Vector3(0,0,-Math.PI/2);
           break;
       }
 
@@ -279,11 +282,11 @@ export default class Server  {
         //let newSecond = delta;
 
         //send with time,
-        this.currentSecond= newSecond;
+        this.serverTime= newSecond;
 
-        const info = <updateInfo>{};
+        const info = <UpdateInfo>{};
         info.users = this.users;
-        info.serverTime = this.currentSecond;
+        info.serverTime = this.serverTime;
 
         //TODO: process the commands from the ControlManager
         this.ncm.pollAndProcessCommands(this.users);
@@ -309,5 +312,12 @@ export default class Server  {
       },27);
       
     }
+
+    testAddPiece(){
+      let block = new BLOCK.Block(new THREE.Vector3(2,2,0),0xffffff);
+      this.persistentBlocks.push(block);
+    }
+
+
 
 }
