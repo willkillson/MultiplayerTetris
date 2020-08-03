@@ -93,72 +93,54 @@ export const levelFloor = () => {
 };
 
 export const frame = () => {
+  const width = 24;
+  const height = 20;
   
   const textureLoader = new THREE.TextureLoader();
   const metal = textureLoader.load('https://3.bp.blogspot.com/-yrh_atograU/UFhj_v6uBvI/AAAAAAAACKU/tWXypPzRhYo/s1600/Seamless+coloured+carpet+floor+texture.jpg');
-  metal.encoding = THREE.sRGBEncoding;
-  metal.anisotropy = 16;
-  const metalMaterial = new THREE.MeshBasicMaterial( {
-    map: metal,
-  });
+  const metalMaterial = new THREE.MeshLambertMaterial( {map: metal});
 
   const group = new THREE.Object3D();
-  for (let i = 0; i< 12; i++) {
-    const geo_xb = new THREE.BoxBufferGeometry(1, 1, 1);
-    const geo_xt = new THREE.BoxBufferGeometry(1, 1, 1);
-    geo_xb.name = 'wall';
-    geo_xt.name = 'wall';
-    geo_xb.translate(i, 0, 0);
-    geo_xt.translate(i, 20, 0);
-
-    const m1 = new THREE.Mesh(geo_xb, metalMaterial);
-    const m2 = new THREE.Mesh(geo_xt, metalMaterial);
-
-    m1.userData = {
+  const geometry = new THREE.BoxBufferGeometry(1, 1, 1);
+  for (let i = 0; i< height; i++) {
+    let leftWall = new THREE.Mesh(geometry, metalMaterial);
+    let rightWall = new THREE.Mesh(geometry, metalMaterial);
+    leftWall.position.set(0,i,0);
+    rightWall.position.set(width,i,0);
+    leftWall.userData = {
       entityType : "frame",
       owner : "LEVEL_1"
     }
-
-    m2.userData = {
+    rightWall.userData = {
       entityType : "frame",
       owner : "LEVEL_1"
     }
-
-    group.add(m1);
-    group.add(m2);
-
+    group.add(leftWall);
+    group.add(rightWall);
   }
 
-  for (let i = 0; i< 20; i++) {
-    const geo_yl = new THREE.BoxBufferGeometry(1, 1, 1);
-    const geo_yr = new THREE.BoxBufferGeometry(1, 1, 1);
-    geo_yl.name = 'wall';
-    geo_yr.name = 'wall';
-    geo_yl.translate(0, i, 0);
-    geo_yr.translate(11, i, 0);
-
-    const m1 = new THREE.Mesh(geo_yl, metalMaterial);
-    const m2 = new THREE.Mesh(geo_yr, metalMaterial);
-
-    m1.userData = {
+  for (let i = 0; i< width+1; i++) {
+    let bottomWall = new THREE.Mesh(geometry, metalMaterial);
+    let topWall = new THREE.Mesh(geometry, metalMaterial);
+    bottomWall.position.set(i,0,0);
+    topWall.position.set(i,height,0);
+    bottomWall.userData = {
       entityType : "frame",
       owner : "LEVEL_1"
     }
-
-    m2.userData = {
+    topWall.userData = {
       entityType : "frame",
       owner : "LEVEL_1"
     }
-
-    group.add(m1);
-    group.add(m2);
+    group.add(topWall);
+    group.add(bottomWall);
   }
-
   group.userData = {
     entityType : "frame",
     owner : "LEVEL_1"
   }
-
+  group.name = group.userData.entityType;
+  group.position.set(-5,1,0);
   return group;
 };
 

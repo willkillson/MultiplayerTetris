@@ -3,6 +3,9 @@ import * as QUEUE from '../utilities/DataTypes/Queue'
 import * as COMMAND from '../Controls/Command'
 import * as CLIENT from '../Entities/Client';
 import * as THREE from 'three';
+import * as BLOCK from '../Entities/Block'
+import * as SERVER from '../Server'
+
 import { Color } from 'three';
 import { receiveMessageOnPort } from 'worker_threads';
 
@@ -15,8 +18,11 @@ export class NetworkControlManager {
 
     //Each player will have their own queue that contains commands
     private players: Map<string,QUEUE.Queue<COMMAND.Command<THREE.Vector3>>>;
+    
+    private server:SERVER.default;
 
-    constructor(){
+    constructor(server:SERVER.default){
+        this.server = server;
         this.players = new Map();
     }
 
@@ -46,41 +52,28 @@ export class NetworkControlManager {
             if(cmd!==undefined){
                 //find the player
                 let index = users.findIndex(usr=>{ return usr.id===player});
-
-                console.log("Before: ");
-                console.log(users[index].position);
                 switch(cmd.cmdType){
-                    case 'up':
+                    case 'movement':
                       users[index].position.add(cmd.cmdValue);
                       break;
-                    case 'down':
-                      users[index].position.add(cmd.cmdValue);
+                    case 'rotation':
+                      users[index].rotation.add(cmd.cmdValue);
                       break;
-                    case 'left':
-                        users[index].position.add(cmd.cmdValue);
-                      break;
-                    case 'right':
-                        users[index].position.add(cmd.cmdValue);
-                      break;
-                    case 'in':
-                        users[index].position.add(cmd.cmdValue);
-                      break;
-                    case 'out':
-                        users[index].position.add(cmd.cmdValue);
-                      break;
-                    case 'ccw':
-                        users[index].rotation.add(cmd.cmdValue);
-                      break;
-                    case 'cw':
-                        users[index].rotation.add(cmd.cmdValue);
+                    case 'setPiece':
+                      this.server.setPiece(
+                          // @ts-ignore
+                          cmd.cmdValue.blocks,
+                          // @ts-ignore
+                        cmd.cmdValue.color,
+                        cmd.owner);
                       break;
                   }
-                  console.log("After: ");
-                  console.log(users[index].position);
             }
   
         });  
     }
+
+
 
 
 }

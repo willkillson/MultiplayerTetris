@@ -21,6 +21,7 @@ export const createBlock = (scene:THREE.Scene,
     const mesh = new THREE.Mesh(geometry,material);
     mesh.userData = userData;
     mesh.position.add(position);
+    mesh.name = mesh.userData.owner;
     scene.add(mesh);
 
 }

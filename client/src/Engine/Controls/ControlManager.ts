@@ -3,24 +3,23 @@
 import * as GAME from '../Game/Game'
 import * as QUEUE from '../Util/AbstractDataTypes/Queue'
 import * as NETWORK from '../Network/ClientNetwork'
-import * as SOCKET from 'socket.io';
+import * as T from '../Util/types';
+import * as COMMAND from './Command';
 
+export class ControlManager extends QUEUE.Queue<COMMAND.Command<any>>{
 
-export class ControlManager extends QUEUE.Queue<string>{
-
-    public isProcessingCommand: boolean; //Controls whether we can process another command or not.
-    
-    private socket: SOCKET.Socket;                 //The clients socket object reference for processing commands.
+    private isProcessingCommand: boolean;   //Controls whether we can process another command or not.             
+    private network:NETWORK.ClientNetwork;
     private game:GAME.Game;
 
-    constructor(game:GAME.Game){
+    constructor( game:GAME.Game, network:NETWORK.ClientNetwork ){
         super();
-
-        this.game = game;
         this.isProcessingCommand = false;
+        this.network = network;
+        this.game = game;
     }
 
-    public addCommand(cmd:string){
+    public addCommand(cmd:COMMAND.Command<any>){
         this.enqueue(cmd);
     }
 
@@ -28,21 +27,28 @@ export class ControlManager extends QUEUE.Queue<string>{
      * Processes commands if there are any. This function should be called once per frame.
      */
     public processCommand(){
-        //TODO decouple this section from the ControlManager
-       // console.log(this);
-        if(this.socket!==null && this.isEmpty()===false ){
-            let cmd = this.dequeue();      
-            if(!this.game.currentPiece.collision_isBlocked[cmd]){
-                console.log(this.game.currentPiece.mesh.position);
-                //NETWORK.sendCommand(cmd, this.game);
+
+        //console.log(this);
+        //console.log(this.game.currentPiece);
+        if( this.isEmpty()===false && this.isProcessingCommand===false ){
+ 
+            let command = this.dequeue();
+        
+            if(this.game.validateCommand(command)){
+                this.network.sendCommand(command);
                 this.isProcessingCommand=true;  
             }
             else{
-                console.log("blocked!");
+                if(command.cmdValue.y===-1 && this.game.currentPiece.collision_isBlocked.down){
+                    let cmd = new COMMAND.Command(this.game.clientId,'setPiece',this.game.getBlockPositions());
+                    this.game.currentPiece = null;
+                    this.isProcessingCommand=true; 
+                    this.network.sendCommand(cmd);
+                }
             }
-            
         }
     }
+    
 
     /**
      * This function is called by the sever to notify the 

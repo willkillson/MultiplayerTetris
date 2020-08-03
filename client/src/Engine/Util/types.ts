@@ -47,6 +47,7 @@ interface NetworkInfo{
 interface UserData{
     entityType: string;
     owner: string;
+    pieceType: number;
 }
 
 interface Directions {
@@ -59,8 +60,13 @@ interface Directions {
     cw: boolean;
     ccw: boolean;
 }
+interface Command{
+    clientId:string,
+    cmd:string,
+}
 
 export type{
+    Command,
     UserData,
     Directions,
     ClientInfo,

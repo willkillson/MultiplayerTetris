@@ -43,7 +43,6 @@ export class Graphics {
     public init(game:GAME.Game, 
       controlManager:CONTROLMANAGER.ControlManager,
       network:NETWORK.ClientNetwork){
-
       this.game = game;
       this.controlManager = controlManager;
       this.network = network;

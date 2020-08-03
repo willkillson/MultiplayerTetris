@@ -1,5 +1,3 @@
-
-
 /**
  * Entity for storing all information regarding
  * a command.

@@ -1,36 +1,40 @@
 import Mousetrap from 'mousetrap';
 import * as CM from './ControlManager';
+import * as T from '../Util/types';
+import * as COMMAND from './Command';
+import * as THREE from 'three';
 
 export class KeyboardControls {
   private MouseTrap: any;
   private controlManager: CM.ControlManager;
 
   constructor(controlManager:CM.ControlManager){
-
     this.controlManager = controlManager;
     this.MouseTrap = Mousetrap;
-
     // Move left
     this.MouseTrap.bind('a', ()=>{
-      this.controlManager.addCommand('left');
+      let newCommand = new COMMAND.Command("","movement", new THREE.Vector3(-1,0,0));
+      this.controlManager.addCommand(newCommand);
     });
     // Move down
     this.MouseTrap.bind('s', ()=>{
-      this.controlManager.addCommand('down');
+      let newCommand = new COMMAND.Command("","movement", new THREE.Vector3(0,-1,0));
+      this.controlManager.addCommand(newCommand);
     });
     // right
     this.MouseTrap.bind('d', ()=>{
-      this.controlManager.addCommand('right');
+      let newCommand = new COMMAND.Command("","movement", new THREE.Vector3(1,0,0));
+      this.controlManager.addCommand(newCommand);
     });
     // Rotate CW
     this.MouseTrap.bind('k', ()=>{
-      this.controlManager.addCommand('cw');
+      let newCommand = new COMMAND.Command("","rotation", new THREE.Vector3(0,0,-Math.PI/2));
+      this.controlManager.addCommand(newCommand);
     });
     // Rotate CCW
     this.MouseTrap.bind('j', ()=>{
-      this.controlManager.addCommand('ccw');
+      let newCommand = new COMMAND.Command("","rotation", new THREE.Vector3(0,0,Math.PI/2));
+      this.controlManager.addCommand(newCommand);
     });
   }
-
-  
 }
