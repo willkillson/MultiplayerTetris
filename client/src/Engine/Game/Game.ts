@@ -3,7 +3,9 @@
 import * as THREE from 'three';
 
 //LocalImports
-import * as PIECE from './entities/Piece/PlayerPiece'
+import * as PC from './entities/Piece/PieceConstants'
+import * as PIECE from './entities/Piece/Piece';
+
 import * as BOARD from './entities/Board/board'
 import * as CM from '../Controls/ControlManager'
 import * as NETWORK from '../Network/ClientNetwork'
@@ -30,7 +32,7 @@ export class Game {
     scene: THREE.Scene;
 
     //Tetris
-    currentPiece: PIECE.Piece;
+    currentPiece: PIECE.LocalPlayerPiece;
     gameState: GameState;
     gameTimeVariables: GameTimeVariables;
     clientId: string;
@@ -73,6 +75,8 @@ export class Game {
 
     public update(controlManager:CM.ControlManager){
 
+      //syncs all network information with the game information
+      //public network: T.NetworkInfo
       this.syncGame();
 
     }
@@ -117,8 +121,8 @@ export class Game {
     }
 
     public updateNetworkInfo(info: T.NetworkInfo){
-      console.log("updateNetworkInfo(info: T.NetworkInfo)");
-      console.log(info);
+      // console.log("updateNetworkInfo(info: T.NetworkInfo)");
+      // console.log(info);
       if(info.clientId!==undefined){
         this.network.clientId = info.clientId;
         this.clientId = info.clientId;
@@ -173,31 +177,84 @@ export class Game {
     //modifies positions so they are current with the network
     private syncGame(){
 
-      this.handleLocalPlayer(this.network.users);
+      this.handleLocalPlayer();
 
-      //this.handleNetworkedPlayers(users);
-
+      this.handleNetworkedPlayers();
     
       this.handlePersistantPieces();
 
     }
 
-    private handleLocalPlayer(users:TYPES.Client[]){
+    private handleLocalPlayer(){
 
       let networkUserMap = new Map(this.network.users.map(i=>[i.id,i]));
-
       if(this.currentPiece===null){
         let currentUserNetworkInfo = networkUserMap.get(this.clientId);
-        console.log(currentUserNetworkInfo);
+        let userData = <T.UserData>{};
+        userData.entityType = "playerPiece"
+        userData.owner = this.clientId;
+        let rot  = currentUserNetworkInfo.rotation;
+        let pos = currentUserNetworkInfo.position;
+        let pt = currentUserNetworkInfo.pieceType;
+        let pm = PC.PIECE_MAP;
+        let bpm = PC.BLOCK_POSITIONS;
+        let pcm = PC.PIECE_COLOR_MAP;
+        //
+        let bp = bpm.get(pm.get(pt));
+        this.currentPiece = new PIECE.LocalPlayerPiece(this.scene,bp,pcm.get(pt),pos,rot,userData);
 
       }else{
         //update the local players piece position
+        let cuni = networkUserMap.get(this.clientId);
+        this.currentPiece.mesh.position.set(cuni.position.x,cuni.position.y,cuni.position.z); 
+        this.currentPiece.mesh.rotation.x += cuni.rotation.x;
+        this.currentPiece.mesh.rotation.y += cuni.rotation.y;
+        this.currentPiece.mesh.rotation.z += cuni.rotation.z;
       }
-
     }
 
-    private handleNetworkedPlayers(users:TYPES.Client[]){
+    private handleNetworkedPlayers(){
 
+      let networkUserMap = new Map(this.network.users.map(i=>[i.id,i]));
+      let localPieceMap = new Map(this.scene.children.map(i=>[i.userData.owner,i]));
+      //console.log(localPieceMap);
+
+      this.network.users.forEach(usr=>{
+        if(usr.id!==this.clientId){
+          let index = EXT.getObjectByUserData(this.scene,'owner',usr.id);
+          if(index===undefined){
+            //add any users that are in network.users but not in the network.users
+            let userNetworkInfo = networkUserMap.get(usr.id);
+            let userData = <T.UserData>{};
+            userData.entityType = "playerPiece"
+            userData.owner = usr.id;
+            let rot  = userNetworkInfo.rotation;
+            let pos = userNetworkInfo.position;
+            let pt = userNetworkInfo.pieceType;
+            let pm = PC.PIECE_MAP;
+            let bpm = PC.BLOCK_POSITIONS;
+            let pcm = PC.PIECE_COLOR_MAP;
+            //
+            let bp = bpm.get(pm.get(pt));
+            new PIECE.NetworkedPlayerPiece(this.scene,bp,pcm.get(pt),pos,rot,userData);
+            console.log("creating");
+          }else{
+          //else update those users
+            let userPiece = localPieceMap.get(usr.id);
+            userPiece.position.set(usr.position.x,usr.position.y,usr.position.z); 
+            userPiece.rotation.x += usr.rotation.x;
+            userPiece.rotation.y += usr.rotation.y;
+            userPiece.rotation.z += usr.rotation.z;
+          }
+        }
+
+
+      })
+      
+
+      //remove any users that are local but not in the network.users
+      
+      
     }
 
     private handlePersistantPieces(){

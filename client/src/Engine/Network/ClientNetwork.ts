@@ -6,7 +6,6 @@ import * as THREE from 'three';
 //LocalImports
 import * as GAME from '../Game/Game';
 import * as GRAPHICS from '../Graphics/Graphics';
-import * as PIECE from '../Game/entities/Piece/PlayerPiece';
 import * as T from '../Util/types'
 
 
@@ -124,20 +123,24 @@ export class ClientNetwork {
     }
 
     private onUpdate(info:any){
-        let updateInfo:T.UpdateInfo = JSON.parse(info);
-        this.game.gameTimeVariables.syncTime = updateInfo.serverTime;
-        if(updateInfo.persistentBlocks!==undefined){
-        //clear the game
-           if(updateInfo.persistentBlocks.length===0){
-                //all persistent blocks are removed, reset game
-                this.game.resetGame();
-           }else{
-            //we have a line clear or something.
-                this.game.resetGame();
-                this.updateBlocks(updateInfo.persistentBlocks);
-           }
-       }
-       this.updateAllPlayers(updateInfo.users);
+        let updateInfo:T.NetworkInfo = JSON.parse(info);
+
+        this.game.updateNetworkInfo(updateInfo);
+
+    //     console.log(updateInfo);
+    //     this.game.gameTimeVariables.syncTime = updateInfo.serverTime;
+    //     if(updateInfo.persistentBlocks!==undefined){
+    //     //clear the game
+    //        if(updateInfo.persistentBlocks.length===0){
+    //             //all persistent blocks are removed, reset game
+    //             this.game.resetGame();
+    //        }else{
+    //         //we have a line clear or something.
+    //             this.game.resetGame();
+    //             this.updateBlocks(updateInfo.persistentBlocks);
+    //        }
+    //    }
+    //    this.updateAllPlayers(updateInfo.users);
     }
 
     private onPlayerSetPiece(info:T.Block[]){
