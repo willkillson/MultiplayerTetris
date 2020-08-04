@@ -43,4 +43,15 @@ export class Queue<T> {
         return this.collection.length===0;
     }
 
+    /**
+     * Adds the element to the front of the que.
+     * @param element 
+     */
+    addFirst(element:T){
+        let newArray = [];
+        newArray.push(element);
+        newArray.concat(...this.collection);
+        this.collection = newArray;
+    }
+
 }

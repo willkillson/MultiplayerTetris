@@ -19,11 +19,8 @@ export class GameLogic {
 
 
     // horizontalMapper: Map<string, number>;
-    mapStringToNumber: Map<string, number>;
-    mapNumberToString: Map<number, string>;
-
-    arrayOfValues: number[];
-    arrayOfKeys: string[];
+    horiIndexToPosition: Map<number, number>;
+    vertiIndexToPosition: Map<number, number>;
 
     constructor(){
         
@@ -33,39 +30,45 @@ export class GameLogic {
         {z=0}
         */
 
-        this.leftBounds = -4;
-        this.rightBounds = 5;
+
 
 
         //TODO Calculate this number based on this.leftBounds and this.rightBounds
-        this.lengthHorizontal = 10; 
+        this.lengthHorizontal = 24-1; 
 
         this.snycClients = false;
 
 
-
-        // this.horizontalMapper = new Map<string,number>();
-        // let k =0;
-        // for(let i = this.leftBounds;i<=this.rightBounds;i++,k++){
-        //     this.horizontalMapper.set(i.toString(),k);    
-        // }
-
         this.collumnChecker = [];
-        this.topBounds = 19;
-        this.botBounds = 1;
+ 
 
-        this.mapStringToNumber = new Map<string,number>();
-        let k = 0;
-        for(let i = this.botBounds;i<=this.topBounds;i++,k++){
-            this.mapStringToNumber.set(i.toString(),k);    
-            this.collumnChecker.push([]);
+        this.horiIndexToPosition = new Map<number,number>();
+        this.vertiIndexToPosition = new Map<number,number>();
+        
+        let leftBounds = -9;
+        let rightBounds = 13;
+
+        let i = 0;
+        while(leftBounds<=rightBounds){
+            this.horiIndexToPosition.set(i,leftBounds);
+            leftBounds++;
+            i++;
         }
-        this.arrayOfValues = Array.from(this.mapStringToNumber.values());        
-        this.arrayOfKeys = Array.from(this.mapStringToNumber.keys());
-        this.mapNumberToString = new Map<number, string>();
-        for(let i = 0;i< this.arrayOfValues.length;i++){
-            this.mapNumberToString.set(this.arrayOfValues[i],this.arrayOfKeys[i]);
+
+        this.topBounds = 20;
+        let botBounds = 2;
+
+        i = 0;
+        while(botBounds<=this.topBounds){
+            this.vertiIndexToPosition.set(i,botBounds);
+            botBounds++;
+            i++;
         }
+
+       // console.log(this.horiIndexToPosition);
+
+        //console.log(this.vertiIndexToPosition);
+
 
     }
 
@@ -74,22 +77,49 @@ export class GameLogic {
      */
     public lineClear(blocks:BLOCK.Block[]){
 
-        //Add all the blocks
-        const rowCount = this.calculateTotalBlocksInEachRow(blocks);
-        //determine which rows are full
-        const determinedRows = this.determineWhichRowsAreFull(rowCount);
-        //remove those rows that are full
-        this.removeRowsThatAreFull(blocks,determinedRows);
+        //console.log(blocks);
 
-       //this.print(rowCount, determinedRows);
+        //Add all the blocks
+        let rowCount = this.calculateTotalBlocksInEachRow(blocks);
+
+        //console.log(rowCount);
+        let str = "";
+        for(let i = 0;i< rowCount.length;i++){
+            str += " "+rowCount[i].length;
+        }
+        //console.log(str);
+        // //determine which rows are full
+        const determinedRows = this.determineWhichRowsAreFull(rowCount);
+
+        // //remove those rows that are full
+
+        // //console.log(rowCount);
+        // console.log(determinedRows);
+
+        // determinedRows.findIndex()
+
+        let index = determinedRows.findIndex(e=>{
+            return e ===true;
+        })
+        if(index!==-1){
+            // console.log("Before: ");
+            // console.log(blocks);
+            this.removeRowsThatAreFull(blocks,determinedRows);
+            // console.log("After: ");
+            // console.log(blocks);
+        }
+
+        //this.print(rowCount, determinedRows);
 
     }
 
-    private calculateTotalBlocksInEachRow(blocks:BLOCK.Block[]):BLOCK.Block[][]{
+    private calculateTotalBlocksInEachRow(blocks:BLOCK.Block[]){
+        let verticalArray = Array.from(this.vertiIndexToPosition.keys());
+        //console.log(verticalArray);
         let rowCount:BLOCK.Block[][] = []; 
-        for(let i = 0;i< this.arrayOfValues.length;i++){
+        for(let i = 0;i< verticalArray.length;i++){
             rowCount[i] = blocks.filter((block:BLOCK.Block)=>{
-                return block.position.y === parseInt(this.mapNumberToString.get(i));
+                return block.position.y === this.vertiIndexToPosition.get(i);
             })
         }
         return rowCount;
@@ -112,8 +142,8 @@ export class GameLogic {
         let shiftAmount = 0;
         for(let i = 0;i< determinedRows.length;i++){
             if(determinedRows[i]===true){
-                let parsedInt = parseInt(this.mapNumberToString.get(i));
-                //console.log("deleting " + parsedInt.toString());
+                let parsedInt = this.vertiIndexToPosition.get(i);
+               // console.log("deleting " + parsedInt.toString());
                 this.snycClients = true;
                 shiftAmount++;
                 for(let k = 0;k< blocks.length;k++){
@@ -122,15 +152,17 @@ export class GameLogic {
                         k = -1;
                     }
                 }
-                this.shiftEverythingAbove(parsedInt,blocks);
+                this.shiftEverythingAbove( parsedInt,blocks );
             }
         }
         return shiftAmount;
     }
 
-    private shiftEverythingAbove(num:number,blocks:BLOCK.Block[],){
+    private shiftEverythingAbove(num:number,blocks:BLOCK.Block[]){
         let myNum = num;
+
         while(myNum<=this.topBounds){
+            
             for(let k = 0;k< blocks.length;k++){
                 if(blocks[k].position.y === myNum){
                     blocks[k].position.y--; 
@@ -140,13 +172,10 @@ export class GameLogic {
         }
     }
 
-    private print(rowCount:BLOCK.Block[][], determineWhichRowsAreFull:boolean[]){
-        console.log("TICK");
-        for(let i = 0;i< this.arrayOfValues.length;i++){
-            console.log("row " + this.mapNumberToString.get(i) +": " + rowCount[i].length.toString() +" shouldClear: " + determineWhichRowsAreFull[i].toString());
-        }
- 
-    }
+    // private print(rowCount:BLOCK.Block[][], determineWhichRowsAreFull:boolean[]){
+    //     console.log("TICK");
+    //     console.log("row " + this.mapNumberToString.get(0) +": " + rowCount[0].length.toString() +" shouldClear: " + determineWhichRowsAreFull[0].toString());
+    // }
 
 
 }

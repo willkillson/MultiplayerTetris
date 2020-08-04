@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@types/mousetrap": "^1.6.3",
+    "@types/socket.io": "^2.1.10",
     "bootstrap": "^4.5.0",
     "mousetrap": "^1.6.5",
     "react": "^16.13.1",

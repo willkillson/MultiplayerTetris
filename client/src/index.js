@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Tetris from './tetris/Tetris';
-
+import * as ENGINE from './Engine/Engine'
 
 import Container from 'react-bootstrap/Container';
 import Button from 'react-bootstrap/Button';
@@ -13,7 +12,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 ReactDOM.render(
     <React.StrictMode>
         <Container id="myCanvas">
-          <Tetris></Tetris>
+          <ENGINE.Engine></ENGINE.Engine>
         </Container>
         <Container fixed='true'>
           <Row>
