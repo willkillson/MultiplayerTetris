@@ -7,7 +7,7 @@ export class Piece{
   
     constructor(){
         //assign position
-        this.position = new THREE.Vector3(0,18,0);
+        this.position = new THREE.Vector3(Math.floor(Math.random()*13)-5,18,0);
         
         //assign euler angle
         this.rotation = new THREE.Vector3(0,0,0);

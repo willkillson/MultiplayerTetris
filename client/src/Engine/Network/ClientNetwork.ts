@@ -25,7 +25,7 @@ export class ClientNetwork {
         if (isDevelop) {
             this.socket = io('192.168.1.2:80');
         } else {
-            this.socket = io('ec2-13-56-213-252.us-west-1.compute.amazonaws.com:80');
+            this.socket = io('willkillson.ddns.net:80');
         }
 
         this.socket.on('onConnected', (newClient)=> this.onConnected(newClient));
