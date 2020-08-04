@@ -30,26 +30,28 @@ export class ControlManager extends QUEUE.Queue<COMMAND.Command<any>>{
 
         //console.log(this);
         //console.log(this.game.currentPiece);
-        if( this.isEmpty()===false && this.isProcessingCommand===false ){
- 
+        if(this.game.gameState.resetGame){
+            let cmd = new COMMAND.Command(this.game.clientId,'reset', 'reset');
+            this.game.gameState.resetGame = false;
+            this.network.sendCommand(cmd);
+        }
+        if( !this.isEmpty() && !this.isProcessingCommand ){
             let command = this.dequeue();
-        
             if(this.game.validateCommand(command)){
                 this.network.sendCommand(command);
                 this.isProcessingCommand=true;  
             }
-            else{
-                if(command.cmdValue.y===-1 && this.game.currentPiece.collision_isBlocked.down){
-                    let cmd = new COMMAND.Command(this.game.clientId,'setPiece',this.game.getBlockPositions());
-                    this.game.currentPiece = null;
-                    this.isProcessingCommand=true; 
-                    this.network.sendCommand(cmd);
-                }
+            else if(command.cmdValue.y===-1 && this.game.currentPiece.collision_isBlocked.down && this.game.currentPiece!==null)
+            {
+                let cmd = new COMMAND.Command(this.game.clientId,'setPiece',this.game.getBlockPositions());
+                this.game.gameState.waitingForUpdate = true;
+                this.game.currentPiece = null; 
+                this.network.sendCommand(cmd);
             }
         }
+        
     }
     
-
     /**
      * This function is called by the sever to notify the 
      * control manager that a command has been processed.

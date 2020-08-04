@@ -42,9 +42,11 @@ const normalizePort = (val:string) => {
 
 export default class Server  {
 
+    public userSockets:Map<string, SocketIO.Socket>; 
+
     private port:string|number|false;
     private io: any;
-    private persistentBlocks: BLOCK.Block[];
+    public persistentBlocks: BLOCK.Block[];
     public users: CLIENT.Client[];
 
     private ncm: NetworkControlManager;
@@ -74,8 +76,12 @@ export default class Server  {
     }
 
     private initServer(port:string){
+      
+        this.userSockets = new Map();
+
         this.port = normalizePort(process.env.PORT || port);
         this.io = require('socket.io')(this.port);
+        this.gl.snycClients=true;
         console.log(this.port);
         console.log("Listening on port: "+ this.port);
 
@@ -99,10 +105,13 @@ export default class Server  {
     }
 
     private connection( socket:SocketIO.Socket ){
+
+      
       
       let info: CLIENT.Client =  new CLIENT.Client(new PIECE.Piece());
       //assign unique id
       info.id = socket.id;   
+      this.userSockets.set(socket.id,socket);
 
       this.users.push(info);                                          
       console.log(MyTime() + ' Client '+ info.id + ' connected.');  
@@ -120,9 +129,12 @@ export default class Server  {
 
     }
 
+
     private disconnect( socket:SocketIO.Socket ){
       //Remove the player from the ControlManager
       this.ncm.removePlayer(socket.id);
+      this.userSockets.delete(socket.id);
+
       this.users.splice(this.users.findIndex((usr)=>{
         if(usr!==null){
           console.log(MyTime() + ' Client '+ socket.id + ' disconnected.');
@@ -158,6 +170,8 @@ export default class Server  {
       })
       this.users[index].generateNewPiece();
       this.gl.snycClients=true;
+
+
     }
 
     private sendConstantUpdates(){
@@ -169,22 +183,38 @@ export default class Server  {
           let newSecond = Math.floor(delta/1000);
           this.serverTime= newSecond;
 
+          
+          this.gl.lineClear(this.persistentBlocks);
+          this.ncm.pollAndProcessCommands(this.users);
+
           const info = <UpdateInfo>{};
           info.users = this.users;
           info.serverTime = this.serverTime;
 
-          this.ncm.pollAndProcessCommands(this.users);
-          this.gl.lineClear(this.persistentBlocks);
           if(this.gl.snycClients===true){
-            info.persistentBlocks = this.persistentBlocks;
-            info.users = this.users;
-            this.io.sockets.emit('UPDATE', JSON.stringify(info));
-            this.gl.snycClients = false;
+            info.persistentBlocks = this.persistentBlocks; //attach persistentBlocks
+            this.gl.snycClients = false;  
+                  
           }
-          else{
-            this.io.sockets.emit('UPDATE', JSON.stringify(info));//normal update
+
+          //check if we need to reset
+
+          let index = this.persistentBlocks.findIndex(block=>{
+            return block.position.y===18;
+          })
+          if(index!==-1){
+            this.persistentBlocks= [];
+            this.users.forEach(usr=>{
+              usr.generateNewPiece();
+            })
+            
           }
-          this.io.sockets.emit('freeControls');
-        },30);
+          
+          this.io.sockets.emit('UPDATE', JSON.stringify(info));
+
+          
+        },15);
+
+        
     }
 }

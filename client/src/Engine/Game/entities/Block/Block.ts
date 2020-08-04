@@ -17,7 +17,7 @@ export const createBlock = (scene:THREE.Scene,
     position:THREE.Vector3) => {
     
     const geometry = new THREE.BoxGeometry(1,1,1);
-    const material = new THREE.MeshBasicMaterial( {color: pColor} );
+    const material = new THREE.MeshLambertMaterial( {color: pColor} );
     const mesh = new THREE.Mesh(geometry,material);
     mesh.userData = userData;
     mesh.position.add(position);

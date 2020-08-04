@@ -15,7 +15,9 @@ import * as BLOCK from './entities/Block/Block'
 import * as COMMAND from '../Controls/Command';
 
 interface GameState{
-    movPlayerDown
+    movPlayerDown:boolean;
+    waitingForUpdate:boolean;
+    resetGame:boolean;
 }
   
 interface GameTimeVariables{
@@ -43,16 +45,19 @@ export class Game {
         this.scene = new THREE.Scene();
         this.network = <T.NetworkInfo>{};
 
-        this.gameState = {
-            //when true, the game will force the player to move down
-            movPlayerDown:false
-        }
+        this.gameState = <GameState>{};
+        // When true, the game will force the player to move down.
+        this.gameState.movPlayerDown = false;
+        // When true, the game will wait for an update from the server.
+        this.gameState.waitingForUpdate = false;
+        this.gameState.resetGame = false;
+            
         // default game values
         this.currentPiece = null;
         this.networkedPieces = [];
         //gameTime
         this.gameTimeVariables = {
-            secondsPerTick: 2,
+            secondsPerTick: 1,
             syncTime: 0,
             previousTime: 0,
             secondsSinceLastUpdate: 0
@@ -89,14 +94,20 @@ export class Game {
     }
 
     public update(controlManager:CM.ControlManager){
+      
+      if(!this.gameState.waitingForUpdate){
+        this.syncGame();
+      }
+      
 
       //syncs all network information with the game information
       //public network: T.NetworkInfo
       //console.log(this.gameTimeVariables);
       //console.log(this);
 
-      this.syncGame();
+     
       if (this.currentPiece!==null) {
+        
         if(this.gameState.movPlayerDown ===true){
             //this.forceDown(network
             let newCommand = new COMMAND.Command(this.clientId,'movement',new THREE.Vector3(0,-1,0));
@@ -107,6 +118,8 @@ export class Game {
         }
       }
 
+
+
       //changes the game state based on the number of ticks.
       if(this.gameTimeVariables.syncTime%this.gameTimeVariables.secondsPerTick===0){
           this.gameTimeVariables.secondsSinceLastUpdate = this.gameTimeVariables.syncTime - this.gameTimeVariables.previousTime;
@@ -116,12 +129,11 @@ export class Game {
           }
       }
 
+
+
     }
 
     public updateNetworkInfo(info: T.NetworkInfo){
-        // console.log("updateNetworkInfo(info: T.NetworkInfo)");
-        // console.log(info);
-        
         if(info.serverTime!==undefined){
           this.gameTimeVariables.syncTime = info.serverTime;
         }
@@ -133,8 +145,9 @@ export class Game {
           this.network.persistentBlocks = info.persistentBlocks;
         if(info.serverTime!==undefined)
           this.network.serverTime = info.serverTime;
-        if(info.users!==undefined)
+        if(info.users!==undefined){
           this.network.users = info.users;
+        }
     }
 
     //Tetris
@@ -151,81 +164,57 @@ export class Game {
     //Tetris
     resetGame(){
 
-        // let inActivePieces = this.scene.children.filter((child)=>{
-        //   return child.userData.entityType==='inactive_piece';
-        // });
-        // //console.log(inActivePieces);
-        // inActivePieces.forEach((piece)=>{
-        //   this.scene.remove(piece);
-        // })
+        let inActivePieces = this.scene.children.filter((child)=>{
+          return child.userData.entityType==='inactive_piece';
+        });
+        //console.log(inActivePieces);
+        inActivePieces.forEach((piece)=>{
+          this.scene.remove(piece);
+        })
 
     }
 
     //modifies positions so they are current with the network
     private syncGame(){
-      const networkUserMap = new Map(this.network.users.map(i=>[i.id,i]));
-      const localPieceMap = new Map(this.scene.children.map(i=>[i.userData.owner,i]));
 
-      this.handleLocalPlayer( networkUserMap,localPieceMap );
+      this.handleLocalPlayer();
+      this.handleNetworkedPlayers();
+      this.handlePersistantPieces();
 
-      console.log(networkUserMap);
-      //this.handleNetworkedPlayers( networkUserMap,localPieceMap );
-      //this.handlePersistantPieces( networkUserMap,localPieceMap );
-      //console.log(this.currentPiece.blocks);
- 
     }
 
-    private handleLocalPlayer( networkUserMap,localPieceMap ){
-      if(this.currentPiece===null){
-        //TODO: this could be refactored into its own code once the 
-        //piece is assigned null on 'set'
-        //remove any local piece that is still in our scene.
-        this.scene.children
-        .filter((child)=> {return child.userData.owner===this.clientId})
-        .forEach((piece)=>{this.scene.remove(piece)});
-
-        let currentUserNetworkInfo = networkUserMap.get(this.clientId);
-        let rot  = currentUserNetworkInfo.rotation;
-        let pos = currentUserNetworkInfo.position;
-        let pt = currentUserNetworkInfo.pieceType;
-
-        let userData = <T.UserData>{};
-        userData.entityType = "playerPiece"
-        userData.owner = this.clientId;
-        userData.pieceType = pt;
-
-        let pm = PC.PIECE_MAP;
-        let bpm = PC.BLOCK_POSITIONS;
-        let pcm = PC.PIECE_COLOR_MAP;
-        console.log("LOCAL_PLAYER_CREATE: " + pm.get(pt));
-        //
-        let bp = bpm.get(pm.get(pt));
-        this.currentPiece = new PIECE.LocalPlayerPiece(this.scene,bp,pcm.get(pt),pos,rot,userData);
-
+    private handleLocalPlayer(){
+      let networkUserMap = new Map(this.network.users.map(i=>[i.id,i]));
+      let currentUserNetworkInfo = networkUserMap.get(this.clientId);
+      if( this.currentPiece===null ){
+          // Remove any local meshes that is still in our scene.
+          this.scene.children
+          .filter((child)=> {return child.userData.owner===this.clientId})
+          .forEach((piece)=>{this.scene.remove(piece)});
+          // Create the new piece.
+          networkUserMap = new Map(this.network.users.map(i=>[i.id,i]));
+          currentUserNetworkInfo = networkUserMap.get(this.clientId);
+          this.currentPiece = new PIECE.LocalPlayerPiece(this.scene, currentUserNetworkInfo);    
+          
       }else{
-              //else update those users
-        //need to change the model if its not the same
-        let currentLocalPiece = localPieceMap.get(this.clientId);
-        let netUserPiece = networkUserMap.get(this.clientId);
-        let pm = PC.PIECE_MAP;
-        console.log("LocalPeice");
-        console.log(pm.get(currentLocalPiece.userData.pieceType));
-        console.log("LocalPeice on the Network");
-        console.log(pm.get(netUserPiece.pieceType));
-
-        let cuni = networkUserMap.get(this.clientId);
-        this.currentPiece.mesh.position.set(cuni.position.x,cuni.position.y,cuni.position.z); 
-        this.currentPiece.mesh.rotation.set(cuni.rotation.x,cuni.rotation.y,cuni.rotation.z);
+        if(this.currentPiece.mesh.userData.pieceType!==currentUserNetworkInfo.pieceType){
+          this.currentPiece = new PIECE.LocalPlayerPiece(this.scene, currentUserNetworkInfo);
+        }
+        this.currentPiece.syncPiece(currentUserNetworkInfo);
       }
     }
 
-    private handleNetworkedPlayers(networkUserMap, localPieceMap){    
+    private handleNetworkedPlayers(){    
 
-      // this.networkedPieces.forEach(piece=>{
-      //   if(networkUserMap.get(piece.mesh.userData.owner)!==undefined){
-      //     piece.syncPiece(networkUserMap.get(piece.mesh.userData.owner))
-      //   }
-      // });
+      let networkUserMap = new Map(this.network.users.map(i=>[i.id,i]));
+      let localPieceMap = new Map(this.scene.children.map(i=>[i.userData.owner,i]));
+      console.log(localPieceMap);
+
+      this.networkedPieces.forEach(piece=>{
+        if(networkUserMap.get(piece.mesh.userData.owner)!==undefined){
+          piece.syncPiece(networkUserMap.get(piece.mesh.userData.owner))
+        }
+      });
       this.network.users.forEach(usr=>{
         if(usr.id!==this.clientId){
           let index = EXT.getObjectByUserData(this.scene,'owner',usr.id);
@@ -253,15 +242,11 @@ export class Game {
             let netUserPiece = networkUserMap.get(usr.id);
             let pm = PC.PIECE_MAP;
             
-            console.log("Local NetworkedPiece");
-            console.log(pm.get(currentLocalPiece.userData.pieceType));
-            console.log("NetworkedPiece on the network");
-            console.log(pm.get(netUserPiece.pieceType));
+            // console.log("Local NetworkedPiece");
+            // console.log(pm.get(currentLocalPiece.userData.pieceType));
+            // console.log("NetworkedPiece on the network");
+            // console.log(pm.get(netUserPiece.pieceType));
 
-
-
-            
-            
             currentLocalPiece.position.set(usr.position.x,usr.position.y,usr.position.z); 
             currentLocalPiece.rotation.set(usr.rotation.x,usr.rotation.y,usr.rotation.z);
           }
@@ -278,17 +263,30 @@ export class Game {
 
     }
 
-    private handlePersistantPieces( networkPieceMap,localPieceMap ){
-      let persistentBlocks = this.network.persistentBlocks;        
+    private handlePersistantPieces(){
+      // //removes anything local thats not in the server
+      // this.scene.children.forEach(child=>{
+      //   if(child.userData.entityType === 'persistentBlock'){  
+      //     if(!networkUserMap.has(child.userData.owner)){
+      //       this.scene.remove(child);
+      //     }
+      //   }
+      // })
+
+      let networkUserMap = new Map(this.network.users.map(i=>[i.id,i]));
+      //let localPieceMap = new Map(this.scene.children.map(i=>[i.userData.owner,i]));
+      let persistentBlocks = this.network.persistentBlocks;   
       //Make sure everything on the server is in thed local scene
-      
+
+      let localPersistentBlocks = this.scene.children.filter((child)=>{
+        return child.userData.pieceType===1337;
+      });
+
+      let LPBMap = new Map(localPersistentBlocks.map(i=>[i.userData.owner,i]));
+      let NPBMap = new Map(this.network.persistentBlocks.map(i=>[i.uuid,i]));
+
       persistentBlocks.forEach((block)=>{
-        if(!localPieceMap.has(block.uuid)){
-          console.log(persistentBlocks);
-          console.log("Creating block");
-          console.log(localPieceMap);
-          console.log(block.uuid);
-          //create the block in the scene
+        if(!LPBMap.has(block.uuid)){
           let userData = <T.UserData>{};
           userData.entityType = "persistentBlock"
           userData.owner = block.uuid;
@@ -296,14 +294,19 @@ export class Game {
           BLOCK.createBlock(this.scene,userData,block.color,block.position);
         }          
       });
-      //removes anything local thats not in the server
-      this.scene.children.forEach(child=>{
-        if(child.userData.entityType === 'persistentBlock'){  
-          if(!networkPieceMap.has(child.userData.owner)){
-            this.scene.remove(child);
-          }
+
+      localPersistentBlocks.forEach(block=>{
+        if(!NPBMap.has(block.userData.owner)){
+          this.scene.remove(block);
+        }else{
+          block.position.set(
+            NPBMap.get(block.userData.owner).position.x,
+            NPBMap.get(block.userData.owner).position.y,
+            NPBMap.get(block.userData.owner).position.z);
         }
       })
+
+
     }
 
     public validateCommand( command:COMMAND.Command<any> ): boolean{

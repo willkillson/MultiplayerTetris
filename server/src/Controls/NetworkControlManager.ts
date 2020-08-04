@@ -55,9 +55,11 @@ export class NetworkControlManager {
                 switch(cmd.cmdType){
                     case 'movement':
                       users[index].position.add(cmd.cmdValue);
+                      this.server.userSockets.get(player).emit('freeControls');
                       break;
                     case 'rotation':
                       users[index].rotation.add(cmd.cmdValue);
+                      this.server.userSockets.get(player).emit('freeControls');
                       break;
                     case 'setPiece':
                       this.server.setPiece(
@@ -66,7 +68,12 @@ export class NetworkControlManager {
                           // @ts-ignore
                         cmd.cmdValue.color,
                         cmd.owner);
+                        this.server.userSockets.get(player).emit('clearWaitingFlag');
+                        
                       break;
+                      case 'reset':
+                          this.server.persistentBlocks = [];
+                          break;
                   }
             }
   

@@ -31,12 +31,11 @@ export class ClientNetwork {
         this.socket.on('onConnected', (newClient)=> this.onConnected(newClient));
         this.socket.on('UPDATE', (info)=> this.onUpdate(info));
         this.socket.on('freeControls', ()=> this.freeControls());
+        this.socket.on('clearWaitingFlag', ()=> this.clearWaitingFlag());
 
     }
 
-    private onConnected(info:T.NewConnectionInfo) {
-        console.log("onConnected - info:NewConnectionInfo")
-        console.log(info)        
+    private onConnected(info:T.NewConnectionInfo) {   
         this.game.updateNetworkInfo(info);
     }
 
@@ -45,9 +44,12 @@ export class ClientNetwork {
         this.game.updateNetworkInfo(updateInfo);
     }
 
+    private clearWaitingFlag(){
+        this.game.gameState.waitingForUpdate=false;
+    }
+
     private freeControls(){
         this.engine.controlManager.freeUpControls();
-        //this.game.
     }
 
     public sendCommand( command:COMMAND.Command<any> ){

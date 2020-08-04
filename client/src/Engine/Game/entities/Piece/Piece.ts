@@ -4,11 +4,6 @@ import * as THREE from 'three';
 import * as MyConstants from './PieceConstants';
 import * as T from '../../../Util/types';
 
-interface UserData{
-  entityType: string;
-  owner: string;
-}
-
 interface Directions {
   up: boolean;
   down: boolean;
@@ -44,17 +39,27 @@ export class LocalPlayerPiece {
 
   constructor(
     scene:THREE.Scene, 
-    blocks:THREE.Vector3[], 
-    color:number, 
-    position:THREE.Vector3, 
-    rotation:THREE.Vector3, 
-    userData:UserData) {
+    client:T.Client) {
 
-    this.color = color;
-    this.blocks = blocks;
+      /*
+
+      interface UserData
+        entityType: string;
+        owner: string;
+        pieceType: number;
+
+      */
+
+    let userData = <T.UserData>{};
+    userData.entityType = "playerPiece";
+    userData.owner = client.id;
+    userData.pieceType = client.pieceType;
+
+    this.color = MyConstants.PIECE_COLOR_MAP.get(client.pieceType);;
+    this.blocks = MyConstants.BLOCK_POSITIONS.get(MyConstants.PIECE_MAP.get(client.pieceType));
     this.collidesWith = new Map();
     this.mesh = new THREE.Object3D();
-    this.mesh.position.add(position);
+    this.mesh.position.add(client.position);
     this.mesh.userData = userData;
     this.mesh.name = this.mesh.userData.entityType;
 
@@ -405,6 +410,15 @@ export class LocalPlayerPiece {
       this.collision_isBlocked['CW'] = false;
     }
   }
+
+  public syncPiece(info:T.Client){    
+    if(this.mesh.userData.pieceType!==info.pieceType){
+      console.log(Date.now().toString() +" - PIECE MISMATCH!!!!");
+    }
+    this.mesh.position.set(info.position.x,info.position.y,info.position.z);
+    this.mesh.rotation.set(info.rotation.x,info.rotation.y,info.rotation.z);   
+
+  }
 }
 
 
@@ -419,7 +433,6 @@ export class NetworkPlayerPiece {
   collidesWith: Map<string,string>;
   collision_isBlocked: Directions;
   mesh: THREE.Object3D;
-
   blocksWorldPositions: THREE.Vector3[];
 
   constructor(
@@ -428,7 +441,7 @@ export class NetworkPlayerPiece {
     color:number, 
     position:THREE.Vector3, 
     rotation:THREE.Vector3, 
-    userData:UserData) {
+    userData:T.UserData) {
 
     this.color = color;
     this.blocks = blocks;
@@ -437,6 +450,7 @@ export class NetworkPlayerPiece {
     this.mesh.position.add(position);
     this.mesh.userData = userData;
     this.mesh.name = this.mesh.userData.entityType;
+    this.mesh.userData.pieceType = userData.pieceType;
   
     scene.add(this.mesh);
     this.blocksWorldPositions = [];
@@ -471,9 +485,13 @@ export class NetworkPlayerPiece {
     let pt = info.pieceType;
 
     this.color = cm.get(pt);
+
     this.blocks = bm.get(pm.get(pt));
 
-    this.mesh = new THREE.Object3D();
+    while(this.mesh.children.length>0){
+      this.mesh.children.shift();
+    }
+    
     this.mesh.position.set(info.position.x,info.position.y,info.position.z);
     this.mesh.rotation.set(info.rotation.x,info.rotation.y,info.rotation.z);
 
