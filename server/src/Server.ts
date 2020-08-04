@@ -191,23 +191,26 @@ export default class Server  {
           info.users = this.users;
           info.serverTime = this.serverTime;
 
-          if(this.gl.snycClients===true){
-            info.persistentBlocks = this.persistentBlocks; //attach persistentBlocks
-            this.gl.snycClients = false;  
-                  
-          }
+
 
           //check if we need to reset
 
           let index = this.persistentBlocks.findIndex(block=>{
-            return block.position.y===18;
+            return block.position.y===19;
           })
           if(index!==-1){
             this.persistentBlocks= [];
+            this.gl.snycClients=true;
             this.users.forEach(usr=>{
               usr.generateNewPiece();
             })
             
+          }
+
+          if(this.gl.snycClients===true){
+            info.persistentBlocks = this.persistentBlocks; //attach persistentBlocks
+            this.gl.snycClients = false;  
+                  
           }
           
           this.io.sockets.emit('UPDATE', JSON.stringify(info));

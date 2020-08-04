@@ -1,6 +1,7 @@
 
 //NodeImports
 import * as THREE from 'three';
+import {GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 //LocalImports
 import * as PC from './entities/Piece/PieceConstants'
@@ -8,11 +9,12 @@ import * as PIECE from './entities/Piece/Piece';
 
 import * as BOARD from './entities/Board/board'
 import * as CM from '../Controls/ControlManager'
-import * as NETWORK from '../Network/ClientNetwork'
 import * as T from '../Util/types'
 import * as EXT from '../Util/ThreeExtension'
 import * as BLOCK from './entities/Block/Block'
 import * as COMMAND from '../Controls/Command';
+
+
 
 interface GameState{
     movPlayerDown:boolean;
@@ -36,11 +38,18 @@ export class Game {
     currentPiece: PIECE.LocalPlayerPiece;
     networkedPieces: PIECE.NetworkPlayerPiece[];
 
+    //animations
+    mixers: THREE.AnimationMixer[];
+    clock: THREE.Clock;
+
     gameState: GameState;
     gameTimeVariables: GameTimeVariables;
     clientId: string;
 
     constructor(){
+      //animations
+      this.mixers = [];
+      this.clock = new THREE.Clock();
 
         this.scene = new THREE.Scene();
         this.network = <T.NetworkInfo>{};
@@ -88,6 +97,89 @@ export class Game {
         let whiteLight = new THREE.DirectionalLight(0xffffff,1);
         whiteLight.position.set(0,20,0);
         whiteLight.lookAt(0,0,0);
+
+        
+        
+
+        // loader.load('./assets/Tree_2.glb',
+        // ( gltf )=>{
+        //   gltf.scene.position.set(5,5,5);
+        //   this.scene.add(gltf.scene);
+        // });
+
+      //      https://github.com/mrdoob/three.js/raw/dev/examples/models/gltf/Flamingo.glb
+      //      https://threejsfundamentals.org/threejs/resources/models/cartoon_lowpoly_small_city_free_pack/scene.gltf
+      
+      let loader = new GLTFLoader();
+      
+      loader.load('http://69.254.195.147:8000/Stork.glb',
+        ( gltf )=>{
+          //on load
+
+          const model = gltf.scene.children[0];
+          model.position.set(-40,5,-10);
+          model.scale.setScalar(0.2);
+          model.rotation.set(0,Math.PI/2,0);
+          const animation  = gltf.animations[0];
+          const mixer = new THREE.AnimationMixer( model );
+          this.mixers.push( mixer );
+          const action = mixer.clipAction( animation );
+          action.play();
+          this.scene.add( model );
+
+      },()=>{},(event)=>{console.log(event.message)});
+
+      loader.load('http://69.254.195.147:8000/Flamingo.glb',
+        ( gltf )=>{
+          const model = gltf.scene.children[0];
+          model.position.set(-60,30,-20);
+          model.scale.setScalar(0.1);
+          model.rotation.set(0,Math.PI/2,0);
+          const animation  = gltf.animations[0];
+          const mixer = new THREE.AnimationMixer( model );
+          this.mixers.push( mixer );
+          const action = mixer.clipAction( animation );
+          action.play();
+          this.scene.add( model );
+      },()=>{},(event)=>{console.log(event.message)});
+
+      loader.load('http://69.254.195.147:8000/Parrot.glb',
+        ( gltf )=>{
+          const model = gltf.scene.children[0];
+          model.position.set(70,40,-30);
+          model.scale.setScalar(0.3);
+          model.rotation.set(0,-Math.PI/2,0);
+          const animation  = gltf.animations[0];
+          const mixer = new THREE.AnimationMixer( model );
+          this.mixers.push( mixer );
+          const action = mixer.clipAction( animation );
+          action.play();
+          this.scene.add( model );
+      },()=>{},(event)=>{console.log(event.message)});
+
+      loader.load('http://69.254.195.147:8000/Horse.glb',
+      ( gltf )=>{
+          const model = gltf.scene.children[0];
+          model.position.set(40,0,-8);
+          model.scale.setScalar(0.1);
+          model.rotation.set(0,-Math.PI/2,0);
+          const animation  = gltf.animations[0];
+          const mixer = new THREE.AnimationMixer( model );
+          this.mixers.push( mixer );
+          const action = mixer.clipAction( animation );
+          action.play();
+          this.scene.add( model );
+      },()=>{},(event)=>{console.log(event.message)});
+
+      loader.load('http://69.254.195.147:8000/Tree_2.glb',
+      ( gltf )=>{
+          gltf.scene.position.set(-50,-5,-30);
+          gltf.scene.scale.setScalar(6);
+          gltf.scene.rotation.set(0,Math.PI/2,0);
+          this.scene.add(gltf.scene);
+      },()=>{},(event)=>{console.log(event.message)});
+
+      
 
         this.scene.add(redLight);
         this.scene.add(whiteLight);
@@ -208,7 +300,7 @@ export class Game {
 
       let networkUserMap = new Map(this.network.users.map(i=>[i.id,i]));
       let localPieceMap = new Map(this.scene.children.map(i=>[i.userData.owner,i]));
-      console.log(localPieceMap);
+      //console.log(localPieceMap);
 
       this.networkedPieces.forEach(piece=>{
         if(networkUserMap.get(piece.mesh.userData.owner)!==undefined){

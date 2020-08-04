@@ -157,7 +157,7 @@ export const sky = () =>{
   const geometry = new THREE.BoxBufferGeometry(1000, 0.0001, 1000);
 
   const group = new THREE.Object3D();
-  geometry.translate(0, 25, 0);
+  geometry.translate(0, 80, 0);
   group.add(new THREE.Mesh(geometry, material));
 
   group.userData = {

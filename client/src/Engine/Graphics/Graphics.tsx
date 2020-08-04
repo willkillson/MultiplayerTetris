@@ -69,6 +69,12 @@ export class Graphics {
             this.game.update(this.controlManager);
           }
 
+          //animations
+          for( const mixer of this.game.mixers ){
+             mixer.update( dt );
+          }
+          
+
           this.renderer.render( this.game.scene, this.camera );
           requestAnimationFrame( animate );
         };
