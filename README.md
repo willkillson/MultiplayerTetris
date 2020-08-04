@@ -1,6 +1,6 @@
 # Project is hosted with AWS EC2 
 
-[Multiplayer Tetris](http://ec2-52-53-191-238.us-west-1.compute.amazonaws.com:5000/). 
+[Multiplayer Tetris](http://willkillson.ddns.net:5000/). 
 
 # Start project with docker 
  
