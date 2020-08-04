@@ -1,26 +1,74 @@
-import {BoxGeometry, MeshBasicMaterial, Mesh, Raycaster, Ray} from 'three';
 import * as THREE from 'three';
-import {Vector3} from 'three';
-import * as MyConstants from '../utilities/constants'
+
+//Local Imports
+import * as MyConstants from './PieceConstants';
+import * as T from '../../../Util/types';
+
+interface Directions {
+  up: boolean;
+  down: boolean;
+  left: boolean;
+  right: boolean;
+  in: boolean;
+  out: boolean;
+  cw: boolean;
+  ccw: boolean;
+}
 
 /**
  * Main Piece class. Contains methods involved with moveing,
  * and checking boundaries for collision.
  */
-export class Piece {
+export class LocalPlayerPiece {
+  color: number;
+  blocks: THREE.Vector3[];
+  collidesWith: Map<string,string>;
+  collision_isBlocked: Directions;
+  mesh: THREE.Object3D;
+
+  blocksWorldPositions: THREE.Vector3[];
+  ignoreCollision: string;
+
+  blockNormals: THREE.Ray[];
+  x_neg_rcs: THREE.Ray[];
+  x_pos_rcs: THREE.Ray[];
+  y_pos_rcs: THREE.Ray[];
+  y_neg_rcs: THREE.Ray[];
+  z_pos_rcs: THREE.Ray[];
+  z_neg_rcs: THREE.Ray[];
+
+  constructor(
+    scene:THREE.Scene, 
+    client:T.Client) {
+
+      /*
+
+      interface UserData
+        entityType: string;
+        owner: string;
+        pieceType: number;
+
+      */
+
+    let userData = <T.UserData>{};
+    userData.entityType = "playerPiece";
+    userData.owner = client.id;
+    userData.pieceType = client.pieceType;
+
+    this.color = MyConstants.PIECE_COLOR_MAP.get(client.pieceType);;
+    this.blocks = MyConstants.BLOCK_POSITIONS.get(MyConstants.PIECE_MAP.get(client.pieceType));
+    this.collidesWith = new Map();
+    this.mesh = new THREE.Object3D();
+    this.mesh.position.add(client.position);
+    this.mesh.userData = userData;
+    this.mesh.name = this.mesh.userData.entityType;
+
+    scene.add(this.mesh);
   
-  constructor(pBlockPositions, pColor, pPos, userData= {
-    entityType : "active_piece",
-    owner : 'NA'}) {
-    // class variables
-    this.color = pColor;
-    this.blockPositions = pBlockPositions;
-    this.startingPosition = pPos;
-    this.userData = userData;
 
+    this.blocksWorldPositions = [];
     this.ignoreCollision = 'active_piece';
-
-
+    this.collision_isBlocked = <Directions>{};
     this.initClassVariables();
     this.initCollisionVariables();
     this.initRaycasters();
@@ -28,44 +76,34 @@ export class Piece {
 
   // initialization
   initClassVariables() {
-    this.mesh = new THREE.Object3D();
-    this.mesh.name = 'cube';
-
+    this.mesh.name = 'playerPiece';
     // create the blocks
-    for (let i = 0; i< this.blockPositions.length; i++) {
-      const geometry = new BoxGeometry(1, 1, 1);
-      const material = new MeshBasicMaterial( {color: this.color} );
-      let newMesh = new Mesh(geometry, material);
-      newMesh.userData = this.userData;
+    for (let i = 0; i< this.blocks.length; i++) {
+      const geometry = new THREE.BoxGeometry(1, 1, 1);
+      const material = new THREE.MeshBasicMaterial( {color: this.color} );
+      let newMesh = new THREE.Mesh(geometry, material);
+      newMesh.userData = this.mesh.userData;
       this.mesh.add(newMesh);
     }
 
     // put the blocks where it needs to go
-    for (let i = 0; i< this.blockPositions.length; i++) {
-      this.mesh.children[i].position.add(this.blockPositions[i]);
+    for (let i = 0; i< this.blocks.length; i++) {
+      this.mesh.children[i].position.add(this.blocks[i]);
     }
-
-    // move the group object to its starting position
-    this.mesh.position.add(this.startingPosition);
 
     // block normals for calculating each faces normal as it changes
     this.blockNormals = [];
-    this.blockPositions.forEach((block)=>{
-      this.blockNormals.push(new Ray(block, new Vector3(-1, 0, 0)));
-      this.blockNormals.push(new Ray(block, new Vector3(1, 0, 0)));
-      this.blockNormals.push(new Ray(block, new Vector3(0, -1, 0)));
-      this.blockNormals.push(new Ray(block, new Vector3(0, 1, 0)));
-      this.blockNormals.push(new Ray(block, new Vector3(0, 0, -1)));
-      this.blockNormals.push(new Ray(block, new Vector3(0, 0, 1)));
+    this.blocks.forEach((block)=>{
+      this.blockNormals.push(new THREE.Ray(block, new THREE.Vector3(-1, 0, 0)));
+      this.blockNormals.push(new THREE.Ray(block, new THREE.Vector3(1, 0, 0)));
+      this.blockNormals.push(new THREE.Ray(block, new THREE.Vector3(0, -1, 0)));
+      this.blockNormals.push(new THREE.Ray(block, new THREE.Vector3(0, 1, 0)));
+      this.blockNormals.push(new THREE.Ray(block, new THREE.Vector3(0, 0, -1)));
+      this.blockNormals.push(new THREE.Ray(block, new THREE.Vector3(0, 0, 1)));
     });
   }
 
   initCollisionVariables() {
-    this.collisionExclusion = [];
-    this.collisionExclusion.push("active_piece");
-
-    this.collision_isBlocked = {};
-    this.collision_isBlocked['up'] = false;
     this.collision_isBlocked['down'] = false;
     this.collision_isBlocked['left'] = false;
     this.collision_isBlocked['right'] = false;
@@ -89,8 +127,8 @@ export class Piece {
       const origin = ray.origin;
       const dir = ray.direction;
 
-      let rotatedDirection = new Vector3(dir.x, dir.y, dir.z);
-      let rotatedPosition = new Vector3(origin.x, origin.y, origin.z);
+      let rotatedDirection = new THREE.Vector3(dir.x, dir.y, dir.z);
+      let rotatedPosition = new THREE.Vector3(origin.x, origin.y, origin.z);
 
 
       rotatedDirection = rotatedDirection.applyQuaternion(this.mesh.quaternion);
@@ -100,7 +138,7 @@ export class Piece {
       rotatedPosition = rotatedPosition.applyQuaternion(this.mesh.quaternion);
       rotatedPosition.add(this.mesh.position);
 
-      const rotatedRay = new Ray(rotatedPosition, rotatedDirection);
+      const rotatedRay = new THREE.Ray(rotatedPosition, rotatedDirection);
       // then check which direction it is now facing
 
       if (rotatedRay.direction.x === -1 &&
@@ -198,7 +236,7 @@ export class Piece {
   checkCollisionUp() {
     const allIntersections = [];
     this.y_pos_rcs.forEach((ray) => {
-      const rayCaster = new Raycaster(ray.origin, ray.direction, 0.1, 1);
+      const rayCaster = new THREE.Raycaster(ray.origin, ray.direction, 0.1, 1);
       allIntersections.push(...rayCaster.intersectObjects(this.mesh.parent.children, true));
     });
     // remove all the intersections with the pieces self
@@ -223,7 +261,7 @@ export class Piece {
   checkCollisionDown() {
     const allIntersections = [];
     this.y_neg_rcs.forEach((ray) => {
-      const rayCaster = new Raycaster(ray.origin, ray.direction, 0.1, 1);
+      const rayCaster = new THREE.Raycaster(ray.origin, ray.direction, 0.1, 1);
       allIntersections.push(...rayCaster.intersectObjects(this.mesh.parent.children, true));
     });
     // remove all the intersections with the pieces self
@@ -245,7 +283,7 @@ export class Piece {
   checkCollisionLeft() {
     const allIntersections = [];
     this.x_neg_rcs.forEach((ray) => {
-      const rayCaster = new Raycaster(ray.origin, ray.direction, 0.1, 1);
+      const rayCaster = new THREE.Raycaster(ray.origin, ray.direction, 0.1, 1);
       allIntersections.push(...rayCaster.intersectObjects(this.mesh.parent.children, true));
     });
     // remove all the intersections with the pieces self
@@ -268,7 +306,7 @@ export class Piece {
   checkCollisionRight() {
     const allIntersections = [];
     this.x_pos_rcs.forEach((ray) => {
-      const rayCaster = new Raycaster(ray.origin, ray.direction, 0.1, 1);
+      const rayCaster = new THREE.Raycaster(ray.origin, ray.direction, 0.1, 1);
       allIntersections.push(...rayCaster.intersectObjects(this.mesh.parent.children, true));
     });
     // remove all the intersections with the pieces self
@@ -282,7 +320,7 @@ export class Piece {
     });
 
     
-    console.log(intersects);
+    //console.log(intersects);
 
     if (intersects.length===0) {
       this.collision_isBlocked['right'] = false;
@@ -294,7 +332,7 @@ export class Piece {
   checkCollisionIn() {
     const allIntersections = [];
     this.z_pos_rcs.forEach((ray) => {
-      const rayCaster = new Raycaster(ray.origin, ray.direction, 0.1, 1);
+      const rayCaster = new THREE.Raycaster(ray.origin, ray.direction, 0.1, 1);
       allIntersections.push(...rayCaster.intersectObjects(this.mesh.parent.children, true));
     });
     // remove all the intersections with the pieces self
@@ -317,7 +355,7 @@ export class Piece {
   checkCollisionOut() {
     const allIntersections = [];
     this.z_neg_rcs.forEach((ray) => {
-      const rayCaster = new Raycaster(ray.origin, ray.direction, 0.1, 1);
+      const rayCaster = new THREE.Raycaster(ray.origin, ray.direction, 0.1, 1);
       allIntersections.push(...rayCaster.intersectObjects(this.mesh.parent.children, true));
     });
     // remove all the intersections with the pieces self
@@ -372,127 +410,101 @@ export class Piece {
       this.collision_isBlocked['CW'] = false;
     }
   }
+
+  public syncPiece(info:T.Client){    
+    if(this.mesh.userData.pieceType!==info.pieceType){
+      console.log(Date.now().toString() +" - PIECE MISMATCH!!!!");
+    }
+    this.mesh.position.set(info.position.x,info.position.y,info.position.z);
+    this.mesh.rotation.set(info.rotation.x,info.rotation.y,info.rotation.z);   
+
+  }
 }
 
-export const createPiece = (pieceType = 0, defaultPosition = new Vector3(0, 18, 0)) =>{
 
-  let retPiece;
 
-  switch (pieceType) {
-    case 0:// T
-    {
-      const blocks = [
-        new Vector3(0, 0, 0),
-        new Vector3(-1, 0, 0),
-        new Vector3(1, 0, 0),
-        new Vector3(0, -1, 0)];
-      retPiece = new Piece(blocks, MyConstants.T_COLOR, defaultPosition);
-      break;
-    }
-    case 1:// S
-    {
-      const blocks = [
-        new Vector3(0, 0, 0),
-        new Vector3(-1, 0, 0),
-        new Vector3(0, 1, 0),
-        new Vector3(1, 1, 0)];
-      retPiece = new Piece(blocks, MyConstants.S_COLOR, defaultPosition);
-      break;
-    }
-    case 2:// I
-    {
-      const blocks = [
-        new Vector3(0, 0, 0),
-        new Vector3(-1, 0, 0),
-        new Vector3(1, 0, 0),
-        new Vector3(2, 0, 0)];
-      retPiece = new Piece(blocks, MyConstants.I_COLOR, defaultPosition);
-      break;
-    }
-    case 3:// L
-    {
-      const blocks = [
-        new Vector3(0, 0, 0),
-        new Vector3(1, 0, 0),
-        new Vector3(-1, 0, 0),
-        new Vector3(-1, -1, 0)];
-      retPiece = new Piece(blocks, MyConstants.L_COLOR, defaultPosition);
-      break;
-    }
-    case 4:// J
-    {
-      const blocks = [
-        new Vector3(0, 0, 0),
-        new Vector3(-1, 0, 0),
-        new Vector3(1, 0, 0),
-        new Vector3(1, -1, 0)];
+  /**
+ * Main Piece class. Contains methods involved with moveing,
+ * and checking boundaries for collision.
+ */
+export class NetworkPlayerPiece {
+  color: number;
+  blocks: THREE.Vector3[];
+  collidesWith: Map<string,string>;
+  collision_isBlocked: Directions;
+  mesh: THREE.Object3D;
+  blocksWorldPositions: THREE.Vector3[];
 
-      retPiece = new Piece(blocks, MyConstants.J_COLOR, defaultPosition);
-      break;
-    }
-    case 5:// Z
-    {
-      const blocks = [
-        new Vector3(0, 0, 0),
-        new Vector3(-1, 0, 0),
-        new Vector3(0, -1, 0),
-        new Vector3(1, -1, 0)];
+  constructor(
+    scene:THREE.Scene, 
+    blocks:THREE.Vector3[], 
+    color:number, 
+    position:THREE.Vector3, 
+    rotation:THREE.Vector3, 
+    userData:T.UserData) {
 
-      retPiece = new Piece(blocks, MyConstants.Z_COLOR, defaultPosition);
-      break;
-    }
-    case 6:// O
-    {
-      const blocks = [
-        new Vector3(0, 0, 0), // top left
-        new Vector3(1, 0, 0), // top right
-        new Vector3(1, -1, 0), // bot right
-        new Vector3(0, -1, 0)];// bot left
-      retPiece = new Piece(blocks, MyConstants.O_COLOR, defaultPosition);
-      break;
-    }
-    case 7:// RANDOM
-    {
-      const blocks = [];
-      blocks.push(new Vector3(0, 0, -1));
-      blocks.push(new Vector3(0, 0, 1));
-      blocks.push(new Vector3(1, 0, 0));
-      blocks.push(new Vector3(-1, 0, 0));
-      //
+    this.color = color;
+    this.blocks = blocks;
+    this.collidesWith = new Map();
+    this.mesh = new THREE.Object3D();
+    this.mesh.position.add(position);
+    this.mesh.userData = userData;
+    this.mesh.name = this.mesh.userData.entityType;
+    this.mesh.userData.pieceType = userData.pieceType;
+  
+    scene.add(this.mesh);
+    this.blocksWorldPositions = [];
 
-      retPiece = new Piece(blocks, MyConstants.O_COLOR, defaultPosition);
-      break;
-    }
-    case 8:// RANDOM
-    {
-      const blocks = [];
-      blocks.push(new Vector3(0, 0, 0));
-      blocks.push(new Vector3(1, 1, 1));
-      blocks.push(new Vector3(1, 0, 1));
-      blocks.push(new Vector3(0, 0, 1));
-      //
+    this.initClassVariables();
 
-      retPiece = new Piece(blocks, MyConstants.O_COLOR, defaultPosition);
-      break;
+  }
+
+  private initClassVariables() {
+    // create the blocks
+    for (let i = 0; i< this.blocks.length; i++) {
+      const geometry = new THREE.BoxGeometry(1, 1, 1);
+      const material = new THREE.MeshLambertMaterial( {color: this.color} );
+      let newMesh = new THREE.Mesh(geometry, material);
+      newMesh.userData = this.mesh.userData;
+      this.mesh.add(newMesh);
+      this.blocksWorldPositions.push(new THREE.Vector3(0,0,0));
     }
-    case 9:// single cube
-    {
-      const blocks =[
-        new Vector3(0, 0, 0),
-      ];
-      retPiece = new Piece(blocks, 0xffffff, defaultPosition);
-      break;
-    }
-    default:// single cube
-    {
-      const blocks =[
-        new Vector3(0, 0, 0),
-      ];
-      retPiece = new Piece(blocks, 0xffffff, defaultPosition);
-      break;
+
+    // put the blocks where it needs to go
+    for (let i = 0; i< this.blocks.length; i++) {
+      this.mesh.children[i].position.add(this.blocks[i]);
     }
   }
 
-  return retPiece;
-};
+  public syncPiece(info:T.Client){
 
+    let pm = MyConstants.PIECE_MAP;
+    let cm = MyConstants.PIECE_COLOR_MAP;
+    let bm = MyConstants.BLOCK_POSITIONS;//block map
+
+    let pt = info.pieceType;
+
+    this.color = cm.get(pt);
+
+    this.blocks = bm.get(pm.get(pt));
+
+    while(this.mesh.children.length>0){
+      this.mesh.children.shift();
+    }
+    
+    this.mesh.position.set(info.position.x,info.position.y,info.position.z);
+    this.mesh.rotation.set(info.rotation.x,info.rotation.y,info.rotation.z);
+
+    let userData = <T.UserData>{};
+    userData.entityType = "playerPiece"
+    userData.owner = info.id;
+    userData.pieceType = pt;
+
+    this.mesh.userData = userData;
+    this.mesh.name = this.mesh.userData.entityType;
+    
+    this.initClassVariables();
+
+  }
+
+}

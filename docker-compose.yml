@@ -7,11 +7,12 @@ services:
             dockerfile: Dockerfile
         container_name: server
         ports:
-            - "80:80"
+            - 80:80
+            - 8000:8000
     client:
         build:
             context: ./client
             dockerfile: Dockerfile
         container_name: client
         ports:
-            - "5000:5000"
+            - 5000:5000

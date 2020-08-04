@@ -1,6 +1,15 @@
 import Server from './Server'
 
-//TODO start backend service, and pass into the server
+const express = require('express');
+const cors = require('cors');
+const app = express();
+
+app.use(cors());
+ 
+//https://expressjs.com/en/starter/static-files.html
+app.use(express.static('public'));
+
+app.listen(8000);
 
 let gameServer = new Server();
 
