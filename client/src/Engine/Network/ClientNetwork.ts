@@ -9,6 +9,7 @@ import * as COMMAND from '../Controls/Command';
 import Engine from '../Engine';
 
 export class ClientNetwork {
+
     ////Networking
     public clientId: string|null;
     private socket: SocketIO.Socket;
@@ -32,6 +33,7 @@ export class ClientNetwork {
         this.socket.on('UPDATE', (info)=> this.onUpdate(info));
         this.socket.on('freeControls', ()=> this.freeControls());
         this.socket.on('clearWaitingFlag', ()=> this.clearWaitingFlag());
+        this.socket.on('clearWaitingForNewPiece', (info)=> this.clearWaitingForNewPiece(info));
 
     }
 
@@ -39,9 +41,8 @@ export class ClientNetwork {
         this.game.updateNetworkInfo(info);
     }
 
-    private onUpdate(info:any){
-        let updateInfo:T.NetworkInfo = JSON.parse(info);
-        this.game.updateNetworkInfo(updateInfo);
+    private onUpdate(info:T.NewConnectionInfo){
+        this.game.updateNetworkInfo(info);
     }
 
     private clearWaitingFlag(){
@@ -54,6 +55,13 @@ export class ClientNetwork {
 
     public sendCommand( command:COMMAND.Command<any> ){
         this.socket.emit('playerCommand', command);
+        console.log("emit - sendCommand_playerCommand");
+        console.log(command);
+    }
+
+    clearWaitingForNewPiece(info:T.NewConnectionInfo): void {
+        this.onUpdate(info);
+        this.game.gameState.waitingForNewPiece = false;
     }
 
 }

@@ -33,22 +33,21 @@ export class ControlManager extends QUEUE.Queue<COMMAND.Command<any>>{
         if(this.game.gameState.resetGame){
             let cmd = new COMMAND.Command(this.game.clientId,'reset', 'reset');
             this.game.gameState.resetGame = false;
+            this.game.gameState.waitingForUpdate = true;
             this.network.sendCommand(cmd);
         }
         if( !this.isEmpty() ){
             let command = this.dequeue();
-            while(!this.isEmpty()){
-                command = this.dequeue();
-            }
-            if(this.game.validateCommand(command)){
+            if(this.game.currentPiece.update(command)){
                 this.network.sendCommand(command);
-                this.isProcessingCommand=true;  
             }
             else if(command.cmdValue.y===-1 && this.game.currentPiece.collision_isBlocked.down && this.game.currentPiece!==null)
             {
                 let cmd = new COMMAND.Command(this.game.clientId,'setPiece',this.game.getBlockPositions());
                 this.game.gameState.waitingForUpdate = true;
+                this.game.currentPiece.removePiece();
                 this.game.currentPiece = null; 
+                this.game.gameState.waitingForNewPiece = true;
                 this.network.sendCommand(cmd);
             }
         }

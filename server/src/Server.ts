@@ -147,6 +147,9 @@ export default class Server  {
 
     private playerCommand( socket:SocketIO.Socket,info:COMMAND.Command<any> ){
 
+      console.log("recieved from: " + socket.id);
+      console.log(info);
+
 
         // console.log(socket.id);
         // console.log(info);
@@ -207,10 +210,14 @@ export default class Server  {
           if(this.gl.snycClients===true){
             info.persistentBlocks = this.persistentBlocks; //attach persistentBlocks
             this.gl.snycClients = false;  
+
+            console.log("Sending to all clients: " );
+            console.log(info);
           }
           
-          this.io.sockets.emit('UPDATE', JSON.stringify(info));
+          this.io.sockets.emit('UPDATE', info);
           //console.log("emit - onConnected to: "+ 'all sockets');
+          //console.log(this.users[0]);
 
           
         },30);

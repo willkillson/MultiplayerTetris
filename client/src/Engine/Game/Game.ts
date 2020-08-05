@@ -20,6 +20,7 @@ interface GameState{
     movPlayerDown:boolean;
     waitingForUpdate:boolean;
     resetGame:boolean;
+    waitingForNewPiece: boolean;
 }
   
 interface GameTimeVariables{
@@ -58,8 +59,9 @@ export class Game {
         // When true, the game will force the player to move down.
         this.gameState.movPlayerDown = false;
         // When true, the game will wait for an update from the server.
-        this.gameState.waitingForUpdate = false;
+        this.gameState.waitingForUpdate = true;
         this.gameState.resetGame = false;
+        this.gameState.waitingForNewPiece = false;
             
         // default game values
         this.currentPiece = null;
@@ -188,18 +190,8 @@ export class Game {
     public update(controlManager:CM.ControlManager){
       
 
-       //changes the game state based on the number of ticks.
-       if(this.gameTimeVariables.syncTime%this.gameTimeVariables.secondsPerTick===0){
-        this.gameTimeVariables.secondsSinceLastUpdate = this.gameTimeVariables.syncTime - this.gameTimeVariables.previousTime;
-        if(this.gameTimeVariables.secondsSinceLastUpdate!==0){
-            this.gameTimeVariables.previousTime = this.gameTimeVariables.syncTime;//update the previous time we did this
-            this.gameState.movPlayerDown=true;
-        }
-        }
-
-
      
-      if (this.currentPiece!==null) {
+      if ( this.currentPiece!==null ) {
         
         if(this.gameState.movPlayerDown ===true){
             //this.forceDown(network
@@ -211,31 +203,42 @@ export class Game {
         }
       }
 
-
-
-
-    
+      if(this.gameState.waitingForNewPiece){
+        return;
+      }
 
       this.syncGame();
 
     }
 
     public updateNetworkInfo(info: T.NetworkInfo){
-        if(info.serverTime!==undefined){
-          this.gameTimeVariables.syncTime = info.serverTime;
-        }
-        if(info.clientId!==undefined){
-          this.network.clientId = info.clientId;
-          this.clientId = info.clientId;
-        }
-        if(info.persistentBlocks!==undefined)
-          this.network.persistentBlocks = info.persistentBlocks;
-        if(info.serverTime!==undefined)
-          this.network.serverTime = info.serverTime;
-        if(info.users!==undefined){
-          this.network.users = info.users;
-        }
+      
+      if(info.serverTime!==undefined){
+        this.gameTimeVariables.syncTime = info.serverTime;
+      }
+      if(info.clientId!==undefined){
+        this.network.clientId = info.clientId;
+        this.clientId = info.clientId;
+      }
+      if(info.persistentBlocks!==undefined)
+        this.network.persistentBlocks = info.persistentBlocks;
+      if(info.serverTime!==undefined)
+        this.network.serverTime = info.serverTime;
+      if(info.users!==undefined){
+        this.network.users = info.users;
+      }
+      this.gameState.waitingForUpdate = false;
+  }
+
+    //modifies positions so they are current with the network
+    private syncGame(){
+
+      this.handleLocalPlayer();
+      this.handleNetworkedPlayers();
+      this.handlePersistantPieces();
+
     }
+
 
     //Tetris
     public getBlockPositions(){
@@ -261,14 +264,7 @@ export class Game {
 
     }
 
-    //modifies positions so they are current with the network
-    private syncGame(){
 
-      this.handleLocalPlayer();
-      this.handleNetworkedPlayers();
-      this.handlePersistantPieces();
-
-    }
 
     private handleLocalPlayer(){
       let networkUserMap = new Map(this.network.users.map(i=>[i.id,i]));
@@ -283,11 +279,6 @@ export class Game {
           currentUserNetworkInfo = networkUserMap.get(this.clientId);
           this.currentPiece = new PIECE.LocalPlayerPiece(this.scene, currentUserNetworkInfo);    
           
-      }else{
-        if(this.currentPiece.mesh.userData.pieceType!==currentUserNetworkInfo.pieceType){
-          this.currentPiece = new PIECE.LocalPlayerPiece(this.scene, currentUserNetworkInfo);
-        }
-        this.currentPiece.syncPiece(currentUserNetworkInfo);
       }
     }
 
@@ -351,7 +342,7 @@ export class Game {
     }
 
     private handlePersistantPieces(){
-      // //removes anything local thats not in the server
+      //removes anything local thats not in the server
       // this.scene.children.forEach(child=>{
       //   if(child.userData.entityType === 'persistentBlock'){  
       //     if(!networkUserMap.has(child.userData.owner)){
@@ -371,6 +362,8 @@ export class Game {
 
       let LPBMap = new Map(localPersistentBlocks.map(i=>[i.userData.owner,i]));
       let NPBMap = new Map(this.network.persistentBlocks.map(i=>[i.uuid,i]));
+
+
 
       persistentBlocks.forEach((block)=>{
         if(!LPBMap.has(block.uuid)){
@@ -396,19 +389,9 @@ export class Game {
 
     }
 
-    public validateCommand( command:COMMAND.Command<any> ): boolean{
-      this.currentPiece.update();
-
-      if(command.cmdValue.x===-1){
-        return !this.currentPiece.collision_isBlocked.left;
-      }
-      if(command.cmdValue.x===1){
-        return !this.currentPiece.collision_isBlocked.right;
-      }
-      if(command.cmdValue.y===-1){
-        return !this.currentPiece.collision_isBlocked.down;
-      }
-      return true;
+    public processCommand( command:COMMAND.Command<any> ){
+      this.currentPiece;
+      
     }
 
 }

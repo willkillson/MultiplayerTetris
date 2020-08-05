@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 
 //Local Imports
+import * as COMMAND from '../../../Controls/Command';
 import * as MyConstants from './PieceConstants';
 import * as T from '../../../Util/types';
 
@@ -67,7 +68,7 @@ export class LocalPlayerPiece {
   
 
     this.blocksWorldPositions = [];
-    this.ignoreCollision = 'active_piece';
+    this.ignoreCollision = 'playerPiece';
     this.collision_isBlocked = <Directions>{};
     this.initClassVariables();
     this.initCollisionVariables();
@@ -174,8 +175,78 @@ export class LocalPlayerPiece {
     }
   }
 
-  update() {
+  public update(command:COMMAND.Command<any>):boolean{
+
+    //handle movement
+    switch(command.cmdType){
+      case 'movement':
+        return this.processMovement(command.cmdValue);
+      case 'rotation':
+        return this.processRotation(command.cmdValue);
+      default:
+        return false;
+    }
+
+  }
+
+  private processMovement(cmdValue:THREE.Vector3):boolean{
+
+    //Get the most current collision detection.
+    this.initRaycasters();
+
+    this.checkCollisionUp();
+    this.checkCollisionDown();
+    this.checkCollisionLeft();
+    this.checkCollisionRight();
+
+    let isAllowed = false;
+    if(cmdValue.x===-1){
+      isAllowed = !this.collision_isBlocked.left;
+    } else if( cmdValue.x === 1 ){
+      isAllowed = !this.collision_isBlocked.right;
+    } else if( cmdValue.y === -1 ){
+      isAllowed = !this.collision_isBlocked.down;
+    }
+
+    if(isAllowed){
+      this.mesh.position.add(cmdValue);
+    }
+
+    return isAllowed;
+  }
+
+  private processRotation( cmdValue:THREE.Vector3 ): boolean {
+    this.initRaycasters();
+    this.checkCollisionCCW();
+    this.checkCollisionCW();
+
+    console.log(cmdValue);
+
+    let isAllowed = false;
+
+    //TODO: Fix rotations.
+    if(cmdValue.z===-Math.PI/2){//ccw
+      isAllowed = !this.collision_isBlocked.ccw;
+    } else if( cmdValue.z === Math.PI/2 ){
+      isAllowed = !this.collision_isBlocked.cw;
+    } 
+
+    
+
+    if(isAllowed){
+      this.mesh.rotation.z += cmdValue.z;
+    }
+
+    return isAllowed;
+    
+  }
+
+  private updateCollision() {
     this.checkAllCollisions();
+  }
+
+  public removePiece(){
+    this.mesh.parent.remove(this.mesh);
   }
 
   // collisions
@@ -227,8 +298,8 @@ export class LocalPlayerPiece {
     this.checkCollisionDown();
     this.checkCollisionLeft();
     this.checkCollisionRight();
-    this.checkCollisionIn();
-    this.checkCollisionOut();
+    // this.checkCollisionIn();
+    // this.checkCollisionOut();
     this.checkCollisionCCW();
     this.checkCollisionCW();
   }
@@ -311,6 +382,9 @@ export class LocalPlayerPiece {
     });
     // remove all the intersections with the pieces self
     const intersects = [];
+
+    console.log(intersects);
+
     allIntersections.forEach((intersection)=>{
       if (intersection.object.parent.uuid!==this.mesh.uuid) {
         if(intersection.object.userData.entityType!==this.ignoreCollision){

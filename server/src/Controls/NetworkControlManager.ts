@@ -8,6 +8,15 @@ import * as SERVER from '../Server'
 
 import { Color } from 'three';
 import { receiveMessageOnPort } from 'worker_threads';
+import { emit } from 'process';
+
+interface UpdateInfo{
+    users:CLIENT.Client[];
+    persistentBlocks: BLOCK.Block[];
+    serverTime:number;
+  }
+
+  
 
 /**
  * Each player will have a queue of commands. A call to poll commands will retrieve one
@@ -60,12 +69,21 @@ export class NetworkControlManager {
                       users[index].rotation.add(cmd.cmdValue);
                       break;
                     case 'setPiece':
+
+
+
                       this.server.setPiece(
                           // @ts-ignore
                           cmd.cmdValue.blocks,
                           // @ts-ignore
                         cmd.cmdValue.color,
-                        cmd.owner);                        
+                        cmd.owner);    
+                        const info = <UpdateInfo>{};
+                        info.users = this.server.users;
+
+
+
+                      this.server.userSockets.get(player).emit('clearWaitingForNewPiece',info);                    
                       break;
                       case 'reset':
                           this.server.persistentBlocks = [];

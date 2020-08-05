@@ -60,13 +60,8 @@ interface Directions {
     cw: boolean;
     ccw: boolean;
 }
-interface Command{
-    clientId:string,
-    cmd:string,
-}
 
 export type{
-    Command,
     UserData,
     Directions,
     ClientInfo,
