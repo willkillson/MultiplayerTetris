@@ -187,15 +187,16 @@ export class Game {
 
     public update(controlManager:CM.ControlManager){
       
-      if(!this.gameState.waitingForUpdate){
-        this.syncGame();
-      }
-      
 
-      //syncs all network information with the game information
-      //public network: T.NetworkInfo
-      //console.log(this.gameTimeVariables);
-      //console.log(this);
+       //changes the game state based on the number of ticks.
+       if(this.gameTimeVariables.syncTime%this.gameTimeVariables.secondsPerTick===0){
+        this.gameTimeVariables.secondsSinceLastUpdate = this.gameTimeVariables.syncTime - this.gameTimeVariables.previousTime;
+        if(this.gameTimeVariables.secondsSinceLastUpdate!==0){
+            this.gameTimeVariables.previousTime = this.gameTimeVariables.syncTime;//update the previous time we did this
+            this.gameState.movPlayerDown=true;
+        }
+        }
+
 
      
       if (this.currentPiece!==null) {
@@ -212,16 +213,10 @@ export class Game {
 
 
 
-      //changes the game state based on the number of ticks.
-      if(this.gameTimeVariables.syncTime%this.gameTimeVariables.secondsPerTick===0){
-          this.gameTimeVariables.secondsSinceLastUpdate = this.gameTimeVariables.syncTime - this.gameTimeVariables.previousTime;
-          if(this.gameTimeVariables.secondsSinceLastUpdate!==0){
-              this.gameTimeVariables.previousTime = this.gameTimeVariables.syncTime;//update the previous time we did this
-              this.gameState.movPlayerDown=true;
-          }
-      }
 
+    
 
+      this.syncGame();
 
     }
 

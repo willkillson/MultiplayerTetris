@@ -123,7 +123,7 @@ export default class Server  {
       newConnectionInfo.clientId = socket.id;
 
       socket.emit('onConnected',newConnectionInfo);  
-
+      console.log("emit - onConnected to: "+socket.id);
       //Add the player to the ControlManager
       this.ncm.addPlayer(info.id);
 
@@ -191,10 +191,7 @@ export default class Server  {
           info.users = this.users;
           info.serverTime = this.serverTime;
 
-
-
           //check if we need to reset
-
           let index = this.persistentBlocks.findIndex(block=>{
             return block.position.y===19;
           })
@@ -210,13 +207,13 @@ export default class Server  {
           if(this.gl.snycClients===true){
             info.persistentBlocks = this.persistentBlocks; //attach persistentBlocks
             this.gl.snycClients = false;  
-                  
           }
           
           this.io.sockets.emit('UPDATE', JSON.stringify(info));
+          //console.log("emit - onConnected to: "+ 'all sockets');
 
           
-        },15);
+        },30);
 
         
     }
