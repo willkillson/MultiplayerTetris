@@ -35,7 +35,7 @@ export class ControlManager extends QUEUE.Queue<COMMAND.Command<any>>{
             this.game.gameState.resetGame = false;
             this.network.sendCommand(cmd);
         }
-        if( !this.isEmpty() && !this.isProcessingCommand ){
+        if( !this.isEmpty() ){
             let command = this.dequeue();
             if(this.game.validateCommand(command)){
                 this.network.sendCommand(command);
