@@ -34,6 +34,7 @@ export class Engine extends React.Component {
     this.graphics = new GRAPHICS.Graphics();
     ////GAME
     ////////////////////
+    const isClient = true;
     this.game = new GAME.Game();
     ////NETWORK
     ////////////////////

@@ -48,6 +48,7 @@ export class Game {
     clientId: string;
 
     constructor(){
+
       //animations
       this.mixers = [];
       this.clock = new THREE.Clock();
@@ -242,7 +243,8 @@ export class Game {
 
     //Tetris
     public getBlockPositions(){
-        const info = {};
+      
+        const info:any = {};
         info['color'] = this.currentPiece.color;
         info['blocks'] = EXT.getRotatedBlocksFromMesh(this.currentPiece.mesh);
         info['blocks'] = EXT.bakeInOrigin(info['blocks'], this.currentPiece.mesh.position);
@@ -311,7 +313,8 @@ export class Game {
             let pcm = PC.PIECE_COLOR_MAP;
             //
             let bp = bpm.get(pm.get(pt));
-            this.networkedPieces.push(new PIECE.NetworkPlayerPiece(this.scene,bp,pcm.get(pt),pos,rot,userData));
+            new PIECE.NetworkPlayerPiece(this.scene,bp,pcm.get(pt),pos,rot,userData)
+            //this.networkedPieces.push();
             console.log("NETWORK_PLAYER_CREATE: " + pm.get(pt));
           }else{
           //else update those users

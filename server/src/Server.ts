@@ -2,6 +2,10 @@ import * as io from 'socket.io';
 import { v4 as uuidv4 } from 'node-uuid';
 import * as THREE from 'three';
 
+
+//import * as GAME from '../../client/src/Engine/Game/Game';
+
+
 //LocalImports
 import MyTime from './utilities/time';
 import * as BLOCK from './Entities/Block'
@@ -42,6 +46,8 @@ const normalizePort = (val:string) => {
 
 export default class Server  {
 
+    //public game: GAME.Game;
+
     public userSockets:Map<string, SocketIO.Socket>; 
 
     private port:string|number|false;
@@ -57,6 +63,10 @@ export default class Server  {
     public serverTime:number;
 
     constructor(){
+
+      //this.game = new GAME.Game();
+
+      
       //Data storage, local only for now.
       this.persistentBlocks = [];
       this.users = [];

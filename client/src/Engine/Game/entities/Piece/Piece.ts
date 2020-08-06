@@ -175,7 +175,7 @@ export class LocalPlayerPiece {
     }
   }
 
-  public update(command:COMMAND.Command<any>):boolean{
+  public update(command:COMMAND.Command<any>): boolean {
 
     //handle movement
     switch(command.cmdType){
@@ -189,7 +189,7 @@ export class LocalPlayerPiece {
 
   }
 
-  private processMovement(cmdValue:THREE.Vector3):boolean{
+  private processMovement(cmdValue:THREE.Vector3): boolean {
 
     //Get the most current collision detection.
     this.initRaycasters();
@@ -241,27 +241,31 @@ export class LocalPlayerPiece {
     
   }
 
-  private updateCollision() {
-    this.checkAllCollisions();
-  }
-
   public removePiece(){
     this.mesh.parent.remove(this.mesh);
   }
 
   // collisions
-  checkCollisionIntersections(pUUID, pMesh, pScene, pRot) {
+  checkCollisionIntersections(pUUID:string, pMesh:THREE.Object3D, pScene:THREE.Scene, pRot:THREE.Quaternion) {
     const scene = pScene;
-    const uuid =pUUID;
+    const uuid = pUUID;
 
-    const allBlocks = [];
-    scene.children.forEach((child)=>{
-      child.children.forEach( (subChild)=>{
-        if (subChild.parent.uuid!==uuid) {
-          const box = new THREE.Box3().setFromObject(subChild);
+    //all blocks that we will collide with
+    const allBlocks:any = [];
+
+    scene.children.filter((child)=>{
+      //console.log(child.userData.entityType);
+      return child.userData.entityType==="persistentBlock" || child.userData.entityType=== "frame";
+    }).forEach(block=>{
+      if(block.userData.entityType==="frame"){
+        block.children.forEach(subChild=>{
+          const box = new THREE.Box3().setFromObject(subChild);//frame has children which are the blocks
           allBlocks.push(box);
-        }
-      });
+        })
+      } else if (block.userData.entityType==="persistentBlock"){
+        const box = new THREE.Box3().setFromObject(block);//persistent blocks are the top level.
+        allBlocks.push(box);
+      }
     });
 
     let intersects = false;
@@ -281,7 +285,7 @@ export class LocalPlayerPiece {
       currentBox.min.y = parseFloat(currentBox.min.y.toFixed(2));
       currentBox.min.z = parseFloat(currentBox.min.z.toFixed(2));
 
-      allBlocks.forEach((block)=>{
+      allBlocks.forEach((block:any)=>{
         if (currentBox.containsBox(block)) {
           intersects=true;
         }
@@ -305,14 +309,14 @@ export class LocalPlayerPiece {
   }
 
   checkCollisionUp() {
-    const allIntersections = [];
+    const allIntersections:any = [];
     this.y_pos_rcs.forEach((ray) => {
       const rayCaster = new THREE.Raycaster(ray.origin, ray.direction, 0.1, 1);
       allIntersections.push(...rayCaster.intersectObjects(this.mesh.parent.children, true));
     });
     // remove all the intersections with the pieces self
-    const intersects = [];
-    allIntersections.forEach((intersection)=>{
+    const intersects:any = [];
+    allIntersections.forEach((intersection:THREE.Intersection)=>{
       if (intersection.object.parent.uuid!==this.mesh.uuid) {
         if(intersection.object.userData.entityType!==this.ignoreCollision){
           intersects.push(intersection);
@@ -330,14 +334,14 @@ export class LocalPlayerPiece {
   }
 
   checkCollisionDown() {
-    const allIntersections = [];
+    const allIntersections:any = [];
     this.y_neg_rcs.forEach((ray) => {
       const rayCaster = new THREE.Raycaster(ray.origin, ray.direction, 0.1, 1);
       allIntersections.push(...rayCaster.intersectObjects(this.mesh.parent.children, true));
     });
     // remove all the intersections with the pieces self
-    const intersects = [];
-    allIntersections.forEach((intersection)=>{
+    const intersects:any = [];
+    allIntersections.forEach((intersection:THREE.Intersection)=>{
       if (intersection.object.parent.uuid!==this.mesh.uuid) {
         if(intersection.object.userData.entityType!==this.ignoreCollision){
           intersects.push(intersection);
@@ -352,14 +356,14 @@ export class LocalPlayerPiece {
   }
 
   checkCollisionLeft() {
-    const allIntersections = [];
+    const allIntersections:any = [];
     this.x_neg_rcs.forEach((ray) => {
       const rayCaster = new THREE.Raycaster(ray.origin, ray.direction, 0.1, 1);
       allIntersections.push(...rayCaster.intersectObjects(this.mesh.parent.children, true));
     });
     // remove all the intersections with the pieces self
-    const intersects = [];
-    allIntersections.forEach((intersection)=>{
+    const intersects:any = [];
+    allIntersections.forEach((intersection:THREE.Intersection)=>{
       if (intersection.object.parent.uuid!==this.mesh.uuid) {
         if(intersection.object.userData.entityType!==this.ignoreCollision){
           intersects.push(intersection);
@@ -375,17 +379,17 @@ export class LocalPlayerPiece {
   }
 
   checkCollisionRight() {
-    const allIntersections = [];
+    const allIntersections:any = [];
     this.x_pos_rcs.forEach((ray) => {
       const rayCaster = new THREE.Raycaster(ray.origin, ray.direction, 0.1, 1);
       allIntersections.push(...rayCaster.intersectObjects(this.mesh.parent.children, true));
     });
     // remove all the intersections with the pieces self
-    const intersects = [];
+    const intersects:any = [];
 
     console.log(intersects);
 
-    allIntersections.forEach((intersection)=>{
+    allIntersections.forEach((intersection:THREE.Intersection)=>{
       if (intersection.object.parent.uuid!==this.mesh.uuid) {
         if(intersection.object.userData.entityType!==this.ignoreCollision){
           intersects.push(intersection);
@@ -404,14 +408,14 @@ export class LocalPlayerPiece {
   }
 
   checkCollisionIn() {
-    const allIntersections = [];
+    const allIntersections:any = [];
     this.z_pos_rcs.forEach((ray) => {
       const rayCaster = new THREE.Raycaster(ray.origin, ray.direction, 0.1, 1);
       allIntersections.push(...rayCaster.intersectObjects(this.mesh.parent.children, true));
     });
     // remove all the intersections with the pieces self
-    const intersects = [];
-    allIntersections.forEach((intersection)=>{
+    const intersects:any = [];
+    allIntersections.forEach((intersection:THREE.Intersection)=>{
       if (intersection.object.parent.uuid!==this.mesh.uuid) {
         if(intersection.object.userData.entityType!==this.ignoreCollision){
           intersects.push(intersection);
@@ -427,14 +431,14 @@ export class LocalPlayerPiece {
   }
 
   checkCollisionOut() {
-    const allIntersections = [];
+    const allIntersections:any = [];
     this.z_neg_rcs.forEach((ray) => {
       const rayCaster = new THREE.Raycaster(ray.origin, ray.direction, 0.1, 1);
       allIntersections.push(...rayCaster.intersectObjects(this.mesh.parent.children, true));
     });
     // remove all the intersections with the pieces self
-    const intersects = [];
-    allIntersections.forEach((intersection)=>{
+    const intersects:any = [];
+    allIntersections.forEach((intersection:THREE.Intersection)=>{
       if (intersection.object.parent.uuid!==this.mesh.uuid) {
         if(intersection.object.userData.entityType!==this.ignoreCollision){
           intersects.push(intersection);
@@ -454,16 +458,16 @@ export class LocalPlayerPiece {
     rotCW.setFromAxisAngle(new THREE.Vector3(0, 0, 1), -Math.PI/2);
 
     const cMesh = this.mesh.clone(true);
-    const scene = this.mesh.parent;
+    const scene:any = this.mesh.parent;
     const uuid = this.mesh.uuid;
 
     const decision = this.checkCollisionIntersections(uuid, cMesh, scene, rotCW);
 
 
     if (decision) {
-      this.collision_isBlocked['CCW'] = true;
+      this.collision_isBlocked.ccw = true;
     } else {
-      this.collision_isBlocked['CCW'] = false;
+      this.collision_isBlocked.ccw = false;
     }
   }
 
@@ -472,16 +476,16 @@ export class LocalPlayerPiece {
     rotCW.setFromAxisAngle(new THREE.Vector3(0, 0, 1), -Math.PI/2);
 
     const cMesh = this.mesh.clone(true);
-    const scene = this.mesh.parent;
+    const scene:any = this.mesh.parent;
     const uuid = this.mesh.uuid;
 
     const decision = this.checkCollisionIntersections(uuid, cMesh, scene, rotCW);
 
 
     if (decision) {
-      this.collision_isBlocked['CW'] = true;
+      this.collision_isBlocked.cw = true;
     } else {
-      this.collision_isBlocked['CW'] = false;
+      this.collision_isBlocked.cw = false;
     }
   }
 
@@ -493,6 +497,7 @@ export class LocalPlayerPiece {
     this.mesh.rotation.set(info.rotation.x,info.rotation.y,info.rotation.z);   
 
   }
+
 }
 
 
