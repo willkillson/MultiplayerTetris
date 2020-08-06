@@ -28,7 +28,7 @@ export class Engine extends React.Component {
   componentDidMount() {
 
     // MAKE SURE TO SET THIS TO FALSE WHEN PUSHING TO MASTER FOR A NEW BUILD
-    const IS_DEVELOP = false;
+    const IS_DEVELOP = true;
     ////GRAPICS
     ////////////////////
     this.graphics = new GRAPHICS.Graphics();

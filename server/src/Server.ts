@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'node-uuid';
 import * as THREE from 'three';
 
 
+// const GAME = require('../../client/src/Engine/Game/Game.ts');
 //import * as GAME from '../../client/src/Engine/Game/Game';
 
 
@@ -45,8 +46,8 @@ const normalizePort = (val:string) => {
 }
 
 export default class Server  {
-
-    //public game: GAME.Game;
+  
+   //public game: any;
 
     public userSockets:Map<string, SocketIO.Socket>; 
 
@@ -65,6 +66,7 @@ export default class Server  {
     constructor(){
 
       //this.game = new GAME.Game();
+      //this.game = new GAME();
 
       
       //Data storage, local only for now.
