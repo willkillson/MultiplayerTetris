@@ -5,7 +5,7 @@ import * as io from 'socket.io-client';
 //LocalImports
 import * as GAME from '../../common-game/Game';
 import * as T from '../../common-utilities/types'
-import * as COMMAND from '../Controls/Command';
+import * as COMMAND from '../../common-game/control/Command';
 import Engine from '../Engine';
 
 export class ClientNetwork {
@@ -38,9 +38,11 @@ export class ClientNetwork {
     }
 
     private onConnected(info:T.NewConnectionInfo) {   
-        //TODO: Refactor
-        //this.game.updateNetworkInfo(info);
+        console.log("onConnected - info:T.NewConnectionInfo");
+        console.log(info);
+        this.game.setInitialGameState(info);
     }
+
 
     private onUpdate(info:T.NewConnectionInfo){
             //TODO: Refactor

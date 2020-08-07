@@ -65,6 +65,21 @@ interface Directions {
     ccw: boolean;
 }
 
+
+interface GameState{
+    movPlayerDown:boolean;
+    waitingForUpdate:boolean;
+    resetGame:boolean;
+    waitingForNewPiece: boolean;
+}
+  
+interface GameTimeVariables{
+    secondsPerTick:number,
+    syncTime: number, // the time we get from the server, and is updated every call to UPDATE
+    previousTime: number, //the time we use to determine whether we have passed a secondsPerTick threshhold value
+    secondsSinceLastUpdate:number
+}
+
 export type{
     UserData,
     Directions,
@@ -73,5 +88,7 @@ export type{
     Block,
     UpdateInfo,
     NewConnectionInfo,
-    NetworkInfo
+    NetworkInfo,
+    GameState,
+    GameTimeVariables
 }

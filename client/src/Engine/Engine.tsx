@@ -41,6 +41,7 @@ export class Engine extends React.Component {
     this.network = new NETWORK.ClientNetwork(IS_DEVELOP, this);
     ////CONTROLS
     ////////////////////
+    
     this.controlManager = new CONTROLMANAGER.ControlManager(this.game, this.network);
     this.keyboardControls = new KEYBOARDCONTROLS.KeyboardControls(this.controlManager);
     this.onscreenControls = new ONSCREENCONTROLS.OnscreenControls(this.controlManager);  

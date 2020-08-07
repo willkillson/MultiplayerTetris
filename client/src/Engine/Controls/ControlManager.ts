@@ -4,7 +4,7 @@ import * as GAME from '../../common-game/Game'
 import * as QUEUE from '../../common-utilities/AbstractDataTypes/Queue'
 import * as NETWORK from '../Network/ClientNetwork'
 import * as T from '../../common-utilities/types';
-import * as COMMAND from './Command';
+import * as COMMAND from '../../common-game/control/Command';
 
 export class ControlManager extends QUEUE.Queue<COMMAND.Command<any>>{
 

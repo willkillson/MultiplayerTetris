@@ -2,10 +2,9 @@ import * as io from 'socket.io';
 import { v4 as uuidv4 } from 'node-uuid';
 import * as THREE from 'three';
 
-
-// const GAME = require('../../client/src/Engine/Game/Game.ts');
-//import * as GAME from '../../client/src/Engine/Game/Game';
+//common imports
 import * as GAME from './common-game/Game';
+import * as T from './common-utilities/types';
 
 
 //LocalImports
@@ -16,19 +15,6 @@ import * as PIECE from './Entities/Piece'
 import * as GL from './GameLogic';
 import { NetworkControlManager } from "./Controls/NetworkControlManager";
 import * as COMMAND from './Controls/Command';
-
-interface UpdateInfo{
-  users:CLIENT.Client[];
-  persistentBlocks: BLOCK.Block[];
-  serverTime:number;
-}
-
-interface NewConnectionInfo{
-  users:CLIENT.Client[];
-  persistentBlocks: BLOCK.Block[];
-  serverTime:number;
-  clientId:string;
-}
 
 const normalizePort = (val:string) => {
   var port = parseInt(val, 10);
@@ -134,7 +120,7 @@ export default class Server  {
       this.users.push(info);                                          
       console.log(MyTime() + ' Client '+ info.id + ' connected.');  
 
-      const newConnectionInfo = <NewConnectionInfo>{};
+      const newConnectionInfo = <T.NewConnectionInfo>{};
       newConnectionInfo.users = this.users;
       newConnectionInfo.persistentBlocks = this.persistentBlocks;
       newConnectionInfo.serverTime = this.serverTime;
@@ -208,7 +194,7 @@ export default class Server  {
           this.gl.lineClear(this.persistentBlocks);
           this.ncm.pollAndProcessCommands(this.users);
 
-          const info = <UpdateInfo>{};
+          const info = <T.UpdateInfo>{};
           info.users = this.users;
           info.serverTime = this.serverTime;
 

@@ -17,48 +17,48 @@ import * as T from '../common-utilities/types';
 //import * as BLOCK from './entities/Block/Block'
 //import * as COMMAND from '../Controls/Command';
 
+import * as COMMAND from '../common-game/control/Command';
 
-
-interface GameState{
-    movPlayerDown:boolean;
-    waitingForUpdate:boolean;
-    resetGame:boolean;
-    waitingForNewPiece: boolean;
-}
-  
-interface GameTimeVariables{
-    secondsPerTick:number,
-    syncTime: number, // the time we get from the server, and is updated every call to UPDATE
-    previousTime: number, //the time we use to determine whether we have passed a secondsPerTick threshhold value
-    secondsSinceLastUpdate:number
-}
 
 export class Game {
     
-    // public network: T.NetworkInfo;
-    scene: THREE.Scene;
+    public clientId: string|null;
 
-    //animations
-    mixers: THREE.AnimationMixer[];
-    clock: THREE.Clock;
 
-    gameState: GameState;
-    gameTimeVariables: GameTimeVariables;
-    clientId: string;
+
+    //Scene graph that contains the world.
+    public scene: THREE.Scene;                
+    //Different states the game can be in. Prevents race conditions.     
+    public gameState: T.GameState;                   
+
+    //Variables for controlling the rate of time, and events.
+    private gameTimeVariables: T.GameTimeVariables;   
+
+    // If this class is instantiated as a client, this will contain the local player,
+    // otherwise it will be assigned null.
+    private localPlayer: T.Client|null;
+    private localPlayerPiece: PIECE.LocalPlayerPiece|null;                
+
+    // This is duplicate information, it will all go into the scene graph.
+    private persistentBlocks: T.Block[]; 
+
+    // An array containing all the players in the game.               
+    private players: T.Client[];  
+    
+    // GameVariables
+    private startingPosition: THREE.Vector3;
+    private defaultRotation: THREE.Vector3;
+    private frameSizeHorizontal: number;
+    private frameSizeVertical: number;
 
     constructor(){
-        //animations
-        this.mixers = [];
-        this.clock = new THREE.Clock();
         this.scene = new THREE.Scene();
         //this.network = <T.NetworkInfo>{};
-
-        this.gameState = <GameState>{};
+        this.gameState = <T.GameState>{};
         this.gameState.movPlayerDown = false;   // When true, the game will force the player to move down.
         this.gameState.waitingForUpdate = true; // When true, the game will wait for an update from the server.
         this.gameState.resetGame = false;
         this.gameState.waitingForNewPiece = false;
-            
         //gameTime
         this.gameTimeVariables = {
             secondsPerTick: 1,
@@ -66,25 +66,39 @@ export class Game {
             previousTime: 0,
             secondsSinceLastUpdate: 0
         }
+        this.clientId = null;
+
+        this.startingPosition = new THREE.Vector3(0,18,0);
+        this.defaultRotation = new THREE.Vector3(0,18,0);
+        this.frameSizeHorizontal = 23;
+        this.frameSizeVertical = 19;
 
         this.init();
-
     }
 
-    public setClientId( clientId:string ){
-        this.clientId = clientId;
-    }
 
-    //TODO: 
-    public setPlayerPiece(  ){
+    public setInitialGameState(info:T.NewConnectionInfo){
+        this.clientId = info.clientId;
+        this.persistentBlocks = info.persistentBlocks;
+        this.players = info.users;
+        this.gameTimeVariables.syncTime = info.serverTime;
 
+        if(info.clientId!=="SERVER"){
+            // Local player initialization.
+            this.localPlayer = info.users.filter(usr=>{return usr.id===info.clientId})[0];
+            this.localPlayerPiece = new PIECE.LocalPlayerPiece(this.scene, this.localPlayer);    
+        }else{
+            // Server doesn't instantiate these.
+            this.localPlayer = null;
+            this.localPlayerPiece = null;
+        }
+        console.log(this.localPlayer);
     }
 
     init(){
         // SETUP GAME
         const frame = BOARD.frame();
         
-
         frame.position.add(new THREE.Vector3(-5, 0, 0));
         this.scene.add(BOARD.levelFloor()); // grpimd
         this.scene.add(BOARD.sky());
@@ -180,47 +194,73 @@ export class Game {
         this.scene.add(whiteLight);
     }
 
-  //TODO: Decouple.
-  // public update(controlManager:CM.ControlManager){     
-  //   if ( this.currentPiece!==null ) {   
-  //     if(this.gameState.movPlayerDown ===true){
-  //         //this.forceDown(network
-  //         let newCommand = new COMMAND.Command(this.clientId,'movement',new THREE.Vector3(0,-1,0));
-  //         controlManager.addCommand(newCommand);
-  //         this.gameState.movPlayerDown=false;
-  //     }else{
-  //         controlManager.processCommand();
-  //     }
-  //   }
-  //   if(this.gameState.waitingForNewPiece){
-  //     return;
-  //   }
-  //   this.syncGame();
-  // }
+    public tick( command:COMMAND.Command<any>){     
+        // CommonUpdate
 
-  //TODO: Decouple.
-  //   public updateNetworkInfo(info: T.NetworkInfo){
-  //     if(info.serverTime!==undefined){
-  //       this.gameTimeVariables.syncTime = info.serverTime;
-  //     }
-  //     if(info.clientId!==undefined){
-  //       this.network.clientId = info.clientId;
-  //       this.clientId = info.clientId;
-  //     }
-  //     if(info.persistentBlocks!==undefined)
-  //       this.network.persistentBlocks = info.persistentBlocks;
-  //     if(info.serverTime!==undefined)
-  //       this.network.serverTime = info.serverTime;
-  //     if(info.users!==undefined){
-  //       this.network.users = info.users;
-  //     }
-  //     this.gameState.waitingForUpdate = false;
-  // }
 
-    //modifies positions so they are current with the network
+        // Server specific / Client specific updates.        
+        if(this.clientId==="SERVER"){
+            this.updateServerModel();
+        }else{
+            this.updateClientModel(command);
+        }
+    }
+
+    //TODO: 
+    private updateCommonModel(command:COMMAND.Command<any>){
+
+    }
+
+    //TODO:
+    private updateClientModel(command:COMMAND.Command<any>){
+        // if ( this.currentPiece!==null ) {   
+        // if(this.gameState.movPlayerDown ===true){
+        //     //this.forceDown(network
+        //     let newCommand = new COMMAND.Command(this.clientId,'movement',new THREE.Vector3(0,-1,0));
+        //     controlManager.addCommand(newCommand);
+        //     this.gameState.movPlayerDown=false;
+        // }else{
+        //     controlManager.processCommand();
+        // }
+        // }
+        // if(this.gameState.waitingForNewPiece){
+        // return;
+        // }
+        // this.syncGame();
+    }
+
+    //TODO:
+    private updateServerModel(){
+
+    }
+
+
+    //TODO: Decouple.
+    public updateNetworkInfo(info: T.NetworkInfo){
+        // if(info.serverTime!==undefined){
+        //     this.gameTimeVariables.syncTime = info.serverTime;
+        // }
+        // if(info.clientId!==undefined){
+        //     this.network.clientId = info.clientId;
+        //     this.clientId = info.clientId;
+        // }
+        // if(info.persistentBlocks!==undefined)
+        //     this.network.persistentBlocks = info.persistentBlocks;
+        // if(info.serverTime!==undefined)
+        //     this.network.serverTime = info.serverTime;
+        // if(info.users!==undefined){
+        //     this.network.users = info.users;
+        // }
+        // this.gameState.waitingForUpdate = false;
+    }
+
+
+
+    //TODO: Decouple
     private syncGame(){
+        //modifies positions so they are current with the network
 
-      //TODO: Decouple
+      
       // this.handleLocalPlayer();
       // this.handleNetworkedPlayers();
       // this.handlePersistantPieces();
@@ -253,23 +293,6 @@ export class Game {
         })
 
     }
-
-
-    //TODO: Decouple
-    // private handleLocalPlayer(){
-    //   let networkUserMap = new Map(this.network.users.map(i=>[i.id,i]));
-    //   let currentUserNetworkInfo = networkUserMap.get(this.clientId);
-    //   if( this.currentPiece===null ){
-    //       // Remove any local meshes that is still in our scene.
-    //       this.scene.children
-    //       .filter((child)=> {return child.userData.owner===this.clientId})
-    //       .forEach((piece)=>{this.scene.remove(piece)});
-    //       // Create the new piece.
-    //       networkUserMap = new Map(this.network.users.map(i=>[i.id,i]));
-    //       currentUserNetworkInfo = networkUserMap.get(this.clientId);
-    //       this.currentPiece = new PIECE.LocalPlayerPiece(this.scene, currentUserNetworkInfo);    
-    //   }
-    // }
 
     //TODO: Decouple
     // private handleNetworkedPlayers(){    
