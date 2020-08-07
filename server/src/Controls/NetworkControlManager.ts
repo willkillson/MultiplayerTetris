@@ -1,6 +1,6 @@
 import * as SOCKET from 'socket.io';
-import * as QUEUE from '../utilities/DataTypes/Queue'
-import * as COMMAND from '../Controls/Command'
+import * as QUEUE from '../common-utilities/AbstractDataTypes/Queue';
+import * as COMMAND from '../Controls/Command';
 import * as CLIENT from '../Entities/Client';
 import * as THREE from 'three';
 import * as BLOCK from '../Entities/Block'

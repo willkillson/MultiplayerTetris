@@ -1,3 +1,7 @@
+
+// @ts-ignore
+import * as THREE from 'three';
+
 interface ClientInfo{
     id: string;
     users: Client[];

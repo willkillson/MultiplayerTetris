@@ -5,10 +5,11 @@ import * as THREE from 'three';
 
 // const GAME = require('../../client/src/Engine/Game/Game.ts');
 //import * as GAME from '../../client/src/Engine/Game/Game';
+import * as GAME from './common-game/Game';
 
 
 //LocalImports
-import MyTime from './utilities/time';
+import MyTime from './common-utilities/time';
 import * as BLOCK from './Entities/Block'
 import * as CLIENT from './Entities/Client'
 import * as PIECE from './Entities/Piece'
@@ -51,6 +52,8 @@ export default class Server  {
 
     public userSockets:Map<string, SocketIO.Socket>; 
 
+    public game:GAME.Game;
+
     private port:string|number|false;
     private io: any;
     public persistentBlocks: BLOCK.Block[];
@@ -72,6 +75,9 @@ export default class Server  {
       //Data storage, local only for now.
       this.persistentBlocks = [];
       this.users = [];
+
+      //this.game = new GAME.Game();
+      //console.log(this.game);
 
       //init the game logic
       this.gl = new GL.GameLogic();

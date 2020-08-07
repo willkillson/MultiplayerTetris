@@ -1,7 +1,7 @@
 
 //NodeImports
 import * as THREE from 'three';
-import * as GAME from '../Game/Game';
+import * as GAME from '../../common-game/Game';
 import * as CONTROLMANAGER from '../Controls/ControlManager'
 import * as NETWORK from '../Network/ClientNetwork'
 
@@ -66,7 +66,7 @@ export class Graphics {
     
           //TODO: perhaps refactor this and remove the control manager.
           if(this.game.clientId!==undefined){
-            this.game.update(this.controlManager);
+            //this.game.update(this.controlManager);
           }
 
           //animations

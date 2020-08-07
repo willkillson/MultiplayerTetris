@@ -4,11 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start:dev": "nodemon",
-    "prestart" :"node ./src/scripts/copyScript.js",
-    "build": "rimraf ./build && tsc",
-    "start": "node build && node build/index.js"
+    "copy-common" : "node ./src/scripts/copyScript.js",
+    "compile-typescript" : "tsc",
+    "remove-build-folders": "rimraf ./build && rimraf ./src/common-game/ && rimraf ./src/common-utilities",
+    "build": "npm run copy-common && npm run remove-build-folders ",
+    "build-dev": "npm run copy-common && tsc",
+    "build-production" :"",
+    "start": "npm run build-dev && node build/index.js",
+    "zzzOLDstart": "node build && node build/index.js"
   },
   "author": "",
   "license": "ISC",
@@ -27,6 +30,7 @@
   "dependencies": {
     "@types/socket.io-client": "^1.4.33",
     "cors": "^2.8.5",
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "ncp": "^2.0.0"
   }
 }

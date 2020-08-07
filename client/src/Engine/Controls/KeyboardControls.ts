@@ -1,6 +1,6 @@
 import Mousetrap from 'mousetrap';
 import * as CM from './ControlManager';
-import * as T from '../Util/types';
+import * as T from '../../common-utilities/types';
 import * as COMMAND from './Command';
 import * as THREE from 'three';
 

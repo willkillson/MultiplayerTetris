@@ -1,9 +1,9 @@
 
 //LocalImports
-import * as GAME from '../Game/Game'
-import * as QUEUE from '../Util/AbstractDataTypes/Queue'
+import * as GAME from '../../common-game/Game'
+import * as QUEUE from '../../common-utilities/AbstractDataTypes/Queue'
 import * as NETWORK from '../Network/ClientNetwork'
-import * as T from '../Util/types';
+import * as T from '../../common-utilities/types';
 import * as COMMAND from './Command';
 
 export class ControlManager extends QUEUE.Queue<COMMAND.Command<any>>{
@@ -27,6 +27,7 @@ export class ControlManager extends QUEUE.Queue<COMMAND.Command<any>>{
      * Processes commands if there are any. This function should be called once per frame.
      */
     public processCommand(){
+        //TODO: Refactor this method to take in the piece of the player.
 
         //console.log(this);
         //console.log(this.game.currentPiece);
@@ -38,18 +39,18 @@ export class ControlManager extends QUEUE.Queue<COMMAND.Command<any>>{
         }
         if( !this.isEmpty() ){
             let command = this.dequeue();
-            if(this.game.currentPiece.update(command)){
-                this.network.sendCommand(command);
-            }
-            else if(command.cmdValue.y===-1 && this.game.currentPiece.collision_isBlocked.down && this.game.currentPiece!==null)
-            {
-                let cmd = new COMMAND.Command(this.game.clientId,'setPiece',this.game.getBlockPositions());
-                this.game.gameState.waitingForUpdate = true;
-                this.game.currentPiece.removePiece();
-                this.game.currentPiece = null; 
-                this.game.gameState.waitingForNewPiece = true;
-                this.network.sendCommand(cmd);
-            }
+            // if(this.game.currentPiece.update(command)){
+            //     this.network.sendCommand(command);
+            // }
+            // else if(command.cmdValue.y===-1 && this.game.currentPiece.collision_isBlocked.down && this.game.currentPiece!==null)
+            // {
+            //     let cmd = new COMMAND.Command(this.game.clientId,'setPiece',this.game.getBlockPositions());
+            //     this.game.gameState.waitingForUpdate = true;
+            //     this.game.currentPiece.removePiece();
+            //     this.game.currentPiece = null; 
+            //     this.game.gameState.waitingForNewPiece = true;
+            //     this.network.sendCommand(cmd);
+            // }
         }
         
     }

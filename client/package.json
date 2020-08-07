@@ -7,6 +7,7 @@
     "@types/socket.io": "^2.1.10",
     "bootstrap": "^4.5.0",
     "mousetrap": "^1.6.5",
+    "ncp": "^2.0.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-keydown": "^1.9.12",
@@ -15,7 +16,8 @@
     "three": "^0.118.3"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "copy-common" : "node ./src/scripts/copyScript.js",
+    "start": "npm run copy-common && react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

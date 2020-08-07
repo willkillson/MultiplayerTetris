@@ -11,7 +11,7 @@ import * as CONTROLMANAGER from './Controls/ControlManager';
 import * as KEYBOARDCONTROLS from './Controls/KeyboardControls';
 import * as ONSCREENCONTROLS from './Controls/OnscreenControls';
 
-import * as GAME from './Game/Game'
+import * as GAME from '../common-game/Game'
 
 
 export class Engine extends React.Component {

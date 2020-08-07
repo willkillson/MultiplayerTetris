@@ -1,3 +1,4 @@
+// @ts-ignore
 import * as THREE from 'three';
 
 export const levelFloor = () => {

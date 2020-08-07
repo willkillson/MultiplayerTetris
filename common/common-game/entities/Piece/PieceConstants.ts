@@ -1,5 +1,6 @@
 
 //NodeImports
+// @ts-ignore
 import * as THREE from 'three';
 
 export const PIECE_MAP = new Map<number,string>();

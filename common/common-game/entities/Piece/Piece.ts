@@ -1,9 +1,14 @@
+
+// @ts-ignore
 import * as THREE from 'three';
 
 //Local Imports
-import * as COMMAND from '../../../Controls/Command';
+
+//TODO: Refactor
+//import * as COMMAND from '../../../Controls/Command';
+
 import * as MyConstants from './PieceConstants';
-import * as T from '../../../Util/types';
+import * as T from '../../../common-utilities/types'
 
 interface Directions {
   up: boolean;
@@ -175,7 +180,7 @@ export class LocalPlayerPiece {
     }
   }
 
-  public update(command:COMMAND.Command<any>): boolean {
+  public update(command:any): boolean {
 
     //handle movement
     switch(command.cmdType){

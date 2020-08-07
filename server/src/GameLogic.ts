@@ -1,5 +1,5 @@
 import * as BLOCK from './Entities/Block'
-import formatedTime from './utilities/time';
+import formatedTime from './common-utilities/time';
 
 
 
@@ -29,9 +29,6 @@ export class GameLogic {
         {1<y<19}
         {z=0}
         */
-
-
-
 
         //TODO Calculate this number based on this.leftBounds and this.rightBounds
         this.lengthHorizontal = 24-1; 

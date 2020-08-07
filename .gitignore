@@ -6,6 +6,17 @@
 /*/*.vscode
 /*/build
 
+
+# files that are copied on build
+/*/src/common-game
+/*/src/common-utilities
+
+# Models
+*.glb
+*.png
+*.gltf
+
+
 /.pnp
 .pnp.js
 

@@ -1,5 +1,6 @@
+// @ts-ignore
 import * as THREE from 'three';
-import * as T from '../../../Util/types';
+import * as T from '../../../common-utilities/types'
 
 // export class Block {
 //     constructor(scene:THREE.Scene, userData:T.UserData, pColor:number, position:THREE.Vector3){

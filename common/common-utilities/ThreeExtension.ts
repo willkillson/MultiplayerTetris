@@ -1,3 +1,5 @@
+
+// @ts-ignore
 import * as THREE from 'three';
 
 export const getObjectByUserData = 

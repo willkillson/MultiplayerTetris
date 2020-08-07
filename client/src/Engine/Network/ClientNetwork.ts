@@ -3,8 +3,8 @@
 import * as io from 'socket.io-client';
 
 //LocalImports
-import * as GAME from '../Game/Game';
-import * as T from '../Util/types'
+import * as GAME from '../../common-game/Game';
+import * as T from '../../common-utilities/types'
 import * as COMMAND from '../Controls/Command';
 import Engine from '../Engine';
 
@@ -38,11 +38,13 @@ export class ClientNetwork {
     }
 
     private onConnected(info:T.NewConnectionInfo) {   
-        this.game.updateNetworkInfo(info);
+        //TODO: Refactor
+        //this.game.updateNetworkInfo(info);
     }
 
     private onUpdate(info:T.NewConnectionInfo){
-        this.game.updateNetworkInfo(info);
+            //TODO: Refactor
+        //this.game.updateNetworkInfo(info);
     }
 
     private clearWaitingFlag(){
