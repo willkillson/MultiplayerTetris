@@ -75,6 +75,11 @@ export class Game {
         this.clientId = clientId;
     }
 
+    //TODO: 
+    public setPlayerPiece(  ){
+
+    }
+
     init(){
         // SETUP GAME
         const frame = BOARD.frame();
