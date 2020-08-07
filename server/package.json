@@ -4,12 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "copy-common" : "node ./src/scripts/copyScript.js",
-    "compile-typescript" : "tsc",
+    "copy-common": "node ./src/scripts/copyScript.js",
+    "compile-typescript": "tsc",
     "remove-build-folders": "rimraf ./build && rimraf ./src/common-game/ && rimraf ./src/common-utilities",
     "build": "npm run copy-common && npm run remove-build-folders ",
     "build-dev": "npm run copy-common && tsc",
-    "build-production" :"",
+    "build-production": "",
     "start": "npm run build-dev && node build/index.js",
     "zzzOLDstart": "node build && node build/index.js"
   },
