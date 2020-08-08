@@ -1,65 +1,56 @@
 
 //LocalImports
-import * as GAME from '../../common-game/Game'
 import * as QUEUE from '../../common-utilities/AbstractDataTypes/Queue'
-import * as NETWORK from '../Network/ClientNetwork'
-import * as T from '../../common-utilities/types';
 import * as COMMAND from '../../common-game/control/Command';
 
-export class ControlManager extends QUEUE.Queue<COMMAND.Command<any>>{
+export class ControlManager {
 
-    private isProcessingCommand: boolean;   //Controls whether we can process another command or not.             
-    private network:NETWORK.ClientNetwork;
-    private game:GAME.Game;
+    /*
 
-    constructor( game:GAME.Game, network:NETWORK.ClientNetwork ){
-        super();
-        this.isProcessingCommand = false;
-        this.network = network;
-        this.game = game;
+    setPiece is the only command that requires a reply.
+
+     cmd.cmdType        cmd.cmdValue
+    'setPiece'    |     Vector3: denotes position the piece is in.
+    'rotation'    |     Vector3: the rotation applied to the euler vec
+    'movement'    |     Vector3: denotes the direction to add to the current position
+    'newPlayer'   |     Client: 
+
+    */
+    public clientId:string|null;
+    
+    private commandsProcessing: COMMAND.Command<any>[];
+    private commandQueue: QUEUE.Queue<COMMAND.Command<any>>;
+
+    constructor(){
+        this.clientId= null;
+        this.commandQueue = new QUEUE.Queue<COMMAND.Command<any>>();
+        this.commandsProcessing = [];
     }
 
-    public addCommand(cmd:COMMAND.Command<any>){
-        this.enqueue(cmd);
+    public addToProcessing(cmd:COMMAND.Command<any>){
+        this.commandsProcessing.push(cmd);
+    }
+
+    public removeProcessing(cmdType:string){
+
+    }
+
+    public queCommand(cmd:COMMAND.Command<any>){
+        cmd.id = this.clientId;
+        this.commandQueue.enqueue(cmd);
     }
 
     /**
      * Processes commands if there are any. This function should be called once per frame.
      */
-    public processCommand(){
-        //TODO: Refactor this method to take in the piece of the player.
+    public getCommand():COMMAND.Command<any>|undefined{
+        if( !this.commandQueue.isEmpty() ){
+            let command = this.commandQueue.dequeue();
+            return command;
+        }
+        else{
+            return undefined;
+        }
+    }
 
-        //console.log(this);
-        //console.log(this.game.currentPiece);
-        if(this.game.gameState.resetGame){
-            let cmd = new COMMAND.Command(this.game.clientId,'reset', 'reset');
-            this.game.gameState.resetGame = false;
-            this.game.gameState.waitingForUpdate = true;
-            this.network.sendCommand(cmd);
-        }
-        if( !this.isEmpty() ){
-            let command = this.dequeue();
-            // if(this.game.currentPiece.update(command)){
-            //     this.network.sendCommand(command);
-            // }
-            // else if(command.cmdValue.y===-1 && this.game.currentPiece.collision_isBlocked.down && this.game.currentPiece!==null)
-            // {
-            //     let cmd = new COMMAND.Command(this.game.clientId,'setPiece',this.game.getBlockPositions());
-            //     this.game.gameState.waitingForUpdate = true;
-            //     this.game.currentPiece.removePiece();
-            //     this.game.currentPiece = null; 
-            //     this.game.gameState.waitingForNewPiece = true;
-            //     this.network.sendCommand(cmd);
-            // }
-        }
-        
-    }
-    
-    /**
-     * This function is called by the sever to notify the 
-     * control manager that a command has been processed.
-     */
-    public freeUpControls(){
-        this.isProcessingCommand = false;
-    }
 }

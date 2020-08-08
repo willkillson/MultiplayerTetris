@@ -52,6 +52,7 @@ interface UserData{
     entityType: string;
     owner: string;
     pieceType: number;
+    clientInfo: Client;
 }
 
 interface Directions {

@@ -42,7 +42,7 @@ export class Engine extends React.Component {
     ////CONTROLS
     ////////////////////
     
-    this.controlManager = new CONTROLMANAGER.ControlManager(this.game, this.network);
+    this.controlManager = new CONTROLMANAGER.ControlManager();
     this.keyboardControls = new KEYBOARDCONTROLS.KeyboardControls(this.controlManager);
     this.onscreenControls = new ONSCREENCONTROLS.OnscreenControls(this.controlManager);  
 

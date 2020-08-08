@@ -98,14 +98,26 @@ export const frame = () => {
   const height = 20;
   
   const textureLoader = new THREE.TextureLoader();
-  const metal = textureLoader.load('https://3.bp.blogspot.com/-yrh_atograU/UFhj_v6uBvI/AAAAAAAACKU/tWXypPzRhYo/s1600/Seamless+coloured+carpet+floor+texture.jpg');
-  const metalMaterial = new THREE.MeshLambertMaterial( {map: metal});
+  let material;
+  textureLoader.loadAsync('https://3.bp.blogspot.com/-yrh_atograU/UFhj_v6uBvI/AAAAAAAACKU/tWXypPzRhYo/s1600/Seamless+coloured+carpet+floor+texture.jpg',
+  (texture:any)=>{
+    material = texture;
+  })
+  .then((texture)=>{
+        //success
+        
+  
+  },()=>{
+        //rejected
+        material = new THREE.MeshLambertMaterial( {color: 0xff00ff});
+  });
+
 
   const group = new THREE.Object3D();
   const geometry = new THREE.BoxBufferGeometry(1, 1, 1);
   for (let i = 0; i< height; i++) {
-    let leftWall = new THREE.Mesh(geometry, metalMaterial);
-    let rightWall = new THREE.Mesh(geometry, metalMaterial);
+    let leftWall = new THREE.Mesh(geometry, material);
+    let rightWall = new THREE.Mesh(geometry, material);
     leftWall.position.set(0,i,0);
     rightWall.position.set(width,i,0);
     leftWall.userData = {
@@ -121,8 +133,8 @@ export const frame = () => {
   }
 
   for (let i = 0; i< width+1; i++) {
-    let bottomWall = new THREE.Mesh(geometry, metalMaterial);
-    let topWall = new THREE.Mesh(geometry, metalMaterial);
+    let bottomWall = new THREE.Mesh(geometry, material);
+    let topWall = new THREE.Mesh(geometry, material);
     bottomWall.position.set(i,0,0);
     topWall.position.set(i,height,0);
     bottomWall.userData = {

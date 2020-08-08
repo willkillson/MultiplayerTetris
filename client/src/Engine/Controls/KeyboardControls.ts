@@ -14,27 +14,27 @@ export class KeyboardControls {
     // Move left
     this.MouseTrap.bind('a', ()=>{
       let newCommand = new COMMAND.Command("","movement", new THREE.Vector3(-1,0,0));
-      this.controlManager.addCommand(newCommand);
+      this.controlManager.queCommand(newCommand);
     });
     // Move down
     this.MouseTrap.bind('s', ()=>{
       let newCommand = new COMMAND.Command("","movement", new THREE.Vector3(0,-1,0));
-      this.controlManager.addCommand(newCommand);
+      this.controlManager.queCommand(newCommand);
     });
     // right
     this.MouseTrap.bind('d', ()=>{
       let newCommand = new COMMAND.Command("","movement", new THREE.Vector3(1,0,0));
-      this.controlManager.addCommand(newCommand);
+      this.controlManager.queCommand(newCommand);
     });
     // Rotate CW
     this.MouseTrap.bind('k', ()=>{
       let newCommand = new COMMAND.Command("","rotation", new THREE.Vector3(0,0,-Math.PI/2));
-      this.controlManager.addCommand(newCommand);
+      this.controlManager.queCommand(newCommand);
     });
     // Rotate CCW
     this.MouseTrap.bind('j', ()=>{
       let newCommand = new COMMAND.Command("","rotation", new THREE.Vector3(0,0,Math.PI/2));
-      this.controlManager.addCommand(newCommand);
+      this.controlManager.queCommand(newCommand);
     });
   }
 }

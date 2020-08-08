@@ -13,3 +13,4 @@ app.use(express.static('public'));
 app.listen(8000);
 var gameServer = new Server_1.default();
 //TODO start a chat service and connect to the clients.
+//# sourceMappingURL=index.js.map

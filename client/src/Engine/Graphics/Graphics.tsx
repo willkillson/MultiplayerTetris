@@ -2,7 +2,7 @@
 //NodeImports
 import * as THREE from 'three';
 import * as GAME from '../../common-game/Game';
-import * as CONTROLMANAGER from '../Controls/ControlManager'
+import * as CM from '../Controls/ControlManager'
 import * as NETWORK from '../Network/ClientNetwork'
 
 export class Graphics {
@@ -17,8 +17,10 @@ export class Graphics {
 
     ////EngineStuff
     private game: GAME.Game;
-    private controlManager: CONTROLMANAGER.ControlManager;
+    private controlManager: CM.ControlManager;
     private network: NETWORK.ClientNetwork;
+
+    
 
     constructor(){
         this.renderer = new THREE.WebGLRenderer();
@@ -39,11 +41,12 @@ export class Graphics {
             window.innerHeight,
         );
         this.totalTime = 0;
+
+
+        
     }
 
-    public init(game:GAME.Game, 
-      controlManager:CONTROLMANAGER.ControlManager,
-      network:NETWORK.ClientNetwork){
+    public init(game:GAME.Game, controlManager:CM.ControlManager,network:NETWORK.ClientNetwork){
       this.game = game;
       this.controlManager = controlManager;
       this.network = network;
@@ -60,13 +63,15 @@ export class Graphics {
     }
 
     public start(){
+
         const animate = (now) => {
             now = now * 0.001; //change to seconds
             const dt = now - this.totalTime;
             this.totalTime = now;
             this.resizeRendererToDisplaySize();//resizes if need be.            
             //TODO: perhaps refactor this and remove the control manager.
-            if(this.game.clientId===null){
+            if(this.game.clientId===null || this.controlManager.clientId===null){
+                this.controlManager.clientId = this.game.clientId;
                 requestAnimationFrame( animate );
             }
             
@@ -81,8 +86,25 @@ export class Graphics {
 
             // emit any new changes
 
-            console.log(this.controlManager);
-            //this.game.tick();
+           
+            const cmd = this.controlManager.getCommand();  
+
+            if(cmd!==undefined){
+
+
+                //this.game.validateCommand(cmd);
+                console.log(cmd);
+
+                if(this.game.isCommandPossible(cmd)){
+                    this.game.processCommand(cmd);
+                    this.controlManager.addToProcessing(cmd);
+                    this.network.sendCommand(cmd);
+                }
+
+            }
+            
+            //console.log(this.game.networkPlayers);
+            
             this.renderer.render( this.game.scene, this.camera );
             requestAnimationFrame( animate );
         };

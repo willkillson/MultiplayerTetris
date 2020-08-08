@@ -31,9 +31,10 @@ export class ClientNetwork {
 
         this.socket.on('onConnected', (newClient)=> this.onConnected(newClient));
         this.socket.on('UPDATE', (info)=> this.onUpdate(info));
-        this.socket.on('freeControls', ()=> this.freeControls());
+        //this.socket.on('freeControls', ()=> this.freeControls());
         this.socket.on('clearWaitingFlag', ()=> this.clearWaitingFlag());
         this.socket.on('clearWaitingForNewPiece', (info)=> this.clearWaitingForNewPiece(info));
+        this.socket.on('onCommand', (info)=> this.receiveCommand(info));
 
     }
 
@@ -53,14 +54,20 @@ export class ClientNetwork {
         this.game.gameState.waitingForUpdate=false;
     }
 
-    private freeControls(){
-        this.engine.controlManager.freeUpControls();
-    }
+    // private freeControls(){
+    //     this.engine.controlManager.freeUpControls();
+    // }
 
     public sendCommand( command:COMMAND.Command<any> ){
         this.socket.emit('playerCommand', command);
-        console.log("emit - sendCommand_playerCommand");
+        console.log("sendCommand - command:command:COMMAND.Command<any> ");
         console.log(command);
+    }
+
+    public receiveCommand( command:COMMAND.Command<any> ){
+        console.log("receiveCommand - command:command:COMMAND.Command<any> ");
+        console.log(command);
+        this.game.processCommand(command);
     }
 
     clearWaitingForNewPiece(info:T.NewConnectionInfo): void {
