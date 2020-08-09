@@ -83,7 +83,13 @@ export class Graphics {
             const networkCommand = this.engine.networkCommandManager.getCommand();  
             
             if(networkCommand!==undefined){
+                
                 this.engine.game.processCommand(networkCommand);
+            }
+
+            if(this.engine.game.gameState.waitingForNewPiece){
+                console.log("Waiting for new piece from the server.");
+                requestAnimationFrame( animate );
             }
 
             if(localCommand!==undefined){
@@ -92,8 +98,6 @@ export class Graphics {
                     this.engine.network.sendCommand(localCommand);
                 }
             }
-
-            
             
             this.renderer.render( this.engine.game.scene, this.camera );
             requestAnimationFrame( animate );

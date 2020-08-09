@@ -74,20 +74,45 @@ export class NetworkControlManager {
     }
 
     private movement(game:GAME.Game, cmd:COMMAND.Command<THREE.Vector3>):void{
+
+        console.log("private movement(game:GAME.Game, cmd:COMMAND.Command<THREE.Vector3>):void");
+        console.log({cmd});
+
         game.processCommand(cmd);
         this.server.userSockets.get(cmd.id).broadcast.emit('onCommand', cmd);
     }
 
-    private rotation(game:GAME.Game, cmd:COMMAND.Command<any>):void{
+    private rotation(game:GAME.Game, cmd:COMMAND.Command<any>): void {
+
+        console.log("private rotation(game:GAME.Game, cmd:COMMAND.Command<any>): void");
+        console.log({cmd});
+
         game.processCommand(cmd);
         this.server.userSockets.get(cmd.id).broadcast.emit('onCommand', cmd);
     }
 
-    private setPiece(game:GAME.Game, cmd:COMMAND.Command<any>):void{
-        //TODO:
+    private setPiece(game:GAME.Game, cmd:COMMAND.Command<any>): void {
+
+        console.log("private setPiece(game:GAME.Game, cmd:COMMAND.Command<any>): void");
+        console.log({cmd});
+
+        //'setPiece'    |     Client: denotes position the piece is in.
+        game.processCommand(cmd);
+   
+        let clientInfo = generateClientInfo(cmd.id);// Create the new piece data for the player that sent this.
+        game.newPiece(clientInfo);// Generate it.
+
+        let ongoingCommand = new COMMAND.Command("SERVER","newPiece",clientInfo);
+        this.server.userSockets.get(cmd.id).broadcast.emit('onCommand', cmd); // Let all the other players know to set this piece.
+        this.server.io.emit('onCommand', ongoingCommand); // Let all the players know this is the new peiece for this player.
+    
     }
 
-    private newPlayer(game:GAME.Game, cmd:COMMAND.Command<any>):void{
+    private newPlayer(game:GAME.Game, cmd:COMMAND.Command<any>): void {
+
+        console.log("private newPlayer(game:GAME.Game, cmd:COMMAND.Command<any>): void");
+        console.log({cmd});
+
         game.processCommand(cmd);
         
         const newConnectionInfo = <T.NewConnectionInfo>{};
@@ -98,12 +123,31 @@ export class NetworkControlManager {
 
         this.server.userSockets.get(cmd.id).emit('onConnected',newConnectionInfo);  
         this.server.userSockets.get(cmd.id).broadcast.emit('onCommand', cmd);
+        
     }
 
-    private playerRemove(game:GAME.Game, cmd:COMMAND.Command<any>):void{
+    private playerRemove(game:GAME.Game, cmd:COMMAND.Command<any>): void {
+
+        console.log("private playerRemove(game:GAME.Game, cmd:COMMAND.Command<any>): void");
+        console.log({cmd});
+
         game.processCommand(cmd);
         this.removePlayer( cmd.id );
         this.server.userSockets.get(cmd.id).broadcast.emit('onCommand', cmd);
         this.server.userSockets.delete( cmd.id);
     }
+
+    private newPiece(game:GAME.Game, cmd:COMMAND.Command<any>): void {
+        
+        //TODO:
+    }
+}
+
+const generateClientInfo = ( clientId:string ):T.Client =>{
+    let info = <T.Client>{};
+    info.id = clientId;
+    info.pieceType = Math.floor(Math.random()*7); 
+    info.rotation = new THREE.Vector3(0,0,0);
+    info.position = new THREE.Vector3(Math.floor(Math.random()*13)-5,18,0);
+    return info;
 }

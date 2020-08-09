@@ -33,7 +33,7 @@ export default class Server  {
     private ncm: NetworkControlManager;
 
     private port:string|number|false;
-    private io: any;
+    public io: any;
 
     //serverTime
     public serverTime:number;

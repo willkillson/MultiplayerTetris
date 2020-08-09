@@ -16,15 +16,16 @@ import * as GAME from '../common-game/Game'
 
 export class Engine extends React.Component {
   
-  IS_DEVELOP: boolean;
+  private IS_DEVELOP: boolean;
+
+  public network: NETWORK.ClientNetwork;
+  public game:GAME.Game;
+  public localCommandManager: CONTROLMANAGER.ControlManager;
+  public networkCommandManager: CONTROLMANAGER.ControlManager;
   
-  graphics:GRAPHICS.Graphics;
-  network: NETWORK.ClientNetwork;
-  game:GAME.Game;
-  localCommandManager: CONTROLMANAGER.ControlManager;
-  networkCommandManager: CONTROLMANAGER.ControlManager;
-  keyboardControls: KEYBOARDCONTROLS.KeyboardControls;
-  onscreenControls: ONSCREENCONTROLS.OnscreenControls;
+  private graphics:GRAPHICS.Graphics;
+  private keyboardControls: KEYBOARDCONTROLS.KeyboardControls;
+  private onscreenControls: ONSCREENCONTROLS.OnscreenControls;
 
   componentDidMount() {
 
@@ -42,8 +43,8 @@ export class Engine extends React.Component {
     this.network = new NETWORK.ClientNetwork(IS_DEVELOP, this);
     ////CONTROLS
     ////////////////////    
-    this.localCommandManager = new CONTROLMANAGER.ControlManager();
-    this.networkCommandManager = new CONTROLMANAGER.ControlManager();
+    this.localCommandManager = new CONTROLMANAGER.ControlManager(this);
+    this.networkCommandManager = new CONTROLMANAGER.ControlManager(this);
     this.keyboardControls = new KEYBOARDCONTROLS.KeyboardControls(this.localCommandManager);
     this.onscreenControls = new ONSCREENCONTROLS.OnscreenControls(this.localCommandManager);  
 

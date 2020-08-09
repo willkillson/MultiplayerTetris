@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "copy-to-common": "node ./src/scripts/copyToCommon.js",
     "copy-common": "node ./src/scripts/copyScript.js",
     "compile-typescript": "tsc",
     "remove-build-folders": "rimraf ./build && rimraf ./src/common-game/ && rimraf ./src/common-utilities",
@@ -11,7 +12,7 @@
     "build-dev": "npm run copy-common && tsc",
     "build-production": "",
     "start": "npm run build-dev && node build/index.js",
-    "zzzOLDstart": "node build && node build/index.js"
+    "dev": "npm run copy-to-common && npm start"
   },
   "author": "",
   "license": "ISC",

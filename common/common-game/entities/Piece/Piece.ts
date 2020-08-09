@@ -55,7 +55,6 @@ export class LocalPlayerPiece {
             pieceType: number;
 
         */
-		console.log(client);
 
         let userData = <T.UserData>{};
         userData.entityType = "playerPiece";
@@ -78,7 +77,9 @@ export class LocalPlayerPiece {
         this.collision_isBlocked = <Directions>{};
         this.initClassVariables();
         this.initCollisionVariables();
-        this.initRaycasters();
+
+        //TODO: Testing
+        //this.initRaycasters();
     }
 
     ////////////////////////////
@@ -233,33 +234,34 @@ export class LocalPlayerPiece {
     ////////////////////////////
     //COLLISION
     public validateCommand(cmd:COMMAND.Command<any>):boolean {
-        //Get the most current collision detection.
-        this.initRaycasters();
-        let isAllowed = false;
-        if(cmd.cmdType==='rotation'){
-            this.checkCollisionCCW();
-            this.checkCollisionCW();
-            if(cmd.cmdValue.z===-Math.PI/2){//ccw
-                isAllowed = !this.collision_isBlocked.ccw;
-            } else if( cmd.cmdValue.z === Math.PI/2 ){//cw
-                isAllowed = !this.collision_isBlocked.cw;
-            } 
-        }else if(cmd.cmdType==='movement'){
+        // //Get the most current collision detection.
+        // this.initRaycasters();
+        // let isAllowed = false;
+        // if(cmd.cmdType==='rotation'){
+        //     this.checkCollisionCCW();
+        //     this.checkCollisionCW();
+        //     if(cmd.cmdValue.z===-Math.PI/2){//ccw
+        //         isAllowed = !this.collision_isBlocked.ccw;
+        //     } else if( cmd.cmdValue.z === Math.PI/2 ){//cw
+        //         isAllowed = !this.collision_isBlocked.cw;
+        //     } 
+        // }else if(cmd.cmdType==='movement'){
+        //     this.checkCollisionUp();
+        //     this.checkCollisionDown();
+        //     this.checkCollisionLeft();
+        //     this.checkCollisionRight();
+        //     if(cmd.cmdValue.x===-1){
+        //         isAllowed = !this.collision_isBlocked.left;
+        //     } else if( cmd.cmdValue.x === 1 ){
+        //         isAllowed = !this.collision_isBlocked.right;
+        //     } else if( cmd.cmdValue.y === -1 ){
+        //         isAllowed = !this.collision_isBlocked.down;
+        //     }
+        // }
+        // return isAllowed;
 
-            this.checkCollisionUp();
-            this.checkCollisionDown();
-            this.checkCollisionLeft();
-            this.checkCollisionRight();
-                
-            if(cmd.cmdValue.x===-1){
-                isAllowed = !this.collision_isBlocked.left;
-            } else if( cmd.cmdValue.x === 1 ){
-                isAllowed = !this.collision_isBlocked.right;
-            } else if( cmd.cmdValue.y === -1 ){
-                isAllowed = !this.collision_isBlocked.down;
-            }
-        }
-        return isAllowed;
+        //TODO:Testing
+        return true;
     }
 
     private checkCollisionIntersections(pUUID:string, pMesh:THREE.Object3D, pScene:THREE.Scene, pRot:THREE.Quaternion) {
@@ -506,8 +508,13 @@ export class LocalPlayerPiece {
                 pieceType: number | null
             }
         */
-        this.mesh.userData.clientInfo.position.set(this.mesh.position.x,this.mesh.position.y,this.mesh.position.z);
-        this.mesh.userData.clientInfo.rotation.set(this.mesh.position.x,this.mesh.position.y,this.mesh.position.z);
+
+        try{
+            this.mesh.userData.clientInfo.position = this.mesh.position;
+            this.mesh.userData.clientInfo.rotation = this.mesh.rotation;
+        }catch (error){
+            console.error(error);
+        }
     }
 }
 

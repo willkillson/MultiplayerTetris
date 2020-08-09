@@ -4,21 +4,21 @@ let fs = require('fs');
 let ncp = require('ncp').ncp;
 
 
-console.log("Copying common Game folder from ./common/Game to ./server/src/");
-ncp('./../common/common-game/', './src/common-game', function (err) {
+console.log("Updating our common folder with src/common-game");
+ncp('./src/common-game', './../common/common-game/', function (err) {
   if (err) {
     return console.error(err);
   }
   console.log('done!');
  });
 
- console.log("Copying common utilities folder from ./common/Utilities to ./server/src/");
- ncp('./../common/common-utilities/', './src/common-utilities/', function (err) {
-  if (err) {
-    return console.error(err);
-  }
-  console.log('done!');
- });
+ console.log("Updating our common folder with src/common-utilities");
+ ncp('./src/common-utilities', './../common/common-utilities/', function (err) {
+   if (err) {
+     return console.error(err);
+   }
+   console.log('done!');
+  });
 
 // console.log("Copying game files from client to server.");
 // fs.createReadStream('./../client/src/Engine/Game/Game.ts').pipe(fs.createWriteStream('./src/Game/Game.ts'));

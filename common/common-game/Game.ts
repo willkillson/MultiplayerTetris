@@ -133,6 +133,9 @@ export class Game {
     }
     
     public isCommandPossible( command:COMMAND.Command<any>):boolean {
+        console.log("public isCommandPossible( command:COMMAND.Command<any>):boolean");
+        console.log({command});
+
         if(command.cmdType==="rotation" || command.cmdType === "movement"){
             return this.localPlayerPiece.validateCommand(command);
         }else{
@@ -141,13 +144,18 @@ export class Game {
     }
 
     public processCommand( command:COMMAND.Command<any> ) {
+
+        console.log("public processCommand( command:COMMAND.Command<any> )")
+        console.log({command})
+
         /*
             cmd.cmdType        cmd.cmdValue
-            'setPiece'    |     string: denotes position the piece is in.
+            'setPiece'    |     Client: denotes position the piece is in.
             'rotation'    |     Vector3: the rotation applied to the euler vec
             'movement'    |     Vector3: denotes the direction to add to the current position
             'newPlayer'   |     Client: 
-            'playerRemove |     Client:
+            'playerRemove' |    Client:
+            'newPiece' |        Client:
         */
         switch(command.cmdType){
             case "setPiece":
@@ -175,6 +183,10 @@ export class Game {
                     this.playerRemove(command.cmdValue);
                     break;
                 }
+            case "newPiece":
+                {
+                    this.newPiece(command.cmdValue);
+                }
         }
     }
 
@@ -184,7 +196,27 @@ export class Game {
     
     //////////////////////
 
+    /**
+     * Is called when the command newPiece is processed. This command is activated once a piece is set.
+     * 
+     * @param info T.Client
+     */
+    public newPiece( info:T.Client ):void {
+        if(info.id===this.clientId){
+            this.localPlayerPiece = new PIECE.LocalPlayerPiece(this.scene,info);
+            this.gameState.waitingForNewPiece=false;
+        }else{
+            let index = this.networkPlayers.findIndex((e)=>{return e.getClientInfo().id===info.id});
+            this.networkPlayers.splice(index,1);
+            let newPlayerPiece = new PIECE.NetworkPlayerPiece(this.scene, info);
+            this.networkPlayers.push(newPlayerPiece);
+        }
+    }
+
     public createLocalPlayer( info:T.Client ):void {
+        console.log("public createLocalPlayer( info:T.Client ):void");
+        console.log({info});
+
         if(this.clientId==="SERVER"){
             throw Error("createLocalPlayer should not be called on the server!");
         }
@@ -193,35 +225,47 @@ export class Game {
     }
 
     public createNetworkedPlayer( info:T.Client):void {
+        console.log("public createNetworkedPlayer( info:T.Client):void");
+        console.log({info});
+
         let npp = new PIECE.NetworkPlayerPiece(this.scene,info);
         this.networkPlayers.push(npp);
     }
 
     public setPiece(info:T.Client):void {
 
-        let blocks;
-        
-        // Remove the player's mesh from the scene, and gather the blocks to be set.
-        if(this.clientId==="SERVER"){
-            let player = this.networkPlayers.find((e)=>{e.getClientInfo().id===info.id});
-            this.scene.remove(player.mesh);
-            blocks = EXT.getRotatedBlocksFromMesh(player.mesh);
-            blocks = EXT.bakeInOrigin(blocks, player.mesh.position);
-           
-        }
-        else{
-            this.scene.remove(this.localPlayerPiece.mesh);
-            blocks = EXT.getRotatedBlocksFromMesh(this.localPlayerPiece.mesh);
-            blocks = EXT.bakeInOrigin(blocks, this.localPlayerPiece.mesh.position);
-        }
+        console.log("public setPiece(info:T.Client):void")
+        console.log({info})
+
         let userData = <T.UserData>{};
         userData.entityType = "persistentBlock"
         userData.owner = info.id;
         userData.pieceType = info.pieceType;
+        userData.clientInfo = info
 
-        for(const b of blocks){
-            BLOCK.createBlock( this.scene, userData, b);
+        let blocks;
+        // Remove the player's mesh from the scene, and gather the blocks to be set.
+        if(info.id===this.clientId){
+            //local player
+            this.scene.remove(this.localPlayerPiece.mesh);
+            blocks = EXT.getRotatedBlocksFromMesh(this.localPlayerPiece.mesh);
+            blocks = EXT.bakeInOrigin(blocks, this.localPlayerPiece.mesh.position);
+            for(const b of blocks){
+                BLOCK.createBlock( this.scene, userData, b);
+            }
+            this.gameState.waitingForNewPiece = true;
         }
+        else {
+            //server or networked other players
+            let nwp = this.networkPlayers.find(e=>{return e.getClientInfo().id===info.id});
+            this.scene.remove(nwp.mesh);
+            blocks = EXT.getRotatedBlocksFromMesh(nwp.mesh);
+            blocks = EXT.bakeInOrigin(blocks, nwp.mesh.position);
+            for(const b of blocks){
+                BLOCK.createBlock( this.scene, userData, b);
+            }    
+        }
+ 
     }
 
     public playerRemove( client:T.Client ) {

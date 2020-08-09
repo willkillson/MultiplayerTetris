@@ -38,7 +38,12 @@ export class KeyboardControls {
     });
     // Set Piece
     this.MouseTrap.bind('h', ()=>{
-        let newCommand = new COMMAND.Command(this.controlManager.clientId,"setPiece", "setPiece");
+        let clientInfo = <T.Client>{};
+        
+        
+        clientInfo= this.controlManager.getCurrentPlayerClientInfo();
+
+        let newCommand = new COMMAND.Command(this.controlManager.clientId,"setPiece", clientInfo);
         this.controlManager.queCommand(newCommand);
     });
   }

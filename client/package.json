@@ -16,8 +16,10 @@
     "three": "^0.118.3"
   },
   "scripts": {
+    "copy-to-common": "node ./src/scripts/copyToCommon.js",
     "copy-common": "node ./src/scripts/copyScript.js",
     "start": "npm run copy-common && react-scripts start",
+    "dev": "npm run copy-to-common && npm start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
