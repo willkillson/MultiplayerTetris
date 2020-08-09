@@ -239,10 +239,12 @@ export class Game {
             public scene: THREE.Scene;       
         */
         try{
-            let nwp = this.networkPlayers
-            .splice(this.networkPlayers
-                .findIndex(np=>{np.mesh.userData.owner===client.id}),1);
-            
+            let index = this.networkPlayers.findIndex(np=>{ return np.mesh.userData.owner===client.id});
+            if(index === -1){
+                throw console.error("playerRemove: "+client.id +" does not exist in this.networkPlayers");
+            }
+            let nwp = this.networkPlayers.splice(index,1);
+
             this.scene.remove(nwp[0].mesh);
         }catch(error){
             console.error(error);

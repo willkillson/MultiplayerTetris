@@ -52,7 +52,6 @@ export class NetworkControlManager {
         playerNames.forEach(player=>{
             let cmd = this.players.get(player).dequeue();
             if(cmd!==undefined){
-                console.log(cmd.cmdType);
                 switch(cmd.cmdType){
                     case "movement":
                         this.movement(game, cmd);
@@ -82,8 +81,6 @@ export class NetworkControlManager {
     private rotation(game:GAME.Game, cmd:COMMAND.Command<any>):void{
         game.processCommand(cmd);
         this.server.userSockets.get(cmd.id).broadcast.emit('onCommand', cmd);
-       // console.log("onCommand - broadcasting to everyone, except "+cmd.id);
-       // console.log(cmd);
     }
 
     private setPiece(game:GAME.Game, cmd:COMMAND.Command<any>):void{
@@ -100,16 +97,13 @@ export class NetworkControlManager {
         newConnectionInfo.clientId = cmd.id;
 
         this.server.userSockets.get(cmd.id).emit('onConnected',newConnectionInfo);  
-       // console.log("onConnected - broadcasting to: "+cmd.id);
         this.server.userSockets.get(cmd.id).broadcast.emit('onCommand', cmd);
-        //console.log("onCommand - broadcasting to everyone, except: "+cmd.id);
     }
 
     private playerRemove(game:GAME.Game, cmd:COMMAND.Command<any>):void{
         game.processCommand(cmd);
         this.removePlayer( cmd.id );
         this.server.userSockets.get(cmd.id).broadcast.emit('onCommand', cmd);
-       // console.log("onCommand - broadcasting to everyone, except: "+cmd.id);
         this.server.userSockets.delete( cmd.id);
     }
 }

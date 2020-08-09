@@ -87,6 +87,7 @@ export default class Server  {
 
     private disconnect( socket:SocketIO.Socket ){
         console.log(MyTime() + ' Client '+ socket.id + ' disconnected.');
+
         let cmd =  <COMMAND.Command<T.Client>>{};
         cmd.id = socket.id;
         cmd.cmdType = "playerRemove";
@@ -95,13 +96,7 @@ export default class Server  {
     }
 
     private playerCommand( socket:SocketIO.Socket, info:COMMAND.Command<any> ){
-        //console.log("recieved from: " + socket.id);
-        //console.log(info);
-        let newCommand = new COMMAND.Command(
-        socket.id,
-        info.cmdType,
-        info.cmdValue);
-        this.ncm.addCommand(newCommand);
+        this.ncm.addCommand(info);
     }
 
     // public setPiece(blocks:THREE.Vector3[], color:number, playerId:string){
@@ -123,9 +118,6 @@ export default class Server  {
             let delta = Date.now()-start;//milliseconds elapsed since start
             let newSecond = Math.floor(delta/1000);
             this.serverTime= newSecond;
-            
-            //console.log("TotalPlayers: " +this.game.networkPlayers.length);
-            //console.log(this.game.networkPlayers);
             this.ncm.pollAndProcessCommands(this.game);
         },100);
     }
