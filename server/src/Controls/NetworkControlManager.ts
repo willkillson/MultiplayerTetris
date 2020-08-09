@@ -74,11 +74,9 @@ export class NetworkControlManager {
         });  
     }
 
-    private movement(game:GAME.Game, cmd:COMMAND.Command<any>):void{
+    private movement(game:GAME.Game, cmd:COMMAND.Command<THREE.Vector3>):void{
         game.processCommand(cmd);
         this.server.userSockets.get(cmd.id).broadcast.emit('onCommand', cmd);
-        //console.log("onCommand - broadcasting to everyone, except "+cmd.id);
-       // console.log(cmd);
     }
 
     private rotation(game:GAME.Game, cmd:COMMAND.Command<any>):void{

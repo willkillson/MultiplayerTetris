@@ -127,7 +127,7 @@ export default class Server  {
             //console.log("TotalPlayers: " +this.game.networkPlayers.length);
             //console.log(this.game.networkPlayers);
             this.ncm.pollAndProcessCommands(this.game);
-        },30);
+        },100);
     }
 }
 

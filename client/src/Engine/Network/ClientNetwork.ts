@@ -59,6 +59,7 @@ export class ClientNetwork {
     // }
 
     public sendCommand( command:COMMAND.Command<any> ){
+        command.id = this.engine.game.clientId;
         this.socket.emit('playerCommand', command);
         console.log("sendCommand - command:command:COMMAND.Command<any> ");
         console.log(command);
@@ -66,8 +67,9 @@ export class ClientNetwork {
 
     public receiveCommand( command:COMMAND.Command<any> ){
         console.log("receiveCommand - command:command:COMMAND.Command<any> ");
-        console.log(command);
-        this.game.processCommand(command);
+        console.log(command.id);
+        this.engine.networkCommandManager.queCommand(command);
+        //this.game.processCommand(command);
     }
 
     clearWaitingForNewPiece(info:T.NewConnectionInfo): void {

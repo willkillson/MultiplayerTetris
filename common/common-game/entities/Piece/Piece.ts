@@ -31,7 +31,7 @@ export class LocalPlayerPiece {
     private color: number;
     private blocks: THREE.Vector3[];
     private collision_isBlocked: Directions;
-    private mesh: THREE.Object3D;
+    public mesh: THREE.Object3D;
 
     private ignoreCollision: string;
 
@@ -549,12 +549,12 @@ export class NetworkPlayerPiece {
     private initClassVariables() {
         // create the blocks
         for (let i = 0; i< this.blocks.length; i++) {
-        const geometry = new THREE.BoxGeometry(1, 1, 1);
-        const material = new THREE.MeshLambertMaterial( {color: this.color} );
-        let newMesh = new THREE.Mesh(geometry, material);
-        newMesh.userData = this.mesh.userData;
-        this.mesh.add(newMesh);
-        this.blocksWorldPositions.push(new THREE.Vector3(0,0,0));
+            const geometry = new THREE.BoxGeometry(1, 1, 1);
+            const material = new THREE.MeshLambertMaterial( {color: this.color} );
+            let newMesh = new THREE.Mesh(geometry, material);
+            newMesh.userData = this.mesh.userData;
+            this.mesh.add(newMesh);
+            this.blocksWorldPositions.push(new THREE.Vector3(0,0,0));
         }
 
         // put the blocks where it needs to go
@@ -630,8 +630,13 @@ export class NetworkPlayerPiece {
                 pieceType: number | null
             }
         */
-        this.mesh.userData.clientInfo.position.set(this.mesh.position.x,this.mesh.position.y,this.mesh.position.z);
-        this.mesh.userData.clientInfo.rotation.set(this.mesh.position.x,this.mesh.position.y,this.mesh.position.z);
+       try{
+        this.mesh.userData.clientInfo.position = this.mesh.position;
+        this.mesh.userData.clientInfo.rotation = this.mesh.rotation;
+       }catch (error){
+           console.error(error);
+       }
+
     }
 
     public getClientInfo(): T.Client{

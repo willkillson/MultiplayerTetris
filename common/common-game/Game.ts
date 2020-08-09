@@ -2,30 +2,27 @@
 //NodeImports
 // @ts-ignore
 import * as THREE from 'three';
-
 //const LOADER = require('three/examples/jsm/loaders/GLTFLoader');
 //import * as LOADER from 'three/examples/jsm/loaders/GLTFLoader';
 
 //LocalImports
 //import * as PC from './entities/Piece/PieceConstants'
 import * as PIECE from './entities/Piece/Piece';
-
+import * as BLOCK from './entities/Block/Block';
 import * as BOARD from './entities/Board/board'
-//import * as CM from '../Controls/ControlManager'
+//import * as CM from '../Controls/ControlManager';
 //import * as T from '../Utilities/types'
 import * as EXT from '../common-utilities/ThreeExtension'
 import * as T from '../common-utilities/types';
-//import * as BLOCK from './entities/Block/Block'
 //import * as COMMAND from '../Controls/Command';
 
 import * as COMMAND from '../common-game/control/Command';
 
 
+
 export class Game {
     
     public clientId: string|null;
-
-
 
     //Scene graph that contains the world.
     public scene: THREE.Scene;                
@@ -129,7 +126,6 @@ export class Game {
         let inActivePieces = this.scene.children.filter((child)=>{
           return child.userData.entityType==='inactive_piece';
         });
-        //console.log(inActivePieces);
         inActivePieces.forEach((piece)=>{
           this.scene.remove(piece);
         })
@@ -137,42 +133,61 @@ export class Game {
     }
     
     public isCommandPossible( command:COMMAND.Command<any>):boolean {
-        return this.localPlayerPiece.validateCommand(command);
-    }
-
-    public processCommand( command:COMMAND.Command<any> ):void{
-        //console.log(command);
-        if(command.cmdType==="playerRemove"){
-            
-            this.removePlayer(command.cmdValue);
-        }
-
-        if(command.cmdType==="newPlayer"){
-            this.createNetworkedPlayer(command.cmdValue);
-            return;
-        }
-
-        if(this.clientId==="SERVER"){
-            this.networkPlayers.forEach((p)=>{
-                if(p.mesh.userData.owner===command.id){
-                    p.processCommand(command);
-                }
-            });
-            return;
-        }
-
-        if(this.clientId===command.id){
-            this.localPlayerPiece.processCommand(command);
+        if(command.cmdType==="rotation" || command.cmdType === "movement"){
+            return this.localPlayerPiece.validateCommand(command);
         }else{
-            this.networkPlayers.forEach((p)=>{
-                if(p.mesh.userData.owner===command.id){
-                    p.processCommand(command);
-                }
-            });
+            return true;
         }
     }
+
+    public processCommand( command:COMMAND.Command<any> ) {
+        /*
+            cmd.cmdType        cmd.cmdValue
+            'setPiece'    |     string: denotes position the piece is in.
+            'rotation'    |     Vector3: the rotation applied to the euler vec
+            'movement'    |     Vector3: denotes the direction to add to the current position
+            'newPlayer'   |     Client: 
+            'playerRemove |     Client:
+        */
+        switch(command.cmdType){
+            case "setPiece":
+                {
+                    this.setPiece(command.cmdValue);
+                    break;
+                }
+            case "rotation":
+                {
+                    this.rotation(command);
+                    break;
+                }
+            case "movement":
+                {
+                    this.movement(command);
+                    break;
+                }
+            case "newPlayer":
+                {
+                    this.createNetworkedPlayer(command.cmdValue);
+                    break;
+                }
+            case "playerRemove":
+                {
+                    this.playerRemove(command.cmdValue);
+                    break;
+                }
+        }
+    }
+
+    //////////////////////
+
+    //Command Functions
+    
+    //////////////////////
 
     public createLocalPlayer( info:T.Client ):void {
+        if(this.clientId==="SERVER"){
+            throw Error("createLocalPlayer should not be called on the server!");
+        }
         let lpp = new PIECE.LocalPlayerPiece(this.scene,info);
         this.localPlayerPiece = lpp;
     }
@@ -181,6 +196,82 @@ export class Game {
         let npp = new PIECE.NetworkPlayerPiece(this.scene,info);
         this.networkPlayers.push(npp);
     }
+
+    public setPiece(info:T.Client):void {
+
+        let blocks;
+        
+        // Remove the player's mesh from the scene, and gather the blocks to be set.
+        if(this.clientId==="SERVER"){
+            let player = this.networkPlayers.find((e)=>{e.getClientInfo().id===info.id});
+            this.scene.remove(player.mesh);
+            blocks = EXT.getRotatedBlocksFromMesh(player.mesh);
+            blocks = EXT.bakeInOrigin(blocks, player.mesh.position);
+           
+        }
+        else{
+            this.scene.remove(this.localPlayerPiece.mesh);
+            blocks = EXT.getRotatedBlocksFromMesh(this.localPlayerPiece.mesh);
+            blocks = EXT.bakeInOrigin(blocks, this.localPlayerPiece.mesh.position);
+        }
+        let userData = <T.UserData>{};
+        userData.entityType = "persistentBlock"
+        userData.owner = info.id;
+        userData.pieceType = info.pieceType;
+
+        for(const b of blocks){
+            BLOCK.createBlock( this.scene, userData, b);
+        }
+    }
+
+    public playerRemove( client:T.Client ) {
+        /*
+            ******************************************
+            **Places where player information is stored.
+            ******************************************
+
+            private localPlayerPiece: PIECE.LocalPlayerPiece|null;  
+
+            //NetworkPlayers
+            public networkPlayers: PIECE.NetworkPlayerPiece[];
+
+            //Scene graph that contains the world meshs.
+            public scene: THREE.Scene;       
+        */
+        try{
+            let nwp = this.networkPlayers
+            .splice(this.networkPlayers
+                .findIndex(np=>{np.mesh.userData.owner===client.id}),1);
+            
+            this.scene.remove(nwp[0].mesh);
+        }catch(error){
+            console.error(error);
+        }
+    }
+
+    public movement( cmd:COMMAND.Command<THREE.Vector3> ) {
+        if(this.clientId!=="SERVER" && this.clientId===cmd.id){
+            // We have the local player that is moveing.
+            if(this.localPlayerPiece.validateCommand(cmd))
+                this.localPlayerPiece.processCommand(cmd);
+        }
+        else
+        {
+            let index = this.networkPlayers.findIndex((p)=>{return p.getClientInfo().id===cmd.id});
+            if(index===-1){
+                throw Error("Error, server does not contain this user in this.networkPlayers.");
+            }
+            let np = this.networkPlayers[index];
+            np.processCommand(cmd);
+        }
+    }
+
+    public rotation( cmd:COMMAND.Command<THREE.Vector3> ):boolean {
+        
+        return false;
+    }
+
+
 
     //TODO: 
     public getPlayersInfo():T.Client[]{
@@ -197,34 +288,7 @@ export class Game {
         return retClientInfo;
     }
 
-    //TODO:
-    public removePlayer( client:T.Client ) {
-        /*
-            ******************************************
-            **Places where player information is stored.
-            ******************************************
 
-            private localPlayerPiece: PIECE.LocalPlayerPiece|null;  
-
-            //NetworkPlayers
-            public networkPlayers: PIECE.NetworkPlayerPiece[];
-
-            //Scene graph that contains the world meshs.
-            public scene: THREE.Scene;       
-        */
-
-        try{
-            let nwp = this.networkPlayers
-            .splice(this.networkPlayers
-                .findIndex(np=>{np.mesh.userData.owner===client.id}),1);
-            
-            this.scene.remove(nwp[0].mesh);
-        }catch(error){
-            console.error(error);
-        }
-
-
-    }
 
     public getPersistentBlocks(): T.Block[]{
         //    private persistentBlocks: T.Block[]; 

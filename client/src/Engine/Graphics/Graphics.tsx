@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import * as GAME from '../../common-game/Game';
 import * as CM from '../Controls/ControlManager'
 import * as NETWORK from '../Network/ClientNetwork'
+import * as ENGINE from  '../Engine';
 
 export class Graphics {
     ////Graphics
@@ -16,13 +17,10 @@ export class Graphics {
     clock: THREE.Clock;
 
     ////EngineStuff
-    private game: GAME.Game;
-    private controlManager: CM.ControlManager;
-    private network: NETWORK.ClientNetwork;
+    private engine: ENGINE.Engine;  
 
-    
-
-    constructor(){
+    constructor(engine:ENGINE.Engine){
+        this.engine = engine;
         this.renderer = new THREE.WebGLRenderer();
         this.camera = new THREE.PerspectiveCamera( 90, window.innerWidth/window.innerHeight, 0.1, 1000 );
         this.camera.rotateOnAxis(new THREE.Vector3(1, 0, 0), 0);
@@ -46,12 +44,6 @@ export class Graphics {
         
     }
 
-    public init(game:GAME.Game, controlManager:CM.ControlManager,network:NETWORK.ClientNetwork){
-      this.game = game;
-      this.controlManager = controlManager;
-      this.network = network;
-    }
-
     public resizeRendererToDisplaySize() {
         const canvas = this.renderer.domElement;
         const needResize = canvas.width !== window.innerWidth || window.innerHeight !== canvas.height;
@@ -70,8 +62,8 @@ export class Graphics {
             this.totalTime = now;
             this.resizeRendererToDisplaySize();//resizes if need be.            
             //TODO: perhaps refactor this and remove the control manager.
-            if(this.game.clientId===null || this.controlManager.clientId===null){
-                this.controlManager.clientId = this.game.clientId;
+            if(this.engine.game.clientId===null || this.engine.localCommandManager.clientId===null){
+                this.engine.localCommandManager.clientId = this.engine.game.clientId;
                 requestAnimationFrame( animate );
             }
             
@@ -87,25 +79,23 @@ export class Graphics {
             // emit any new changes
 
            
-            const cmd = this.controlManager.getCommand();  
-
-            if(cmd!==undefined){
-
-
-                //this.game.validateCommand(cmd);
-                console.log(cmd);
-
-                if(this.game.isCommandPossible(cmd)){
-                    this.game.processCommand(cmd);
-                    this.controlManager.addToProcessing(cmd);
-                    this.network.sendCommand(cmd);
-                }
-
+            const localCommand = this.engine.localCommandManager.getCommand();  
+            const networkCommand = this.engine.networkCommandManager.getCommand();  
+            
+            if(networkCommand!==undefined){
+                this.engine.game.processCommand(networkCommand);
             }
+
+            if(localCommand!==undefined){
+                if(this.engine.game.isCommandPossible(localCommand)){
+                    this.engine.game.processCommand(localCommand);
+                    this.engine.network.sendCommand(localCommand);
+                }
+            }
+
             
-            //console.log(this.game.networkPlayers);
             
-            this.renderer.render( this.game.scene, this.camera );
+            this.renderer.render( this.engine.game.scene, this.camera );
             requestAnimationFrame( animate );
         };
 

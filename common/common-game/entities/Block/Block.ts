@@ -1,21 +1,13 @@
 // @ts-ignore
 import * as THREE from 'three';
 import * as T from '../../../common-utilities/types'
+import * as C from '../../entities/Piece/PieceConstants';
 
-// export class Block {
-//     constructor(scene:THREE.Scene, userData:T.UserData, pColor:number, position:THREE.Vector3){
-//         const geometry = new THREE.BoxGeometry(1,1,1);
-//         const material = new THREE.MeshBasicMaterial( {color: pColor} );
-//         const mesh = new THREE.Mesh(geometry,material);
-//         mesh.userData = userData;
-//         mesh.position.add(position);
-//     }
-// }
 
-export const createBlock = (scene:THREE.Scene, 
-    userData:T.UserData, 
-    pColor:number, 
-    position:THREE.Vector3) => {
+export const createBlock = (scene:THREE.Scene, userData:T.UserData, position:THREE.Vector3) => {
+
+    let pcm = C.PIECE_COLOR_MAP;
+    let pColor = pcm.get(userData.clientInfo.pieceType);
     
     const geometry = new THREE.BoxGeometry(1,1,1);
     const material = new THREE.MeshLambertMaterial( {color: pColor} );

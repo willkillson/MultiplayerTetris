@@ -21,7 +21,8 @@ export class Engine extends React.Component {
   graphics:GRAPHICS.Graphics;
   network: NETWORK.ClientNetwork;
   game:GAME.Game;
-  controlManager: CONTROLMANAGER.ControlManager;
+  localCommandManager: CONTROLMANAGER.ControlManager;
+  networkCommandManager: CONTROLMANAGER.ControlManager;
   keyboardControls: KEYBOARDCONTROLS.KeyboardControls;
   onscreenControls: ONSCREENCONTROLS.OnscreenControls;
 
@@ -31,7 +32,7 @@ export class Engine extends React.Component {
     const IS_DEVELOP = true;
     ////GRAPICS
     ////////////////////
-    this.graphics = new GRAPHICS.Graphics();
+    this.graphics = new GRAPHICS.Graphics(this);
     ////GAME
     ////////////////////
     const isClient = true;
@@ -40,18 +41,14 @@ export class Engine extends React.Component {
     ////////////////////
     this.network = new NETWORK.ClientNetwork(IS_DEVELOP, this);
     ////CONTROLS
-    ////////////////////
-    
-    this.controlManager = new CONTROLMANAGER.ControlManager();
-    this.keyboardControls = new KEYBOARDCONTROLS.KeyboardControls(this.controlManager);
-    this.onscreenControls = new ONSCREENCONTROLS.OnscreenControls(this.controlManager);  
+    ////////////////////    
+    this.localCommandManager = new CONTROLMANAGER.ControlManager();
+    this.networkCommandManager = new CONTROLMANAGER.ControlManager();
+    this.keyboardControls = new KEYBOARDCONTROLS.KeyboardControls(this.localCommandManager);
+    this.onscreenControls = new ONSCREENCONTROLS.OnscreenControls(this.localCommandManager);  
 
     // @ts-ignore
     this.mount.appendChild( this.graphics.renderer.domElement ); // must be located in the componentDidMount()
-
-    this.graphics.init(this.game,
-      this.controlManager,
-      this.network);
           
     ////StartMainGameLoop
     ////////////////////

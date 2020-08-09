@@ -36,5 +36,10 @@ export class KeyboardControls {
       let newCommand = new COMMAND.Command("","rotation", new THREE.Vector3(0,0,Math.PI/2));
       this.controlManager.queCommand(newCommand);
     });
+    // Set Piece
+    this.MouseTrap.bind('h', ()=>{
+        let newCommand = new COMMAND.Command(this.controlManager.clientId,"setPiece", "setPiece");
+        this.controlManager.queCommand(newCommand);
+    });
   }
 }
