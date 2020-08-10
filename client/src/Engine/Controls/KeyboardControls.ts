@@ -42,7 +42,7 @@ export class KeyboardControls {
         
         
         clientInfo= this.controlManager.getCurrentPlayerClientInfo();
-
+        // @ts-ignore
         let newCommand = new COMMAND.Command(this.controlManager.clientId,"setPiece", clientInfo);
         this.controlManager.queCommand(newCommand);
     });

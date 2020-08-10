@@ -75,26 +75,17 @@ export class NetworkControlManager {
 
     private movement(game:GAME.Game, cmd:COMMAND.Command<THREE.Vector3>):void{
 
-        console.log("private movement(game:GAME.Game, cmd:COMMAND.Command<THREE.Vector3>):void");
-        console.log({cmd});
-
         game.processCommand(cmd);
         this.server.userSockets.get(cmd.id).broadcast.emit('onCommand', cmd);
     }
 
     private rotation(game:GAME.Game, cmd:COMMAND.Command<any>): void {
 
-        console.log("private rotation(game:GAME.Game, cmd:COMMAND.Command<any>): void");
-        console.log({cmd});
-
         game.processCommand(cmd);
         this.server.userSockets.get(cmd.id).broadcast.emit('onCommand', cmd);
     }
 
     private setPiece(game:GAME.Game, cmd:COMMAND.Command<any>): void {
-
-        console.log("private setPiece(game:GAME.Game, cmd:COMMAND.Command<any>): void");
-        console.log({cmd});
 
         //'setPiece'    |     Client: denotes position the piece is in.
         game.processCommand(cmd);
@@ -109,10 +100,7 @@ export class NetworkControlManager {
     }
 
     private newPlayer(game:GAME.Game, cmd:COMMAND.Command<any>): void {
-
-        console.log("private newPlayer(game:GAME.Game, cmd:COMMAND.Command<any>): void");
-        console.log({cmd});
-
+        
         game.processCommand(cmd);
         
         const newConnectionInfo = <T.NewConnectionInfo>{};
@@ -127,10 +115,7 @@ export class NetworkControlManager {
     }
 
     private playerRemove(game:GAME.Game, cmd:COMMAND.Command<any>): void {
-
-        console.log("private playerRemove(game:GAME.Game, cmd:COMMAND.Command<any>): void");
-        console.log({cmd});
-
+        
         game.processCommand(cmd);
         this.removePlayer( cmd.id );
         this.server.userSockets.get(cmd.id).broadcast.emit('onCommand', cmd);

@@ -35,12 +35,19 @@ export class LocalPlayerPiece {
 
     private ignoreCollision: string;
 
+                // @ts-ignore
     private blockNormals: THREE.Ray[];
+                // @ts-ignore
     private x_neg_rcs: THREE.Ray[];
+                // @ts-ignore
     private x_pos_rcs: THREE.Ray[];
+                // @ts-ignore
     private y_pos_rcs: THREE.Ray[];
+                // @ts-ignore
     private y_neg_rcs: THREE.Ray[];
+                // @ts-ignore
     private z_pos_rcs: THREE.Ray[];
+                // @ts-ignore
     private z_neg_rcs: THREE.Ray[];
 
     constructor(
@@ -59,11 +66,13 @@ export class LocalPlayerPiece {
         let userData = <T.UserData>{};
         userData.entityType = "playerPiece";
         userData.owner = client.id;
+                    // @ts-ignore
         userData.pieceType = client.pieceType;
         userData.clientInfo = client;
         
-
-        this.color = MyConstants.PIECE_COLOR_MAP.get(client.pieceType);;
+            // @ts-ignore
+        this.color = MyConstants.PIECE_COLOR_MAP.get(client.pieceType);
+                    // @ts-ignore
         this.blocks = MyConstants.BLOCK_POSITIONS.get(MyConstants.PIECE_MAP.get(client.pieceType));
         this.mesh = new THREE.Object3D();
         this.mesh.position.add(client.position);
@@ -110,6 +119,7 @@ export class LocalPlayerPiece {
     }
 
     public removePiece(){
+                    // @ts-ignore
         this.mesh.parent.remove(this.mesh);
     }
     
@@ -317,11 +327,13 @@ export class LocalPlayerPiece {
         const allIntersections:any = [];
         this.y_pos_rcs.forEach((ray) => {
             const rayCaster = new THREE.Raycaster(ray.origin, ray.direction, 0.1, 1);
+                        // @ts-ignore
             allIntersections.push(...rayCaster.intersectObjects(this.mesh.parent.children, true));
         });
         // remove all the intersections with the pieces self
         const intersects:any = [];
         allIntersections.forEach((intersection:THREE.Intersection)=>{
+                        // @ts-ignore
             if (intersection.object.parent.uuid!==this.mesh.uuid) {
             if(intersection.object.userData.entityType!==this.ignoreCollision){
                 intersects.push(intersection);
@@ -342,11 +354,13 @@ export class LocalPlayerPiece {
         const allIntersections:any = [];
         this.y_neg_rcs.forEach((ray) => {
             const rayCaster = new THREE.Raycaster(ray.origin, ray.direction, 0.1, 1);
+                        // @ts-ignore
             allIntersections.push(...rayCaster.intersectObjects(this.mesh.parent.children, true));
         });
         // remove all the intersections with the pieces self
         const intersects:any = [];
         allIntersections.forEach((intersection:THREE.Intersection)=>{
+                        // @ts-ignore
             if (intersection.object.parent.uuid!==this.mesh.uuid) {
             if(intersection.object.userData.entityType!==this.ignoreCollision){
                 intersects.push(intersection);
@@ -364,11 +378,13 @@ export class LocalPlayerPiece {
     const allIntersections:any = [];
     this.x_neg_rcs.forEach((ray) => {
         const rayCaster = new THREE.Raycaster(ray.origin, ray.direction, 0.1, 1);
+                    // @ts-ignore
         allIntersections.push(...rayCaster.intersectObjects(this.mesh.parent.children, true));
     });
     // remove all the intersections with the pieces self
     const intersects:any = [];
     allIntersections.forEach((intersection:THREE.Intersection)=>{
+                    // @ts-ignore
         if (intersection.object.parent.uuid!==this.mesh.uuid) {
         if(intersection.object.userData.entityType!==this.ignoreCollision){
             intersects.push(intersection);
@@ -387,12 +403,14 @@ export class LocalPlayerPiece {
     const allIntersections:any = [];
     this.x_pos_rcs.forEach((ray) => {
         const rayCaster = new THREE.Raycaster(ray.origin, ray.direction, 0.1, 1);
+                    // @ts-ignore
         allIntersections.push(...rayCaster.intersectObjects(this.mesh.parent.children, true));
     });
     // remove all the intersections with the pieces self
     const intersects:any = [];
 
     allIntersections.forEach((intersection:THREE.Intersection)=>{
+                    // @ts-ignore
         if (intersection.object.parent.uuid!==this.mesh.uuid) {
         if(intersection.object.userData.entityType!==this.ignoreCollision){
             intersects.push(intersection);
@@ -414,11 +432,13 @@ export class LocalPlayerPiece {
     const allIntersections:any = [];
     this.z_pos_rcs.forEach((ray) => {
         const rayCaster = new THREE.Raycaster(ray.origin, ray.direction, 0.1, 1);
+                    // @ts-ignore
         allIntersections.push(...rayCaster.intersectObjects(this.mesh.parent.children, true));
     });
     // remove all the intersections with the pieces self
     const intersects:any = [];
     allIntersections.forEach((intersection:THREE.Intersection)=>{
+                    // @ts-ignore
         if (intersection.object.parent.uuid!==this.mesh.uuid) {
         if(intersection.object.userData.entityType!==this.ignoreCollision){
             intersects.push(intersection);
@@ -437,11 +457,13 @@ export class LocalPlayerPiece {
     const allIntersections:any = [];
     this.z_neg_rcs.forEach((ray) => {
         const rayCaster = new THREE.Raycaster(ray.origin, ray.direction, 0.1, 1);
+                    // @ts-ignore
         allIntersections.push(...rayCaster.intersectObjects(this.mesh.parent.children, true));
     });
     // remove all the intersections with the pieces self
     const intersects:any = [];
     allIntersections.forEach((intersection:THREE.Intersection)=>{
+                    // @ts-ignore
         if (intersection.object.parent.uuid!==this.mesh.uuid) {
         if(intersection.object.userData.entityType!==this.ignoreCollision){
             intersects.push(intersection);
@@ -525,6 +547,7 @@ export class LocalPlayerPiece {
 export class NetworkPlayerPiece {
     color: number;
     blocks: THREE.Vector3[];
+                // @ts-ignore
     collision_isBlocked: Directions;
     mesh: THREE.Object3D;
     blocksWorldPositions: THREE.Vector3[];
@@ -534,11 +557,13 @@ export class NetworkPlayerPiece {
         let userData = <T.UserData>{};
         userData.entityType = "playerPiece";
         userData.owner = client.id;
+                    // @ts-ignore
         userData.pieceType = client.pieceType;
         userData.clientInfo = client;
 
-
-        this.color = MyConstants.PIECE_COLOR_MAP.get(client.pieceType);;
+            // @ts-ignore
+        this.color = MyConstants.PIECE_COLOR_MAP.get(client.pieceType);
+                    // @ts-ignore
         this.blocks = MyConstants.BLOCK_POSITIONS.get(MyConstants.PIECE_MAP.get(client.pieceType));
 
         this.mesh = new THREE.Object3D();
@@ -597,9 +622,9 @@ export class NetworkPlayerPiece {
         let bm = MyConstants.BLOCK_POSITIONS;//block map
 
         let pt = info.pieceType;
-
+            // @ts-ignore
         this.color = cm.get(pt);
-
+            // @ts-ignore
         this.blocks = bm.get(pm.get(pt));
 
         while(this.mesh.children.length>0){
@@ -612,6 +637,7 @@ export class NetworkPlayerPiece {
         let userData = <T.UserData>{};
         userData.entityType = "playerPiece"
         userData.owner = info.id;
+                    // @ts-ignore
         userData.pieceType = pt;
 
         this.mesh.userData = userData;

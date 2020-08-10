@@ -113,13 +113,13 @@ export default class Server  {
 
     private sendConstantUpdates(){
       // https://stackoverflow.com/questions/29971898/how-to-create-an-accurate-timer-in-javascript
-        let start = Date.now();
+        //let start = Date.now();
         setInterval(()=>{
-            let delta = Date.now()-start;//milliseconds elapsed since start
-            let newSecond = Math.floor(delta/1000);
-            this.serverTime= newSecond;
+            // let delta = Date.now()-start;//milliseconds elapsed since start
+            // let newSecond = Math.floor(delta/1000);
+            // this.serverTime= newSecond;
             this.ncm.pollAndProcessCommands(this.game);
-        },100);
+        },30);
     }
 }
 

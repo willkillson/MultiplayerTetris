@@ -10,6 +10,7 @@ export const getObjectByUserData =
         return eval(func) === value;
     });
     if(index===-1){
+                    // @ts-ignore
         return undefined;
     }
     else{

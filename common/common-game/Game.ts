@@ -22,7 +22,7 @@ import * as COMMAND from '../common-game/control/Command';
 
 export class Game {
     
-    public clientId: string|null;
+    public clientId: string;
 
     //Scene graph that contains the world.
     public scene: THREE.Scene;                
@@ -34,12 +34,13 @@ export class Game {
 
     // If this class is instantiated as a client, this will contain the local player,
     // otherwise it will be assigned null.
-    private localPlayerPiece: PIECE.LocalPlayerPiece|null;  
+    public localPlayerPiece: PIECE.LocalPlayerPiece|undefined;  
 
     //NetworkPlayers
     public networkPlayers: PIECE.NetworkPlayerPiece[];
 
     // This is duplicate information, it will all go into the scene graph.
+    // @ts-ignore
     private persistentBlocks: T.Block[]; 
     
     // GameVariables
@@ -63,7 +64,7 @@ export class Game {
             previousTime: 0,
             secondsSinceLastUpdate: 0
         }
-        this.clientId = null;
+        this.clientId = '';
         this.networkPlayers = [];
 
         this.defaultPosition = new THREE.Vector3(0,18,0);
@@ -133,10 +134,9 @@ export class Game {
     }
     
     public isCommandPossible( command:COMMAND.Command<any>):boolean {
-        console.log("public isCommandPossible( command:COMMAND.Command<any>):boolean");
-        console.log({command});
 
         if(command.cmdType==="rotation" || command.cmdType === "movement"){
+            // @ts-ignore
             return this.localPlayerPiece.validateCommand(command);
         }else{
             return true;
@@ -144,9 +144,6 @@ export class Game {
     }
 
     public processCommand( command:COMMAND.Command<any> ) {
-
-        console.log("public processCommand( command:COMMAND.Command<any> )")
-        console.log({command})
 
         /*
             cmd.cmdType        cmd.cmdValue
@@ -214,8 +211,6 @@ export class Game {
     }
 
     public createLocalPlayer( info:T.Client ):void {
-        console.log("public createLocalPlayer( info:T.Client ):void");
-        console.log({info});
 
         if(this.clientId==="SERVER"){
             throw Error("createLocalPlayer should not be called on the server!");
@@ -225,8 +220,6 @@ export class Game {
     }
 
     public createNetworkedPlayer( info:T.Client):void {
-        console.log("public createNetworkedPlayer( info:T.Client):void");
-        console.log({info});
 
         let npp = new PIECE.NetworkPlayerPiece(this.scene,info);
         this.networkPlayers.push(npp);
@@ -234,12 +227,10 @@ export class Game {
 
     public setPiece(info:T.Client):void {
 
-        console.log("public setPiece(info:T.Client):void")
-        console.log({info})
-
         let userData = <T.UserData>{};
         userData.entityType = "persistentBlock"
         userData.owner = info.id;
+        // @ts-ignore
         userData.pieceType = info.pieceType;
         userData.clientInfo = info
 
@@ -247,8 +238,11 @@ export class Game {
         // Remove the player's mesh from the scene, and gather the blocks to be set.
         if(info.id===this.clientId){
             //local player
+            // @ts-ignore
             this.scene.remove(this.localPlayerPiece.mesh);
+            // @ts-ignore
             blocks = EXT.getRotatedBlocksFromMesh(this.localPlayerPiece.mesh);
+            // @ts-ignore
             blocks = EXT.bakeInOrigin(blocks, this.localPlayerPiece.mesh.position);
             for(const b of blocks){
                 BLOCK.createBlock( this.scene, userData, b);
@@ -258,8 +252,11 @@ export class Game {
         else {
             //server or networked other players
             let nwp = this.networkPlayers.find(e=>{return e.getClientInfo().id===info.id});
+            // @ts-ignore
             this.scene.remove(nwp.mesh);
+            // @ts-ignore
             blocks = EXT.getRotatedBlocksFromMesh(nwp.mesh);
+            // @ts-ignore
             blocks = EXT.bakeInOrigin(blocks, nwp.mesh.position);
             for(const b of blocks){
                 BLOCK.createBlock( this.scene, userData, b);
@@ -298,8 +295,12 @@ export class Game {
     public movement( cmd:COMMAND.Command<THREE.Vector3> ) {
         if(this.clientId!=="SERVER" && this.clientId===cmd.id){
             // We have the local player that is moveing.
-            if(this.localPlayerPiece.validateCommand(cmd))
-                this.localPlayerPiece.processCommand(cmd);
+            // @ts-ignore
+           // if(this.localPlayerPiece.validateCommand(cmd)){
+            // @ts-ignore
+            this.localPlayerPiece.processCommand(cmd);
+          //  }
+
         }
         else
         {
@@ -328,6 +329,7 @@ export class Game {
         });
         
         if(this.clientId!=="SERVER"){
+                        // @ts-ignore
             retClientInfo.push(this.localPlayerPiece.getClientInfo());
         }
 

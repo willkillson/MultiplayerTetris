@@ -1,9 +1,11 @@
 
 //NodeImports
 import * as THREE from 'three';
+
 import * as GAME from '../../common-game/Game';
-import * as CM from '../Controls/ControlManager'
-import * as NETWORK from '../Network/ClientNetwork'
+import * as CM from '../Controls/ControlManager';
+import * as NETWORK from '../Network/ClientNetwork';
+import * as T from '../../common-utilities/types';
 import * as ENGINE from  '../Engine';
 
 export class Graphics {
@@ -15,6 +17,7 @@ export class Graphics {
     ////Graphics//Animations
     mixers: THREE.AnimationMixer[];
     clock: THREE.Clock;
+    stats:any;
 
     ////EngineStuff
     private engine: ENGINE.Engine;  
@@ -39,9 +42,6 @@ export class Graphics {
             window.innerHeight,
         );
         this.totalTime = 0;
-
-
-        
     }
 
     public resizeRendererToDisplaySize() {
@@ -56,50 +56,72 @@ export class Graphics {
 
     public start(){
 
-        const animate = (now) => {
-            now = now * 0.001; //change to seconds
-            const dt = now - this.totalTime;
-            this.totalTime = now;
-            this.resizeRendererToDisplaySize();//resizes if need be.            
-            //TODO: perhaps refactor this and remove the control manager.
-            if(this.engine.game.clientId===null || this.engine.localCommandManager.clientId===null){
-                this.engine.localCommandManager.clientId = this.engine.game.clientId;
+        let start = Date.now();
+        // @ts-ignore
+        const animate = (now:any) => {
+ 
+            let d = Date.now() - start;
+          
+            console.log(d);
+            
+            // if(then>1.0){
+            //     console.log(then);
+            //     then = 0;
+            //     console.log(frames);
+            //     frames = 0;
+               
+            // }
+
+            // frames++;
+       
+
+            
+            
+            this.resizeRendererToDisplaySize();//resizes if need be.       
+            
+            
+            if(this.engine.game.localPlayerPiece===undefined){
+                console.log("Waiting to connect!");
                 requestAnimationFrame( animate );
             }
-            
 
             
-
+   
+    
             // get updates from network 
-
             // populate the ControlManager with updates
-
             // tick game with change
-
             // emit any new changes
-
            
-            const localCommand = this.engine.localCommandManager.getCommand();  
+           
+           //console.log(dt);
+           
             const networkCommand = this.engine.networkCommandManager.getCommand();  
-            
             if(networkCommand!==undefined){
-                
+                console.log({networkCommand});
                 this.engine.game.processCommand(networkCommand);
             }
 
-            if(this.engine.game.gameState.waitingForNewPiece){
-                console.log("Waiting for new piece from the server.");
-                requestAnimationFrame( animate );
-            }
-
+        //     if(this.engine.game.gameState.waitingForNewPiece){
+        //         console.log("Waiting for new piece from the server.");
+        //         requestAnimationFrame( animate );
+        //     }
+            let localCommand = this.engine.localCommandManager.getCommand();  
             if(localCommand!==undefined){
+                console.log({localCommand});
+                console.log(this.engine.game.clientId);
+                localCommand.id = this.engine.game.clientId;
                 if(this.engine.game.isCommandPossible(localCommand)){
                     this.engine.game.processCommand(localCommand);
                     this.engine.network.sendCommand(localCommand);
                 }
+                this.renderer.render( this.engine.game.scene, this.camera );
             }
+
+         
             
-            this.renderer.render( this.engine.game.scene, this.camera );
+            
+           this.renderer.render( this.engine.game.scene, this.camera );
             requestAnimationFrame( animate );
         };
 

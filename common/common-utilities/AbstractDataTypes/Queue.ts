@@ -21,6 +21,7 @@ export class Queue<T> {
      *  Removes an element from the queue
      */
     dequeue():T{
+        // @ts-ignore
         return this.collection.shift();
     }
 

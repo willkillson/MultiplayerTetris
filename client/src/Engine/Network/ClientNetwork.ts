@@ -6,43 +6,39 @@ import * as io from 'socket.io-client';
 import * as GAME from '../../common-game/Game';
 import * as T from '../../common-utilities/types'
 import * as COMMAND from '../../common-game/control/Command';
-import Engine from '../Engine';
+import {Engine} from '../Engine';
 
 export class ClientNetwork {
 
     ////Networking
-    public clientId: string|null;
-    private socket: SocketIO.Socket;
-    private game: GAME.Game;
+    public clientId: any;
+    private socket: any;
+    private engine:any;
 
-    private engine:Engine;
-
-    constructor( isDevelop:boolean, engine:Engine ){
-        this.clientId = null;
-        this.socket = null;
-        this.game = engine.game;
+    constructor( isDevelop:any, engine:any ){
+        this.clientId = '';
         this.engine = engine;
         
         if (isDevelop) {
-            this.socket = io('192.168.1.2:80');
+            this.socket = io.connect('http://localhost/');
         } else {
-            this.socket = io('willkillson.ddns.net:80');
+            this.socket = io.connect('willkillson.ddns.net:80');
         }
 
-        this.socket.on('onConnected', (newClient)=> this.onConnected(newClient));
-        this.socket.on('UPDATE', (info)=> this.onUpdate(info));
-        this.socket.on('onCommand', (info)=> this.receiveCommand(info));
+        this.socket.on('onConnected', (newClient:any)=> this.onConnected(newClient));
+        this.socket.on('onCommand', (info:any)=> this.receiveCommand(info));
     }
 
     private onConnected(info:T.NewConnectionInfo) {   
         console.log("onConnected - info:T.NewConnectionInfo");
         console.log({info});
-        this.game.setInitialGameState(info);
+        this.engine.game.setInitialGameState(info);
     }
 
     public sendCommand( command:COMMAND.Command<any> ){
         console.log("public sendCommand( command:COMMAND.Command<any> )");
         console.log({command});
+        // @ts-ignore
         command.id = this.engine.game.clientId;
         this.socket.emit('playerCommand', command);
 
@@ -52,11 +48,7 @@ export class ClientNetwork {
         console.log("public receiveCommand( command:COMMAND.Command<any> )");
         console.log({command});
         this.engine.networkCommandManager.queCommand(command);
-        //this.game.processCommand(command);
+        //this.engine.game.processCommand(command);
     }
 
-    private onUpdate(info:T.NewConnectionInfo){
-            //TODO: Refactor
-        //this.game.updateNetworkInfo(info);
-    }
 }

@@ -4,7 +4,7 @@ let fs = require('fs');
 let ncp = require('ncp').ncp;
 
 
-console.log("Copying common Game folder from ./common/Game to ./server/src/");
+console.log("Copying common Game folder from ./../common/common-game/ to './src/common-game'");
 ncp('./../common/common-game/', './src/common-game', function (err) {
   if (err) {
     return console.error(err);
@@ -12,7 +12,7 @@ ncp('./../common/common-game/', './src/common-game', function (err) {
   console.log('done!');
  });
 
- console.log("Copying common utilities folder from ./common/Utilities to ./server/src/");
+ console.log("Copying common utilities folder from ./../common/common-utilities/ to ./src/common-utilities/");
  ncp('./../common/common-utilities/', './src/common-utilities/', function (err) {
   if (err) {
     return console.error(err);

@@ -7,6 +7,7 @@ import * as C from '../../entities/Piece/PieceConstants';
 export const createBlock = (scene:THREE.Scene, userData:T.UserData, position:THREE.Vector3) => {
 
     let pcm = C.PIECE_COLOR_MAP;
+                // @ts-ignore
     let pColor = pcm.get(userData.clientInfo.pieceType);
     
     const geometry = new THREE.BoxGeometry(1,1,1);

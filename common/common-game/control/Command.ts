@@ -13,6 +13,7 @@ export class Command<T>{
     'rotation'    |     Vector3: the rotation applied to the euler vec
     'movement'    |     Vector3: denotes the direction to add to the current position
     'newPlayer'   |     Client: 
+    'init'        |     NewConnectionInfo:
 
     */
 
