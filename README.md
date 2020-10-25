@@ -1,6 +1,4 @@
-# Project is hosted with AWS EC2 
-
-[Multiplayer Tetris](http://willkillson.ddns.net:5000/). 
+![image](https://user-images.githubusercontent.com/26101774/97098085-449b3700-1636-11eb-8b67-4cb8c93a7b98.png)
 
 # Start project with docker 
  
